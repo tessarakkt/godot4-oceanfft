@@ -18,6 +18,8 @@ enum Binding {
 }
 
 
+@export var simulation_enabled := true
+@export var simulation_frameskip := 0
 @export_range(0, 8192) var fft_resolution := 256:
 	set(new_fft_resolution):
 		fft_resolution = new_fft_resolution
@@ -112,6 +114,9 @@ var _waves_image:Image
 var _waves_texture:ImageTexture
 
 var _is_ping_phase := true
+
+var _frameskip := 0
+var _accumulated_delta := 0.0
 
 var _rng := RandomNumberGenerator.new()
 
@@ -312,6 +317,10 @@ func _ready() -> void:
 ##    shaders without being copied via the CPU by passing the RDUniform or
 ##    texture RID pointers around as needed.
 ##
+##  * Unfortunately the displacement and normal maps DO need to be copied to CPU
+##    each frame, as the compute render context and Godots main render context
+##    can't share memory directly.
+##
 ##  * RDUniforms, texture RIDs, storage buffer RIDs, shader RIDs, and pipeline
 ##    RIDs can be initialized once and reused.
 ##
@@ -326,6 +335,25 @@ func _ready() -> void:
 ##    like me beginning the next compute list as the previous is still executing,
 ##    but I might have been doing that wrong.
 func _process(delta:float) -> void:
+	if simulation_enabled:
+		_accumulated_delta += delta
+		
+		if simulation_frameskip > 0:
+			_frameskip += 1
+			if _frameskip <= simulation_frameskip:
+				return
+			else:
+				_frameskip = 0
+		
+		simulate(_accumulated_delta)
+		_accumulated_delta = 0.0
+
+
+## Simulate a single iteration of the ocean. If simulation_enabled is true, this
+## will be run every frame, excluding frameskips. The resulting displacement and
+## normal map textures can be retrieved using the get_waves_texture() and
+## get_normal_map_texture() methods.
+func simulate(delta:float) -> void:
 	var uniform_set:RID
 	var compute_list:int
 	var settings_bytes:PackedByteArray
@@ -528,10 +556,10 @@ func _process(delta:float) -> void:
 	## not need to update it there again.
 	if is_sub_ping_phase:
 		_waves_image.set_data(fft_resolution, fft_resolution, false, Image.FORMAT_RGF, _rd.texture_get_data(_spectrum_tex, 0))
-		
+
 	else:
 		_waves_image.set_data(fft_resolution, fft_resolution, false, Image.FORMAT_RGF, _rd.texture_get_data(_sub_pong_tex, 0))
-	
+
 	_waves_texture.update(_waves_image)
 	
 	#### Execute Normal Map Shader

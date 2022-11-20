@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://bcj6571ulkwvl"]
+[gd_scene load_steps=7 format=3 uid="uid://bcj6571ulkwvl"]
 
 [ext_resource type="PackedScene" uid="uid://cxeke306y3arl" path="res://Ocean.tscn" id="1_78lg6"]
+[ext_resource type="Script" path="res://Example.gd" id="1_bbw57"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_neonl"]
 
@@ -15,12 +16,26 @@ sky = SubResource("Sky_ispkt")
 
 [node name="WorldEnvironment" type="WorldEnvironment"]
 environment = SubResource("Environment_q1h0a")
+script = ExtResource("1_bbw57")
 
 [node name="Ocean" parent="." instance=ExtResource("1_78lg6")]
 mesh = SubResource("PlaneMesh_to2ef")
-horizontal_scale = 2.0
 choppiness = 3.5
 wind_direction = Vector2(25, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 256)
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 128)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="Displacement" type="TextureRect" parent="CanvasLayer"]
+custom_minimum_size = Vector2(256, 256)
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Normal" type="TextureRect" parent="CanvasLayer"]
+custom_minimum_size = Vector2(256, 256)
+offset_top = 256.0
+offset_right = 256.0
+offset_bottom = 512.0
