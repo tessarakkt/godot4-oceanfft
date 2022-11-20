@@ -1,0 +1,26 @@
+[gd_scene load_steps=6 format=3 uid="uid://bcj6571ulkwvl"]
+
+[ext_resource type="PackedScene" uid="uid://cxeke306y3arl" path="res://Ocean.tscn" id="1_78lg6"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_neonl"]
+
+[sub_resource type="Sky" id="Sky_ispkt"]
+sky_material = SubResource("ProceduralSkyMaterial_neonl")
+
+[sub_resource type="Environment" id="Environment_q1h0a"]
+background_mode = 2
+sky = SubResource("Sky_ispkt")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_to2ef"]
+
+[node name="WorldEnvironment" type="WorldEnvironment"]
+environment = SubResource("Environment_q1h0a")
+
+[node name="Ocean" parent="." instance=ExtResource("1_78lg6")]
+mesh = SubResource("PlaneMesh_to2ef")
+horizontal_scale = 2.0
+choppiness = 3.5
+wind_direction = Vector2(25, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 256)

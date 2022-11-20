@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://2bgdnitk3d1m"
+path="res://.godot/imported/OceanPhase.glsl-1e6244759bda2942f1fcb9c6f56a4054.res"
+
+[deps]
+
+source_file="res://shaders/OceanPhase.glsl"
+dest_files=["res://.godot/imported/OceanPhase.glsl-1e6244759bda2942f1fcb9c6f56a4054.res"]
+
+[params]
+

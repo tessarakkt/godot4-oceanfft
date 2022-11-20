@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://cxeke306y3arl"]
+
+[ext_resource type="Shader" path="res://shaders/OceanStaticGrid.gdshader" id="1_5meea"]
+[ext_resource type="Script" path="res://Ocean.gd" id="1_a84yj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ebifb"]
+render_priority = 0
+shader = ExtResource("1_5meea")
+shader_parameter/deep_color = Color(0, 0.33, 0.46, 1)
+shader_parameter/shallow_color = Color(0, 0.33, 0.46, 1)
+shader_parameter/uv_scale = null
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_y0j8f"]
+
+[node name="OceanStockhamFFT" type="MeshInstance3D"]
+material_override = SubResource("ShaderMaterial_ebifb")
+mesh = SubResource("PlaneMesh_y0j8f")
+script = ExtResource("1_a84yj")
+wind_direction = Vector2(14, 0)
