@@ -34,7 +34,7 @@ enum FFTResolution {
 
 
 @export var simulation_enabled := true
-@export_range(0, 30) var simulation_frameskip := 0
+@export_range(0, 30, 1) var simulation_frameskip := 0
 @export var fft_resolution:FFTResolution = FFTResolution.FFT_256x256:
 	set(new_fft_resolution):
 		fft_resolution = new_fft_resolution
@@ -288,7 +288,7 @@ func _ready() -> void:
 	_sub_pong_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	_sub_pong_uniform.add_id(_sub_pong_tex)
 	
-	#### Compile & Initialize FFT Shaders
+	#### Compile & Normal Map Shader
 	############################################################################
 	## Generates the normal map from the displacement map.
 	
