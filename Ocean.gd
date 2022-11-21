@@ -288,7 +288,7 @@ func _ready() -> void:
 	_sub_pong_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	_sub_pong_uniform.add_id(_sub_pong_tex)
 	
-	#### Compile & Normal Map Shader
+	#### Compile & Initialize Normal Map Shader
 	############################################################################
 	## Generates the normal map from the displacement map.
 	
@@ -452,7 +452,7 @@ func simulate(delta:float) -> void:
 	############################################################################
 	
 	## Ensure the Spectrum texture binding is correct from previous frames. It
-	## gets changed later on in _process().
+	## gets changed later on in simulate().
 	_spectrum_uniform.binding = Binding.SPECTRUM
 	
 	## Update Settings Buffer
