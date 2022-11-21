@@ -16,4 +16,3 @@ shader_parameter/uv_scale = null
 material_override = SubResource("ShaderMaterial_ebifb")
 mesh = SubResource("PlaneMesh_y0j8f")
 script = ExtResource("1_a84yj")
-wind_direction = Vector2(14, 0)

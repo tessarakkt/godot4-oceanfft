@@ -18,22 +18,37 @@ enum Binding {
 }
 
 
+enum FFTResolution {
+	FFT_2x2 = 2,
+	FFT_4x4 = 4,
+	FFT_8x8 = 8,
+	FFT_16x16 = 16,
+	FFT_32x32 = 32,
+	FFT_64x64 = 64,
+	FFT_128x128 = 128,
+	FFT_256x256 = 256,
+	FFT_512x512 = 512,
+	FFT_1024x1024 = 1024,
+	FFT_2048x2048 = 2048,
+}
+
+
 @export var simulation_enabled := true
-@export var simulation_frameskip := 0
-@export_range(0, 8192) var fft_resolution := 256:
+@export_range(0, 30) var simulation_frameskip := 0
+@export var fft_resolution:FFTResolution = FFTResolution.FFT_256x256:
 	set(new_fft_resolution):
 		fft_resolution = new_fft_resolution
 		_is_initial_spectrum_changed = true
 		_is_normal_changed = true
 
-@export_range(0, 100000) var horizontal_dimension := 256:
+@export_range(0, 2048) var horizontal_dimension := 256:
 	set(new_horizontal_dimension):
 		horizontal_dimension = new_horizontal_dimension
 		_is_initial_spectrum_changed = true
 		_is_normal_changed = true
 		_is_spectrum_changed = true
 
-@export_range(0.0, 100.0) var horizontal_scale := 1.0
+@export_range(0.0, 10.0) var horizontal_scale := 1.0
 @export_range(0.0, 10.0) var subdivision := 1.0:
 	set(new_subdivision):
 		subdivision = new_subdivision
@@ -44,14 +59,9 @@ enum Binding {
 		choppiness = new_choppiness
 		_is_spectrum_changed = true
 
-@export_range(0.0, 12.0) var beaufort_rating := 0.0:
-	set(new_beaufort_rating):
-		beaufort_rating = clamp(new_beaufort_rating, 0.0, 12.0)
-		_is_initial_spectrum_changed = true
-
-@export var wind_direction := Vector2(1.0, 0.0):
-	set(new_wind_direction):
-		wind_direction = new_wind_direction
+@export var wind_vector := Vector2(1.0, 0.0):
+	set(new_wind_vector):
+		wind_vector = new_wind_vector
 		_is_initial_spectrum_changed = true
 
 
@@ -604,35 +614,35 @@ func simulate(delta:float) -> void:
 
 ## Get the wave displacement map as an Image.
 ## This returns the displacement map already cached on the CPU, it will not
-## force a recalculation, or marshall additional from the GPU.
+## call simulate(), or marshall additional data from the GPU.
 func get_waves() -> Image:
 	return _waves_image
 
 
 ## Get the wave displacement map as an ImageTexture.
 ## This returns the displacement map already cached on the CPU, it will not
-## recalculate, or marshall additional from the GPU.
+## call simulate(), or marshall additional data from the GPU.
 func get_waves_texture() -> ImageTexture:
 	return _waves_texture
 
 
 ## Get the wave normal map as an Image.
 ## This returns the normal map already cached on the CPU, it will not
-## recalculate, or marshall additional from the GPU.
+## call simulate(), or marshall additional data from the GPU.
 func get_normal_map() -> Image:
 	return _normal_map_image
 
 
 ## Get the wave normal map as an ImageTexture.
 ## This returns the normal map already cached on the CPU, it will not
-## recalculate, or marshall additional from the GPU.
+## call simulate(), or marshall additional data from the GPU.
 func get_normal_map_texture() -> ImageTexture:
 	return _normal_map_texture
 
 
 func _pack_initial_spectrum_settings() -> PackedByteArray:
 	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension]).to_byte_array()
-	settings_bytes.append_array(PackedVector2Array([wind_direction]).to_byte_array())
+	settings_bytes.append_array(PackedVector2Array([wind_vector]).to_byte_array())
 	return settings_bytes
 
 

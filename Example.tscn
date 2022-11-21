@@ -21,7 +21,7 @@ script = ExtResource("1_bbw57")
 [node name="Ocean" parent="." instance=ExtResource("1_78lg6")]
 mesh = SubResource("PlaneMesh_to2ef")
 choppiness = 3.5
-wind_direction = Vector2(25, 0)
+wind_vector = Vector2(25, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 128)
