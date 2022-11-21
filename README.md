@@ -3,6 +3,8 @@ An early work in progress ocean shader for Godot 4 base on Jerry Tessendorf's
 FFT method for generating the waves, using compute shaders to generate the
 displacement and normal maps.
 
+![image](https://user-images.githubusercontent.com/118585625/202946339-b6fd51ac-e242-4c2b-b645-ba96b89f352a.png)
+
 The GLSL shaders that generate the displacement and normal maps were ported into
 Godot 4 from [this project](https://github.com/achalpandeyy/OceanFFT). The
 underlying math is identical, but some things like binding points and how
@@ -13,6 +15,8 @@ GPU, the example scene gets ~35fps when updating the FFT each frame.
 
 Press the `/~ key while running the example scene to toggle the debug texture
 views for the displacement and normal maps.
+
+![image](https://user-images.githubusercontent.com/118585625/202946456-cb15ffcd-fe53-4d58-ba8c-a0fb1bb73b00.png)
 
 ## Todo List
 - Improve visual rendering
