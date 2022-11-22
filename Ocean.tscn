@@ -9,6 +9,8 @@ shader = ExtResource("1_5meea")
 shader_parameter/deep_color = Color(0, 0.33, 0.46, 1)
 shader_parameter/shallow_color = Color(0, 0.33, 0.46, 1)
 shader_parameter/uv_scale = null
+shader_parameter/wind_angle = null
+shader_parameter/wind_uv_offset = null
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_y0j8f"]
 

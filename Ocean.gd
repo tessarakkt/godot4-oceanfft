@@ -40,6 +40,8 @@ enum FFTResolution {
 		fft_resolution = new_fft_resolution
 		_is_initial_spectrum_changed = true
 		_is_normal_changed = true
+		_is_subdivision_changed = true
+		_is_scale_changed = true
 
 @export_range(0, 2048) var horizontal_dimension := 256:
 	set(new_horizontal_dimension):
@@ -47,21 +49,43 @@ enum FFTResolution {
 		_is_initial_spectrum_changed = true
 		_is_normal_changed = true
 		_is_spectrum_changed = true
+		_is_subdivision_changed = true
+		_is_scale_changed = true
 
-@export_range(0.0, 10.0) var horizontal_scale := 1.0
+@export_range(0.0, 10.0) var horizontal_scale := 1.0:
+	set(new_horizontal_scale):
+		horizontal_scale = new_horizontal_scale
+		_is_scale_changed = true
+
 @export_range(0.0, 10.0) var subdivision := 1.0:
 	set(new_subdivision):
 		subdivision = new_subdivision
+		_is_subdivision_changed = true
 
+@export_range(0.001, 100.0) var time_scale := 1.0
 
-@export_range(0.0, 10.0) var choppiness := 1.5:
+@export_range(0.0, 100.0) var choppiness := 1.5:
 	set(new_choppiness):
 		choppiness = new_choppiness
 		_is_spectrum_changed = true
 
-@export var wind_vector := Vector2(1.0, 0.0):
-	set(new_wind_vector):
-		wind_vector = new_wind_vector
+@export_range(0.0, 360.0) var wind_direction_degrees := 0.0:
+	set(new_wind_direction_degrees):
+		wind_direction_degrees = clamp(new_wind_direction_degrees, 0.0, 360.0)
+		_wind_rad = deg_to_rad(new_wind_direction_degrees)
+		material_override.set_shader_parameter("wind_angle", _wind_rad)
+
+@export_range(0.0, 100.0) var wave_speed := 0.0
+
+@export_range(0.0, 1760.0) var wave_length := 300.0:
+	set(new_wave_length):
+		wave_vector = wave_vector.normalized() * new_wave_length
+	get:
+		return wave_vector.length()
+
+var wave_vector := Vector2(300.0, 0.0):
+	set(new_wave_vector):
+		wave_vector = new_wave_vector
 		_is_initial_spectrum_changed = true
 
 
@@ -124,9 +148,14 @@ var _waves_image:Image
 var _waves_texture:ImageTexture
 
 var _is_ping_phase := true
+var _is_subdivision_changed := true
+var _is_scale_changed := true
 
 var _frameskip := 0
 var _accumulated_delta := 0.0
+
+var _wind_uv_offset := Vector2.ZERO
+var _wind_rad := 0.0
 
 var _rng := RandomNumberGenerator.new()
 
@@ -348,6 +377,9 @@ func _process(delta:float) -> void:
 	if simulation_enabled:
 		_accumulated_delta += delta
 		
+		_wind_uv_offset += Vector2(cos(_wind_rad), sin(_wind_rad)) * wave_speed * delta
+		material_override.set_shader_parameter("wind_uv_offset", _wind_uv_offset)
+		
 		if simulation_frameskip > 0:
 			_frameskip += 1
 			if _frameskip <= simulation_frameskip:
@@ -376,16 +408,28 @@ func simulate(delta:float) -> void:
 	## CPU RAM.
 	
 	if _is_initial_spectrum_changed:
-		## Update the UV scale to allow the correct level of displacement and
-		## normal map tiling
-		material_override.set_shader_parameter("uv_scale", (horizontal_dimension * horizontal_scale) / float(fft_resolution))
+		if _is_scale_changed:
+			## Update the UV scale to allow the correct level of displacement
+			## and normal map tiling
+			material_override.set_shader_parameter("uv_scale", (horizontal_dimension * horizontal_scale) / float(fft_resolution))
+			
+			## Re-scale and Re-subdivide the plane mesh
+			## This should generally be avoided during gameplay, as it can cause
+			## a significant stall.
+			mesh.size = Vector2(horizontal_dimension * horizontal_scale, horizontal_dimension * horizontal_scale)
+			
+			_is_scale_changed = false
 		
-		## Re-scale and Re-subdivide the plane mesh
-		mesh.size = Vector2(horizontal_dimension * horizontal_scale, horizontal_dimension * horizontal_scale)
-		@warning_ignore(integer_division)
-		mesh.subdivide_width = ((horizontal_dimension * horizontal_scale) / fft_resolution) * subdivision * fft_resolution
-		@warning_ignore(integer_division)
-		mesh.subdivide_depth = ((horizontal_dimension * horizontal_scale) / fft_resolution) * subdivision * fft_resolution
+		## If subdivision has changed, re-subdivide the plane mesh.
+		## This should generally be avoided during gameplay, as it can cause a
+		## significant stall.
+		if _is_subdivision_changed:
+			@warning_ignore(integer_division)
+			mesh.subdivide_width = ((horizontal_dimension * horizontal_scale) / fft_resolution) * subdivision * fft_resolution
+			@warning_ignore(integer_division)
+			mesh.subdivide_depth = ((horizontal_dimension * horizontal_scale) / fft_resolution) * subdivision * fft_resolution
+			
+			_is_subdivision_changed = false
 		
 		## Update Settings Buffer
 		settings_bytes = _pack_initial_spectrum_settings()
@@ -426,7 +470,7 @@ func simulate(delta:float) -> void:
 		_pong_uniform.binding = Binding.PING
 	
 	## Update Settings Buffer
-	settings_bytes = _pack_phase_settings(delta)
+	settings_bytes = _pack_phase_settings(delta * time_scale)
 	if _rd.buffer_update(_phase_settings_buffer, 0, settings_bytes.size(), settings_bytes) != OK:
 		print("error updating phase settings buffer")
 	
@@ -642,7 +686,7 @@ func get_normal_map_texture() -> ImageTexture:
 
 func _pack_initial_spectrum_settings() -> PackedByteArray:
 	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension]).to_byte_array()
-	settings_bytes.append_array(PackedVector2Array([wind_vector]).to_byte_array())
+	settings_bytes.append_array(PackedVector2Array([wave_vector]).to_byte_array())
 	return settings_bytes
 
 

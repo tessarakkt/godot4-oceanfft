@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bcj6571ulkwvl"]
+[gd_scene load_steps=8 format=3 uid="uid://bcj6571ulkwvl"]
 
 [ext_resource type="PackedScene" uid="uid://cxeke306y3arl" path="res://Ocean.tscn" id="1_78lg6"]
 [ext_resource type="Script" path="res://Example.gd" id="1_bbw57"]
@@ -14,20 +14,25 @@ sky = SubResource("Sky_ispkt")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_to2ef"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i8f6a"]
+bg_color = Color(0.188235, 0.188235, 0.188235, 1)
+expand_margin_left = 10.0
+expand_margin_top = 10.0
+expand_margin_right = 10.0
+expand_margin_bottom = 10.0
+
 [node name="WorldEnvironment" type="WorldEnvironment"]
 environment = SubResource("Environment_q1h0a")
 script = ExtResource("1_bbw57")
 
 [node name="Ocean" parent="." instance=ExtResource("1_78lg6")]
 mesh = SubResource("PlaneMesh_to2ef")
-choppiness = 3.5
-wind_vector = Vector2(25, 0)
+horizontal_scale = 4.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 128)
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 512)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Displacement" type="TextureRect" parent="CanvasLayer"]
 custom_minimum_size = Vector2(256, 256)
@@ -39,3 +44,132 @@ custom_minimum_size = Vector2(256, 256)
 offset_top = 256.0
 offset_right = 256.0
 offset_bottom = 512.0
+
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer"]
+custom_minimum_size = Vector2(256, 0)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -136.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 166.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_i8f6a")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/PanelContainer"]
+layout_mode = 2
+offset_right = 256.0
+offset_bottom = 346.0
+
+[node name="SimulateEnabled" type="CheckButton" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_right = 256.0
+offset_bottom = 31.0
+button_pressed = true
+text = "Simulate"
+
+[node name="FrameskipLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 35.0
+offset_right = 256.0
+offset_bottom = 61.0
+text = "Frameskip"
+
+[node name="Frameskip" type="SpinBox" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 65.0
+offset_right = 256.0
+offset_bottom = 96.0
+tooltip_text = "You probably don't want to use more than 5 here. If running <20fps, any value will start to be noticable."
+max_value = 30.0
+
+[node name="SpeedLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 100.0
+offset_right = 256.0
+offset_bottom = 126.0
+text = "Time Scale"
+
+[node name="Speed" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 130.0
+offset_right = 256.0
+offset_bottom = 146.0
+min_value = 0.05
+max_value = 5.0
+step = 0.05
+value = 0.75
+
+[node name="ChopLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 150.0
+offset_right = 256.0
+offset_bottom = 176.0
+text = "Choppiness"
+
+[node name="Choppiness" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 180.0
+offset_right = 256.0
+offset_bottom = 196.0
+max_value = 20.0
+step = 0.1
+value = 10.0
+
+[node name="WaveLengthLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 200.0
+offset_right = 256.0
+offset_bottom = 226.0
+text = "Wave Length"
+
+[node name="WaveLength" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 230.0
+offset_right = 256.0
+offset_bottom = 246.0
+min_value = 1.0
+max_value = 1760.0
+value = 300.0
+
+[node name="WaveSpeedLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 250.0
+offset_right = 256.0
+offset_bottom = 276.0
+text = "Wave Speed"
+
+[node name="WaveSpeed" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 280.0
+offset_right = 256.0
+offset_bottom = 296.0
+max_value = 0.05
+step = 0.001
+
+[node name="WindDirectionLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 300.0
+offset_right = 256.0
+offset_bottom = 326.0
+text = "Wind Direction"
+
+[node name="WindDirection" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+offset_top = 330.0
+offset_right = 256.0
+offset_bottom = 346.0
+tooltip_text = "Tick marks represent, in order, North (000), East (090), South (180), and West (270)."
+max_value = 360.0
+step = 0.001
+tick_count = 4
+ticks_on_borders = true
+
+[connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="." method="_on_simulate_enabled_toggled"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Frameskip" to="." method="_on_frameskip_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Speed" to="." method="_on_speed_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Choppiness" to="." method="_on_choppiness_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WaveLength" to="." method="_on_wind_speed_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WaveSpeed" to="." method="_on_wave_speed_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WindDirection" to="." method="_on_wind_direction_value_changed"]
