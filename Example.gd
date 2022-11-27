@@ -7,6 +7,8 @@ extends WorldEnvironment
 
 @onready var ocean = $Ocean
 
+@onready var camera = $Camera3D
+
 
 func _ready() -> void:
 	displacement_view.texture = ocean.get_waves_texture()
@@ -16,6 +18,12 @@ func _ready() -> void:
 func _input(event:InputEvent) -> void:
 	if event.is_action_pressed("toggle_ocean_debug"):
 		canvas_layer.visible = not canvas_layer.visible
+		camera.motion_enabled = not canvas_layer.visible
+		
+		if canvas_layer.visible:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
 func _on_frameskip_value_changed(value:float) -> void:

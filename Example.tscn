@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://bcj6571ulkwvl"]
+[gd_scene load_steps=7 format=3 uid="uid://bcj6571ulkwvl"]
 
 [ext_resource type="PackedScene" uid="uid://cxeke306y3arl" path="res://Ocean.tscn" id="1_78lg6"]
 [ext_resource type="Script" path="res://Example.gd" id="1_bbw57"]
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://Environment.tres" id="1_hcce8"]
+[ext_resource type="Script" path="res://Camera.gd" id="4_4k0tt"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_to2ef"]
 
@@ -26,6 +27,7 @@ wave_length = 192.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 128)
+script = ExtResource("4_4k0tt")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.906308, 0.178606, -0.383022, 0, 0.906308, 0.422618, 0.422618, 0.383022, -0.821394, 0, 2.5, 0)
@@ -33,7 +35,6 @@ rotation_edit_mode = 2
 light_energy = 0.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Displacement" type="TextureRect" parent="CanvasLayer"]
 custom_minimum_size = Vector2(256, 256)
