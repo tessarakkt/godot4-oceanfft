@@ -1,16 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://bcj6571ulkwvl"]
+[gd_scene load_steps=6 format=3 uid="uid://bcj6571ulkwvl"]
 
 [ext_resource type="PackedScene" uid="uid://cxeke306y3arl" path="res://Ocean.tscn" id="1_78lg6"]
 [ext_resource type="Script" path="res://Example.gd" id="1_bbw57"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_neonl"]
-
-[sub_resource type="Sky" id="Sky_ispkt"]
-sky_material = SubResource("ProceduralSkyMaterial_neonl")
-
-[sub_resource type="Environment" id="Environment_q1h0a"]
-background_mode = 2
-sky = SubResource("Sky_ispkt")
+[ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://Environment.tres" id="1_hcce8"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_to2ef"]
 
@@ -22,17 +14,26 @@ expand_margin_right = 10.0
 expand_margin_bottom = 10.0
 
 [node name="WorldEnvironment" type="WorldEnvironment"]
-environment = SubResource("Environment_q1h0a")
+environment = ExtResource("1_hcce8")
 script = ExtResource("1_bbw57")
 
 [node name="Ocean" parent="." instance=ExtResource("1_78lg6")]
 mesh = SubResource("PlaneMesh_to2ef")
-horizontal_scale = 4.0
+time_scale = 1.1
+choppiness = 4.3
+wave_speed = 0.003
+wave_length = 192.0
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 512)
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 128)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.906308, 0.178606, -0.383022, 0, 0.906308, 0.422618, 0.422618, 0.383022, -0.821394, 0, 2.5, 0)
+rotation_edit_mode = 2
+light_energy = 0.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Displacement" type="TextureRect" parent="CanvasLayer"]
 custom_minimum_size = Vector2(256, 256)
@@ -115,7 +116,7 @@ offset_right = 256.0
 offset_bottom = 196.0
 max_value = 20.0
 step = 0.1
-value = 10.0
+value = 6.5
 
 [node name="WaveLengthLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
@@ -131,7 +132,7 @@ offset_right = 256.0
 offset_bottom = 246.0
 min_value = 1.0
 max_value = 1760.0
-value = 300.0
+value = 15.0
 
 [node name="WaveSpeedLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
