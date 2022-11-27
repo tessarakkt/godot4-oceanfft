@@ -23,15 +23,20 @@ views for the displacement and normal maps.
   - Foam
   - Splash particles
   - Light interactions (reflections, refractions, sub surface scattering)
+- Cascading FFTs
 - Buoyancy physics
-- Expand the current "static grid" mesh method to allow use in open world games
-  (possibly either a tiled LOD system, projected grid, or center on player methods)
-- Multiplayer synchronization? Not sure if this can be done where the time shift
-  takes a delta time, rather than just time
+- Expand the current "static grid" mesh method to allow use in open world games. Possible options being considered:
+  - [Continuous Distance-Dependent Level of Detail (CDLOD)](https://github.com/fstrugar/CDLOD/blob/master/cdlod_paper_latest.pdf)
+  - [Projected Grid](https://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/projgrid-lq.pdf)
+- Multiplayer synchronization? [This reference](https://developer.download.nvidia.com/assets/gameworks/downloads/regular/events/cgdc15/CGDC2015_ocean_simulation_en.pdf) may be helpful for this.
 
 ## References
 - The theory behind the wave generation: [Jerry Tessendorf - Simulating Ocean Water](https://people.computing.clemson.edu/~jtessen/reports/papers_files/coursenotes2004.pdf)
 - The implementation behind the wave height generation: [achalpandeyy/OceanFFT](https://github.com/achalpandeyy/OceanFFT)
+- [Platinguin/Godot-Water-Shader-Prototype](https://github.com/Platinguin/Godot-Water-Shader-Prototype/)
 - [Assassin’s Creed III: The tech behind (or beneath) the action](https://www.fxguide.com/fxfeatured/assassins-creed-iii-the-tech-behind-or-beneath-the-action/)
-- [The technical art of sea of thieves](https://dl.acm.org/doi/10.1145/3214745.3214820)
+- [The technical art of Sea of Thieves](https://dl.acm.org/doi/10.1145/3214745.3214820)
+- [Ocean simulation and rendering in War Thunder](https://developer.download.nvidia.com/assets/gameworks/downloads/regular/events/cgdc15/CGDC2015_ocean_simulation_en.pdf)
 - [Claes Johanson - Real-time water rendering Introducing the projected grid concept](https://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/projgrid-lq.pdf)
+- [Continuous Distance-Dependent Level of Detail for Rendering Heightmaps (CDLOD)](https://github.com/fstrugar/CDLOD/blob/master/cdlod_paper_latest.pdf)
+- [Jump Trajectory - Ocean waves simulation with Fast Fourier transform](https://www.youtube.com/watch?v=kGEqaX4Y4bQ)
