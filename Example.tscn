@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://bcj6571ulkwvl"]
+[gd_scene load_steps=8 format=3 uid="uid://d2hu7v7tw0ufr"]
 
-[ext_resource type="PackedScene" uid="uid://cxeke306y3arl" path="res://Ocean.tscn" id="1_78lg6"]
+[ext_resource type="PackedScene" uid="uid://uu2l3eg5ybw7" path="res://Ocean3D.tscn" id="1_78lg6"]
 [ext_resource type="Script" path="res://Example.gd" id="1_bbw57"]
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://Environment.tres" id="1_hcce8"]
 [ext_resource type="Script" path="res://Camera.gd" id="4_4k0tt"]
+[ext_resource type="PackedScene" uid="uid://bdlade7ptf25e" path="res://BuoyancyBody3D.tscn" id="5_h5rtj"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_to2ef"]
 
@@ -167,6 +168,10 @@ max_value = 360.0
 step = 0.001
 tick_count = 4
 ticks_on_borders = true
+
+[node name="BuoyancyBody3D" parent="." instance=ExtResource("5_h5rtj")]
+mass = 2.0
+angular_damp = 1000.0
 
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="." method="_on_simulate_enabled_toggled"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Frameskip" to="." method="_on_frameskip_value_changed"]

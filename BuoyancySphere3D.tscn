@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bkowycd0rhpug"]
+
+[ext_resource type="Script" path="res://BuoyancySphere3D.gd" id="1_qxg6t"]
+
+[node name="BuoyancySphere3D" type="Marker3D"]
+script = ExtResource("1_qxg6t")

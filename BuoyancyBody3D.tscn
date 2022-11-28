@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://bdlade7ptf25e"]
+
+[ext_resource type="Script" path="res://BuoyancyBody3D.gd" id="1_vxdw4"]
+[ext_resource type="PackedScene" uid="uid://bkowycd0rhpug" path="res://BuoyancySphere3D.tscn" id="2_3rijd"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_5uwkl"]
+size = Vector3(30, 5, 15)
+
+[node name="BuoyancyBody3D" type="RigidBody3D"]
+angular_damp = 100.0
+script = ExtResource("1_vxdw4")
+buoyancy_multiplier = 0.1
+
+[node name="BuoyancySpheres" type="Node3D" parent="."]
+
+[node name="BuoyancySphere3D" parent="BuoyancySpheres" instance=ExtResource("2_3rijd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, -1, -7)
+radius = 2.5
+
+[node name="BuoyancySphere3D2" parent="BuoyancySpheres" instance=ExtResource("2_3rijd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, -1, 7)
+radius = 2.5
+
+[node name="BuoyancySphere3D3" parent="BuoyancySpheres" instance=ExtResource("2_3rijd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, -1, -7)
+radius = 2.5
+
+[node name="BuoyancySphere3D4" parent="BuoyancySpheres" instance=ExtResource("2_3rijd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, -1, 7)
+radius = 2.5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_5uwkl")

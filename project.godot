@@ -8,6 +8,28 @@
 
 config_version=5
 
+_global_script_classes=[{
+"base": "RigidBody3D",
+"class": &"BuoyancyBody3D",
+"language": &"GDScript",
+"path": "res://BuoyancyBody3D.gd"
+}, {
+"base": "Marker3D",
+"class": &"BuoyancySphere3D",
+"language": &"GDScript",
+"path": "res://BuoyancySphere3D.gd"
+}, {
+"base": "MeshInstance3D",
+"class": &"Ocean3D",
+"language": &"GDScript",
+"path": "res://Ocean3D.gd"
+}]
+_global_script_class_icons={
+"BuoyancyBody3D": "",
+"BuoyancySphere3D": "",
+"Ocean3D": ""
+}
+
 [application]
 
 config/name="Ocean"

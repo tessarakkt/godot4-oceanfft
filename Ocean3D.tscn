@@ -1,6 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://cxeke306y3arl"]
+[gd_scene load_steps=5 format=3 uid="uid://uu2l3eg5ybw7"]
 
-[ext_resource type="Script" path="res://Ocean.gd" id="1_a84yj"]
+[ext_resource type="Script" path="res://Ocean3D.gd" id="1_a84yj"]
 [ext_resource type="Shader" path="res://shaders/OceanStaticGrid.gdshader" id="1_irt5k"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_36t6u"]
@@ -8,13 +8,14 @@ render_priority = 0
 shader = ExtResource("1_irt5k")
 shader_parameter/deep_color = Color(0, 0.329412, 0.462745, 1)
 shader_parameter/shallow_color = Color(0, 0.72549, 0.992157, 1)
+shader_parameter/sss_strength = null
 shader_parameter/uv_scale = null
 shader_parameter/wind_angle = null
 shader_parameter/wind_uv_offset = null
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_fqbii"]
 
-[node name="OceanFFT" type="MeshInstance3D"]
+[node name="Ocean3D" type="MeshInstance3D" groups=["ocean"]]
 material_override = SubResource("ShaderMaterial_36t6u")
 mesh = SubResource("PlaneMesh_fqbii")
 script = ExtResource("1_a84yj")

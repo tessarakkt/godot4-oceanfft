@@ -1,4 +1,5 @@
 extends MeshInstance3D
+class_name Ocean3D
 
 
 const UNIFORM_SET := 0
@@ -153,6 +154,8 @@ var _is_scale_changed := true
 
 var _frameskip := 0
 var _accumulated_delta := 0.0
+
+var _uv_scale := 1.0
 
 var _wind_uv_offset := Vector2.ZERO
 var _wind_rad := 0.0
@@ -411,7 +414,8 @@ func simulate(delta:float) -> void:
 		if _is_scale_changed:
 			## Update the UV scale to allow the correct level of displacement
 			## and normal map tiling
-			material_override.set_shader_parameter("uv_scale", (horizontal_dimension * horizontal_scale) / float(fft_resolution))
+			_uv_scale = (horizontal_dimension * horizontal_scale) / float(fft_resolution)
+			material_override.set_shader_parameter("uv_scale", _uv_scale)
 			
 			## Re-scale and Re-subdivide the plane mesh
 			## This should generally be avoided during gameplay, as it can cause
@@ -654,6 +658,62 @@ func simulate(delta:float) -> void:
 	_normal_map_texture.update(_normal_map_image)
 	
 	_is_ping_phase = not _is_ping_phase
+
+
+## Convert a global position (on the horizontal XZ plane) to a pixel coordinate
+## for sampling the wave displacement texture directly. The Y coordinate is
+## ignored.
+func global_to_pixel(global_pos:Vector3) -> Vector2i:
+	## The order of operations in this function is dependent on the order of
+	## operations used in the vertex shader to rotate and scale the displacement
+	## map before applying it. Make sure to check if the vertex shader should be
+	## updated to account for any changes made here.
+	
+	## Convert global position to local position
+	var local_pos := to_local(global_pos)
+	
+	## Convert to UV coordinate
+	var extents := horizontal_dimension * horizontal_scale * 0.5
+	var uv_pos := Vector2.ZERO
+	uv_pos.x = local_pos.x / extents
+	uv_pos.y = local_pos.z / extents
+	
+	## Offset by wind scrolling
+	uv_pos += _wind_uv_offset
+	
+	## Rotate to align with wind
+	uv_pos = uv_pos.rotated(_wind_rad)
+	
+	## Normalize values to 0.0-1.0
+	uv_pos.x -= floorf(uv_pos.x)
+	uv_pos.y -= floorf(uv_pos.y)
+	
+	## Convert to pixel coordinate
+	var pixel_pos := Vector2i.ZERO
+	pixel_pos.x = floor(fft_resolution * uv_pos.x)
+	pixel_pos.y = floor(fft_resolution * uv_pos.y)
+	
+	return pixel_pos
+
+
+## Query the wave height at a given location on the horizontal XZ plane. The Y
+## coordinate is ignored, and global position in this context is the position
+## relative to the oceans parent node. Since each pixel encodes both a vertical
+## and horizontal displacement, we need to offset the horizontal displacement 
+## and resample a few times to get an accurate height. The number of resample
+## iterations is defined by steps parameter.
+func get_wave_height(global_pos:Vector3, steps:int = 3) -> float:
+	var pixel:Color
+	var xz_offset := Vector3.ZERO
+	
+	for i in range(steps):
+		var pixel_pos := global_to_pixel(global_pos + xz_offset.rotated(Vector3.UP, _wind_rad))
+		
+		pixel = _waves_image.get_pixelv(pixel_pos)
+		xz_offset.x -= pixel.r
+		xz_offset.z -= pixel.b
+	
+	return pixel.g
 
 
 ## Get the wave displacement map as an Image.
