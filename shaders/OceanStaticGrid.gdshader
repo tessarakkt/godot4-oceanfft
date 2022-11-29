@@ -2,8 +2,8 @@ shader_type spatial;
 render_mode world_vertex_coords;
 
 
+uniform float fft_resolution = 256.0;
 uniform sampler2D displacement:hint_default_black,repeat_enable;
-uniform sampler2D normal_map:hint_normal,repeat_enable;
 
 uniform vec4 deep_color:source_color;
 uniform vec4 shallow_color:source_color;
@@ -20,25 +20,45 @@ varying vec3 world_normal;
 varying mat3 invview3;
 
 
-void vertex() {
-	float angle = wind_angle;
-	float costheta = cos(angle);
-	float sintheta = sin(angle);
+vec3 rotate_y(vec3 vector, float sintheta, float costheta) {
+	return vec3(
+		vector.x * costheta - vector.z * sintheta,
+		vector.y,
+		vector.z * costheta + vector.x * sintheta
+	);
+}
 
+
+vec3 get_rotated_displacement(vec2 rotated_uv, float sintheta, float costheta) {
+	return rotate_y(texture(displacement, rotated_uv * uv_scale).rgb, sintheta, costheta);
+}
+
+
+void vertex() {
+	float costheta = cos(wind_angle);
+	float sintheta = sin(wind_angle);
+	
+	// Vertex Offset
 	vec2 rotated_uv = vec2((UV.x - 0.5) * costheta - (UV.y - 0.5) * sintheta,
 			(UV.y - 0.5) * costheta + (UV.x - 0.5) * sintheta) + wind_uv_offset;
-
-	vec3 rotated_displacement = texture(displacement, rotated_uv * uv_scale).rgb;
-	//rotated_displacement.xz = vec2((rotated_displacement.x - 0.5) * costheta - (rotated_displacement.z - 0.5) * sintheta,
-	//		(rotated_displacement.z - 0.5) * costheta + (rotated_displacement.x - 0.5) * sintheta);
+	vec3 rotated_displacement = get_rotated_displacement(rotated_uv, sintheta, costheta);
 	
-	vec3 rotated_normal = texture(normal_map, rotated_uv * uv_scale).rgb;
-	//rotated_normal.xz = vec2((rotated_normal.x - 0.5) * costheta - (rotated_normal.z - 0.5) * sintheta,
-	//		(rotated_normal.z - 0.5) * costheta + (rotated_normal.x - 0.5) * sintheta);
-	
-	// TODO: Correct horizontal displacement and normal maps when rotated
 	VERTEX += rotated_displacement;
-	NORMAL = rotated_normal;
+	
+	// Surface Normals
+	float offset = 1.0 / (fft_resolution * uv_scale);
+	
+	vec3 right = vec3(1.0, get_rotated_displacement(rotated_uv + vec2(offset, 0.0), sintheta, costheta).y, 0.0) - rotated_displacement;
+	vec3 left = vec3(-1.0, get_rotated_displacement(rotated_uv + vec2(-offset, 0.0), sintheta, costheta).y, 0.0) - rotated_displacement;
+	vec3 bottom = vec3(0.0, get_rotated_displacement(rotated_uv + vec2(0.0, offset), sintheta, costheta).y, 1.0) - rotated_displacement;
+	vec3 top = vec3(0.0, get_rotated_displacement(rotated_uv + vec2(0.0, -offset), sintheta, costheta).y, -1.0) - rotated_displacement;
+	
+	vec3 top_right = cross(right, top);
+	vec3 top_left = cross(top, left);
+	vec3 bottom_left = cross(left, bottom);
+	vec3 bottom_right = cross(bottom, right);
+	
+	NORMAL = normalize(rotate_y(top_right + top_left + bottom_left + bottom_right, sin(-wind_angle), cos(-wind_angle)));
 }
 
 
@@ -51,7 +71,6 @@ void fragment() {
 	ALBEDO = deep_color.rgb;
 	ROUGHNESS = 0.02;
 	SPECULAR = 1.0;
-	//NORMAL_MAP = normalize(texture(normal_map, UV).rgb - NORMAL);
 }
 
 

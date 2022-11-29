@@ -3,7 +3,6 @@ extends WorldEnvironment
 
 @onready var canvas_layer:CanvasLayer = $CanvasLayer
 @onready var displacement_view:TextureRect = $CanvasLayer/Displacement
-@onready var normal_view:TextureRect = $CanvasLayer/Normal
 
 @onready var ocean = $Ocean
 
@@ -12,7 +11,6 @@ extends WorldEnvironment
 
 func _ready() -> void:
 	displacement_view.texture = ocean.get_waves_texture()
-	normal_view.texture = ocean.get_normal_map_texture()
 
 
 func _input(event:InputEvent) -> void:

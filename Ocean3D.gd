@@ -15,7 +15,6 @@ enum Binding {
 	INPUT = 27,
 	OUTPUT = 28,
 	DISPLACEMENT = 30,
-	NORMAL = 31,
 }
 
 
@@ -40,15 +39,14 @@ enum FFTResolution {
 	set(new_fft_resolution):
 		fft_resolution = new_fft_resolution
 		_is_initial_spectrum_changed = true
-		_is_normal_changed = true
 		_is_subdivision_changed = true
 		_is_scale_changed = true
+		material_override.set_shader_parameter("fft_resolution", fft_resolution)
 
 @export_range(0, 2048) var horizontal_dimension := 256:
 	set(new_horizontal_dimension):
 		horizontal_dimension = new_horizontal_dimension
 		_is_initial_spectrum_changed = true
-		_is_normal_changed = true
 		_is_spectrum_changed = true
 		_is_subdivision_changed = true
 		_is_scale_changed = true
@@ -134,16 +132,6 @@ var _fft_settings_uniform := RDUniform.new()
 var _sub_pong_uniform := RDUniform.new()
 var _sub_pong_image:Image
 var _sub_pong_tex:RID
-
-var _normal_shader:RID
-var _normal_pipeline:RID
-var _is_normal_changed := true
-var _normal_settings_buffer:RID
-var _normal_settings_uniform := RDUniform.new()
-var _normal_map_uniform := RDUniform.new()
-var _normal_map_image:Image
-var _normal_map_tex:RID
-var _normal_map_texture:ImageTexture
 
 var _waves_image:Image
 var _waves_texture:ImageTexture
@@ -320,33 +308,6 @@ func _ready() -> void:
 	_sub_pong_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	_sub_pong_uniform.add_id(_sub_pong_tex)
 	
-	#### Compile & Initialize Normal Map Shader
-	############################################################################
-	## Generates the normal map from the displacement map.
-	
-	## Compile Shader
-	shader_file = load("res://shaders/OceanNormalMap.glsl")
-	_normal_shader = _rd.shader_create_from_spirv(shader_file.get_spirv())
-	_normal_pipeline = _rd.compute_pipeline_create(_normal_shader)
-	
-	## Initialize Settings Buffer
-	settings_bytes = _pack_normal_settings()
-	_normal_settings_buffer = _rd.storage_buffer_create(settings_bytes.size(), settings_bytes)
-	_normal_settings_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	_normal_settings_uniform.binding = Binding.SETTINGS
-	_normal_settings_uniform.add_id(_normal_settings_buffer)
-	
-	## Initialized empty, it will be generated each frame
-	_normal_map_image = Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RGBAF)
-	_normal_map_tex = _rd.texture_create(_fmt_rgba32f, RDTextureView.new(), [_normal_map_image.get_data()])
-	_normal_map_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
-	_normal_map_uniform.binding = Binding.NORMAL
-	_normal_map_uniform.add_id(_normal_map_tex)
-	
-	## Bind the normal map texture to the visual shader
-	_normal_map_texture = ImageTexture.create_from_image(_normal_map_image)
-	material_override.set_shader_parameter("normal_map", _normal_map_texture)
-	
 	## Bind the displacement map texture to the visual shader
 	_waves_image = Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RGF)
 	_waves_texture = ImageTexture.create_from_image(_waves_image)
@@ -359,9 +320,11 @@ func _ready() -> void:
 ##    shaders without being copied via the CPU by passing the RDUniform or
 ##    texture RID pointers around as needed.
 ##
-##  * Unfortunately the displacement and normal maps DO need to be copied to CPU
-##    each frame, as the compute render context and Godots main render context
-##    can't share memory directly.
+##  * The displacement map does need to be copied to CPU each frame, as the
+##    compute render context and Godots main render context can't share memory
+##    directly. The silver lining of this is the displacement map is already
+##    available to the CPU to sample for buoyancy, so any perfomance lost in
+##    copying to the CPU should be made up in buoyancy simulation.
 ##
 ##  * RDUniforms, texture RIDs, storage buffer RIDs, shader RIDs, and pipeline
 ##    RIDs can be initialized once and reused.
@@ -395,9 +358,8 @@ func _process(delta:float) -> void:
 
 
 ## Simulate a single iteration of the ocean. If simulation_enabled is true, this
-## will be run every frame, excluding frameskips. The resulting displacement and
-## normal map textures can be retrieved using the get_waves_texture() and
-## get_normal_map_texture() methods.
+## will be run every frame, excluding frameskips. The resulting displacement map
+## texture can be retrieved using the get_waves_texture() function.
 func simulate(delta:float) -> void:
 	var uniform_set:RID
 	var compute_list:int
@@ -413,7 +375,7 @@ func simulate(delta:float) -> void:
 	if _is_initial_spectrum_changed:
 		if _is_scale_changed:
 			## Update the UV scale to allow the correct level of displacement
-			## and normal map tiling
+			## map tiling
 			_uv_scale = (horizontal_dimension * horizontal_scale) / float(fft_resolution)
 			material_override.set_shader_parameter("uv_scale", _uv_scale)
 			
@@ -620,43 +582,6 @@ func simulate(delta:float) -> void:
 
 	_waves_texture.update(_waves_image)
 	
-	#### Execute Normal Map Shader
-	############################################################################
-	
-	## Update Settings Buffer
-	if _is_normal_changed:
-		_is_normal_changed = false
-		settings_bytes = _pack_normal_settings()
-		if _rd.buffer_update(_normal_settings_buffer, 0, settings_bytes.size(), settings_bytes) != OK:
-			print("error updating normal map settings buffer")
-	
-	## Leave the Spectrum in place and change the binding point to input it here
-	_spectrum_uniform.binding = Binding.DISPLACEMENT
-	
-	## Build Uniform Set
-	uniform_set = _rd.uniform_set_create([
-			_normal_settings_uniform,
-			_normal_map_uniform,
-			_spectrum_uniform], _normal_shader, UNIFORM_SET)
-	
-	## Create Compute List
-	compute_list = _rd.compute_list_begin()
-	_rd.compute_list_bind_compute_pipeline(compute_list, _normal_pipeline)
-	_rd.compute_list_bind_uniform_set(compute_list, uniform_set, UNIFORM_SET)
-	@warning_ignore(integer_division)
-	_rd.compute_list_dispatch(compute_list, fft_resolution / WORK_GROUP_DIM, fft_resolution / WORK_GROUP_DIM, 1)
-	_rd.compute_list_end()
-	
-	## Submit to GPU and wait for results
-	_rd.submit()
-	_rd.sync()
-	
-	## Retrieve the normal map from the normal texture, and store it CPU side.
-	## This has already been bound to the visual shader in _ready(), we do not
-	## need to update it there again.
-	_normal_map_image.set_data(fft_resolution, fft_resolution, false, Image.FORMAT_RGBAF, _rd.texture_get_data(_normal_map_tex, 0))
-	_normal_map_texture.update(_normal_map_image)
-	
 	_is_ping_phase = not _is_ping_phase
 
 
@@ -730,20 +655,6 @@ func get_waves_texture() -> ImageTexture:
 	return _waves_texture
 
 
-## Get the wave normal map as an Image.
-## This returns the normal map already cached on the CPU, it will not
-## call simulate(), or marshall additional data from the GPU.
-func get_normal_map() -> Image:
-	return _normal_map_image
-
-
-## Get the wave normal map as an ImageTexture.
-## This returns the normal map already cached on the CPU, it will not
-## call simulate(), or marshall additional data from the GPU.
-func get_normal_map_texture() -> ImageTexture:
-	return _normal_map_texture
-
-
 func _pack_initial_spectrum_settings() -> PackedByteArray:
 	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension]).to_byte_array()
 	settings_bytes.append_array(PackedVector2Array([wave_vector]).to_byte_array())
@@ -764,7 +675,3 @@ func _pack_spectrum_settings() -> PackedByteArray:
 
 func _pack_fft_settings(subseq_count:int) -> PackedByteArray:
 	return PackedInt32Array([fft_resolution, subseq_count]).to_byte_array()
-
-
-func _pack_normal_settings() -> PackedByteArray:
-	return PackedInt32Array([fft_resolution, horizontal_dimension]).to_byte_array()

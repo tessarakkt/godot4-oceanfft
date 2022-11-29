@@ -42,12 +42,6 @@ custom_minimum_size = Vector2(256, 256)
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="Normal" type="TextureRect" parent="CanvasLayer"]
-custom_minimum_size = Vector2(256, 256)
-offset_top = 256.0
-offset_right = 256.0
-offset_bottom = 512.0
-
 [node name="PanelContainer" type="PanelContainer" parent="CanvasLayer"]
 custom_minimum_size = Vector2(256, 0)
 anchors_preset = 1

@@ -7,6 +7,7 @@
 render_priority = 0
 shader = ExtResource("1_irt5k")
 shader_parameter/deep_color = Color(0, 0.329412, 0.462745, 1)
+shader_parameter/fft_resolution = null
 shader_parameter/shallow_color = Color(0, 0.72549, 0.992157, 1)
 shader_parameter/sss_strength = null
 shader_parameter/uv_scale = null
