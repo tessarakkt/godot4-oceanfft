@@ -39,8 +39,9 @@ void vertex() {
 	float sintheta = sin(wind_angle);
 	
 	// Vertex Offset
-	vec2 rotated_uv = vec2((UV.x - 0.5) * costheta - (UV.y - 0.5) * sintheta,
-			(UV.y - 0.5) * costheta + (UV.x - 0.5) * sintheta) + wind_uv_offset;
+	// Use the world vertex XZ coordinates as UV for simplicity
+	vec2 rotated_uv = vec2(VERTEX.x * costheta - VERTEX.z * sintheta,
+			VERTEX.z * costheta + VERTEX.x * sintheta) + wind_uv_offset;
 	vec3 rotated_displacement = get_rotated_displacement(rotated_uv, sintheta, costheta);
 	
 	VERTEX += rotated_displacement;

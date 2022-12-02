@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://d8xemdqvv0v6"]
+
+[ext_resource type="Script" path="res://QuadTree3D.gd" id="1_60upk"]
+[ext_resource type="Material" uid="uid://dbq5y5brnm626" path="res://Ocean.material" id="2_do2v2"]
+[ext_resource type="ArrayMesh" uid="uid://d1hw8grely66o" path="res://meshes/Ocean256.obj" id="2_qhtmj"]
+
+[node name="QuadTree3D" type="Node3D"]
+script = ExtResource("1_60upk")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
+material_override = ExtResource("2_do2v2")
+mesh = ExtResource("2_qhtmj")
+
+[node name="VisibleOnScreenNotifier3D" type="VisibleOnScreenNotifier3D" parent="."]
+
+[node name="SubQuads" type="Node3D" parent="."]

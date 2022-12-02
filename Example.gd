@@ -4,7 +4,7 @@ extends WorldEnvironment
 @onready var canvas_layer:CanvasLayer = $CanvasLayer
 @onready var displacement_view:TextureRect = $CanvasLayer/Displacement
 
-@onready var ocean = $Ocean
+@onready var ocean = $QuadTree3D/Ocean
 
 @onready var camera = $Camera3D
 
@@ -50,3 +50,7 @@ func _on_wind_direction_value_changed(value:float) -> void:
 
 func _on_wave_speed_value_changed(value:float) -> void:
 	ocean.wave_speed = value
+
+
+func _on_cull_enabled_toggled(button_pressed:bool) -> void:
+	$QuadTree3D.pause_cull = not button_pressed

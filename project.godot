@@ -19,15 +19,21 @@ _global_script_classes=[{
 "language": &"GDScript",
 "path": "res://BuoyancySphere3D.gd"
 }, {
-"base": "MeshInstance3D",
+"base": "Node3D",
 "class": &"Ocean3D",
 "language": &"GDScript",
 "path": "res://Ocean3D.gd"
+}, {
+"base": "Node3D",
+"class": &"QuadTree3D",
+"language": &"GDScript",
+"path": "res://QuadTree3D.gd"
 }]
 _global_script_class_icons={
 "BuoyancyBody3D": "",
 "BuoyancySphere3D": "",
-"Ocean3D": ""
+"Ocean3D": "",
+"QuadTree3D": ""
 }
 
 [application]

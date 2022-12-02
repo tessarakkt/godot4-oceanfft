@@ -1,4 +1,4 @@
-extends MeshInstance3D
+extends Node3D
 class_name Ocean3D
 
 
@@ -39,27 +39,20 @@ enum FFTResolution {
 	set(new_fft_resolution):
 		fft_resolution = new_fft_resolution
 		_is_initial_spectrum_changed = true
-		_is_subdivision_changed = true
 		_is_scale_changed = true
-		material_override.set_shader_parameter("fft_resolution", fft_resolution)
+		_material.set_shader_parameter("fft_resolution", fft_resolution)
 
 @export_range(0, 2048) var horizontal_dimension := 256:
 	set(new_horizontal_dimension):
 		horizontal_dimension = new_horizontal_dimension
 		_is_initial_spectrum_changed = true
 		_is_spectrum_changed = true
-		_is_subdivision_changed = true
 		_is_scale_changed = true
 
 @export_range(0.0, 10.0) var horizontal_scale := 1.0:
 	set(new_horizontal_scale):
 		horizontal_scale = new_horizontal_scale
 		_is_scale_changed = true
-
-@export_range(0.0, 10.0) var subdivision := 1.0:
-	set(new_subdivision):
-		subdivision = new_subdivision
-		_is_subdivision_changed = true
 
 @export_range(0.001, 100.0) var time_scale := 1.0
 
@@ -72,7 +65,7 @@ enum FFTResolution {
 	set(new_wind_direction_degrees):
 		wind_direction_degrees = clamp(new_wind_direction_degrees, 0.0, 360.0)
 		_wind_rad = deg_to_rad(new_wind_direction_degrees)
-		material_override.set_shader_parameter("wind_angle", _wind_rad)
+		_material.set_shader_parameter("wind_angle", _wind_rad)
 
 @export_range(0.0, 100.0) var wave_speed := 0.0
 
@@ -137,16 +130,15 @@ var _waves_image:Image
 var _waves_texture:ImageTexture
 
 var _is_ping_phase := true
-var _is_subdivision_changed := true
 var _is_scale_changed := true
 
 var _frameskip := 0
 var _accumulated_delta := 0.0
 
-var _uv_scale := 1.0
-
 var _wind_uv_offset := Vector2.ZERO
 var _wind_rad := 0.0
+
+var _material:ShaderMaterial = preload("res://Ocean.material")
 
 var _rng := RandomNumberGenerator.new()
 
@@ -311,7 +303,7 @@ func _ready() -> void:
 	## Bind the displacement map texture to the visual shader
 	_waves_image = Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RGF)
 	_waves_texture = ImageTexture.create_from_image(_waves_image)
-	material_override.set_shader_parameter("displacement", _waves_texture)
+	_material.set_shader_parameter("displacement", _waves_texture)
 
 
 ## Notes on compute shader usage within _process():
@@ -344,7 +336,7 @@ func _process(delta:float) -> void:
 		_accumulated_delta += delta
 		
 		_wind_uv_offset += Vector2(cos(_wind_rad), sin(_wind_rad)) * wave_speed * delta
-		material_override.set_shader_parameter("wind_uv_offset", _wind_uv_offset)
+		_material.set_shader_parameter("wind_uv_offset", _wind_uv_offset)
 		
 		if simulation_frameskip > 0:
 			_frameskip += 1
@@ -373,30 +365,6 @@ func simulate(delta:float) -> void:
 	## CPU RAM.
 	
 	if _is_initial_spectrum_changed:
-		if _is_scale_changed:
-			## Update the UV scale to allow the correct level of displacement
-			## map tiling
-			_uv_scale = (horizontal_dimension * horizontal_scale) / float(fft_resolution)
-			material_override.set_shader_parameter("uv_scale", _uv_scale)
-			
-			## Re-scale and Re-subdivide the plane mesh
-			## This should generally be avoided during gameplay, as it can cause
-			## a significant stall.
-			mesh.size = Vector2(horizontal_dimension * horizontal_scale, horizontal_dimension * horizontal_scale)
-			
-			_is_scale_changed = false
-		
-		## If subdivision has changed, re-subdivide the plane mesh.
-		## This should generally be avoided during gameplay, as it can cause a
-		## significant stall.
-		if _is_subdivision_changed:
-			@warning_ignore(integer_division)
-			mesh.subdivide_width = ((horizontal_dimension * horizontal_scale) / fft_resolution) * subdivision * fft_resolution
-			@warning_ignore(integer_division)
-			mesh.subdivide_depth = ((horizontal_dimension * horizontal_scale) / fft_resolution) * subdivision * fft_resolution
-			
-			_is_subdivision_changed = false
-		
 		## Update Settings Buffer
 		settings_bytes = _pack_initial_spectrum_settings()
 		if _rd.buffer_update(_initial_spectrum_settings_buffer, 0, settings_bytes.size(), settings_bytes) != OK:
