@@ -4,10 +4,10 @@ FFT method for generating the waves, using compute shaders to generate the
 displacement and normal maps.
 
 
-The GLSL shaders that generate the displacement and normal maps were ported into
-Godot 4 from [this project](https://github.com/achalpandeyy/OceanFFT). The
-underlying math is identical, but some things like binding points and how
-uniforms were accessed had to be changed to work in Godots compute shader API.
+The GLSL shaders that generates the displacement map were ported into Godot 4
+from [this project](https://github.com/achalpandeyy/OceanFFT). The underlying
+math is identical, but some things like binding points and how uniforms were
+accessed had to be changed to work in Godots compute shader API.
 
 Press the `/~ key while running the example scene to toggle the debug texture
 views for the displacement and normal maps.
