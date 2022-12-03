@@ -4,7 +4,7 @@ extends WorldEnvironment
 @onready var canvas_layer:CanvasLayer = $CanvasLayer
 @onready var displacement_view:TextureRect = $CanvasLayer/Displacement
 
-@onready var ocean = $QuadTree3D/Ocean
+@onready var ocean = $Ocean3D
 
 @onready var camera = $Camera3D
 

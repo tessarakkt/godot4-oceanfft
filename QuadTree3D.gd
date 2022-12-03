@@ -14,11 +14,11 @@ class_name QuadTree3D
 var pause_cull := false
 var cull_box:AABB:
 	get:
-		return _visibility_detector.aabb
+		return AABB(
+				global_position + _visibility_detector.aabb.position,
+				_visibility_detector.aabb.size)
 	set(new_aabb):
-		_visibility_detector.aabb = AABB(
-				global_position + new_aabb.position,
-				new_aabb.size)
+		_visibility_detector.aabb = new_aabb
 
 var mesh:MeshInstance3D
 var material:ShaderMaterial:
@@ -51,8 +51,8 @@ func _ready() -> void:
 		_camera = get_node(camera)
 	
 	## Initialized with size only, global position is added in the setter
-	cull_box = AABB(Vector3(-quad_size * 0.8, -128.0, -quad_size * 0.8),
-			Vector3(quad_size * 1.6, 256.0, quad_size * 1.6))
+	cull_box = AABB(Vector3(-quad_size * 0.5, -128.0, -quad_size * 0.5),
+			Vector3(quad_size * 1.0, 256.0, quad_size * 1.0))
 	
 	## If this is not the most detailed LOD level, initialize more detailed
 	## children.
@@ -75,61 +75,68 @@ func _ready() -> void:
 ## quad will run _process().
 func _process(_delta:float) -> void:
 	if not pause_cull:
-#		var offset:Vector3 = global_position - _camera.global_position.snapped(Vector3(512.0, 0.0, 512.0))
-#		offset.y = 0.0
-#		if not offset.is_zero_approx():
-#			shift(offset)
+		var offset:Vector3 = _camera.global_position.snapped(Vector3(512.0, 0.0, 512.0))
+		var frustrum_override := false
+		offset.y = 0.0
+		if not offset.is_equal_approx(global_position):
+			global_position = offset
+			frustrum_override = true
 		
 		reset_visibility()
-		lod_select(_camera)
+		lod_select(_camera.global_position, frustrum_override)
 
 
 ## Select which meshes will be displayed at which LOD level. A return value of
 ## true marks the node as handled, and a value of false indicates the parent
 ## node must handle it.
-func lod_select(cam:Camera3D) -> bool:
+## cam_pos is the camera/player position in global coordinates.
+## frustrum_override, if true, forces all quads to be considered within the
+## camera frustrum. If this is false, this will be determined by a
+## VisibleOnScreenNotifier3D for each quad.
+func lod_select(cam_pos:Vector3, frustrum_override:bool) -> bool:
 	## Beginning at the root node of lowest LOD, and working towards the most
 	## detailed LOD 0.
 	
-	if not within_sphere(cam.global_position, ranges[lod_level]):
-		## This node is not within range of the selected LOD level, the parent
-		## will need to display this at a lower detailed LOD.
+	if not within_sphere(cam_pos, ranges[lod_level]):
+		## This quad is not within range of the selected LOD level, the parent
+		## will need to display this at a lower detailed LOD. Return false to
+		## mark the area as not handled.
 		return false
 	
-	if not _visibility_detector.is_on_screen() and not cull_box.has_point(cam.global_position):
-		## This node is not on screen, and the camera is not within its cell. Do
-		## not make it visible, and mark it as handled.
-		#mesh.mesh = high_lod_mesh
-		#mesh.visible = true
+	if not (_visibility_detector.is_on_screen() or frustrum_override):
+		## This quad is not on screen. Do not make it visible, and return true
+		## to mark the area as handled.
 		return true
 	
 	if lod_level == 0:
-		## Within range of selected LOD level, and at lowest LOD, there are no
-		## more detailed children to render this. Make it visible.
+		## Within range of selected LOD level, and at highest detailed LOD,
+		## there are no more detailed children to render this. Make this quad
+		## visible. Return true to mark the area handled.
 		mesh.mesh = high_lod_mesh
 		mesh.visible = true
 		return true
 	
 	else:
 		## Within range of selected LOD level, but there are more detailed
-		## children that may be able to display this.
-		if not within_sphere(cam.global_position, ranges[lod_level - 1]):
-			## No children are within range of their LOD levels, handle the
-			## entire node here.
+		## children that may be able to display this. Check if any are within
+		## their LOD range.
+		if not within_sphere(cam_pos, ranges[lod_level - 1]):
+			## No children are within range of their LOD levels, make this quad
+			## visible to handle the area.
 			mesh.mesh = high_lod_mesh
 			mesh.visible = true
 		
 		else:
-			## Some more detailed children are within their LOD range. Recurse
-			## through them and select them.
+			## At least one more detailed children is within LOD range. Recurse
+			## through them and select them if appropriate.
 			for subquad in _subquads:
-				if not subquad.lod_select(cam):
-					## If a child node is out of its LOD range, we need to cover
-					## it with a lower LOD.
+				if not subquad.lod_select(cam_pos, frustrum_override):
+					## If a child node is out of its LOD range, we need to force
+					## it to display at a lower detailed LOD.
 					subquad.mesh.mesh = low_lod_mesh
-					subquad.visible = true
-					subquad.position.y += 32
+					subquad.mesh.visible = true
 		
+		## The area has been handled.
 		return true
 
 
@@ -142,30 +149,12 @@ func reset_visibility(to:bool = false) -> void:
 		subquad.position.y = 0
 
 
-## Shift the plane horizontally. Intended for following the player position.
-## This should be used rather than adjusting position directly, as this will
-## properly adjust the AABB cull boxes of this and child quads. Y coordinate
-## should be set to 0 offset is used as global coordinates.
-func shift(offset:Vector3, is_root_quad:bool = true) -> void:
-	cull_box.position += offset
-	
-	if is_root_quad:
-		global_position += offset
-	
-	for subquad in _subquads:
-		subquad.shift(offset, false)
-
-
 ## Returns true if this quads cull_box AABB intersects with a sphere with the
 ## specified radius and center point.
 func within_sphere(center:Vector3, radius:float) -> bool:
-	var vector:Vector3 = (cull_box.get_center() - center).normalized()
+	var vector:Vector3 = (cull_box.abs().get_center() - center).normalized()
 	
-	if cull_box.intersects_segment(center, center + vector * radius):
+	if cull_box.intersects_segment(center, center + (vector * radius)):
 		return true
-	
-	for i in range(8):
-		if (cull_box.get_endpoint(i) - center).length() < radius:
-			return true
 	
 	return false
