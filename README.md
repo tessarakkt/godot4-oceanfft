@@ -19,7 +19,7 @@ views for the displacement and normal maps.
   - Foam
   - Splash particles
   - Light interactions (transparency, refractions)
-- Improve quad tree LOD system for large scale worlds
+- Improve quad tree LOD transitions, and lower detail but faster visual shader for lower LOD quads
 - Improve buoyancy system for large objects
 - Cascading FFTs
 - Multiplayer synchronization? [This reference](https://developer.download.nvidia.com/assets/gameworks/downloads/regular/events/cgdc15/CGDC2015_ocean_simulation_en.pdf) may be helpful for this.
