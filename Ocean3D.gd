@@ -562,20 +562,19 @@ func global_to_pixel(global_pos:Vector3) -> Vector2i:
 	## map before applying it. Make sure to check if the vertex shader should be
 	## updated to account for any changes made here.
 	
-	## Convert global position to local position
-	var local_pos := to_local(global_pos)
-	
 	## Convert to UV coordinate
-	var extents := horizontal_dimension * horizontal_scale * 0.5
 	var uv_pos := Vector2.ZERO
-	uv_pos.x = local_pos.x / extents
-	uv_pos.y = local_pos.z / extents
+	uv_pos.x = global_pos.x
+	uv_pos.y = global_pos.z
+	
+	## Rotate to align with wind
+	uv_pos = uv_pos.rotated(_wind_rad)
 	
 	## Offset by wind scrolling
 	uv_pos += _wind_uv_offset
 	
-	## Rotate to align with wind
-	uv_pos = uv_pos.rotated(_wind_rad)
+	## Apply UV scale
+	uv_pos *= 0.004
 	
 	## Normalize values to 0.0-1.0
 	uv_pos.x -= floorf(uv_pos.x)
