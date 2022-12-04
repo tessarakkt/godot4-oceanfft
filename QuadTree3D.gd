@@ -140,13 +140,16 @@ func lod_select(cam_pos:Vector3, frustrum_override:bool) -> bool:
 		return true
 
 
-## Reset all quads to a certain visibility, defaults to false.
-func reset_visibility(to:bool = false) -> void:
-	mesh.visible = to
+## Reset all quads to invisible.
+func reset_visibility() -> void:
+	if mesh.visible:
+		## If this quad is visible, no children should be visible.
+		mesh.visible = false
 	
-	for subquad in _subquads:
-		subquad.reset_visibility(to)
-		subquad.position.y = 0
+	else:
+		## If this quad is not visible, there are likely children displaying it.
+		for subquad in _subquads:
+			subquad.reset_visibility()
 
 
 ## Returns true if this quads cull_box AABB intersects with a sphere with the
