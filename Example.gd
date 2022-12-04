@@ -1,8 +1,9 @@
 extends WorldEnvironment
 
 
-@onready var canvas_layer:CanvasLayer = $CanvasLayer
 @onready var displacement_view:TextureRect = $CanvasLayer/Displacement
+@onready var settings_view:PanelContainer = $CanvasLayer/PanelContainer
+@onready var fps_view:Label = $CanvasLayer/FPS
 
 @onready var ocean = $Ocean3D
 
@@ -13,12 +14,17 @@ func _ready() -> void:
 	displacement_view.texture = ocean.get_waves_texture()
 
 
+func _process(_delta:float) -> void:
+	fps_view.text = "%.1f FPS" % [Engine.get_frames_per_second()]
+
+
 func _input(event:InputEvent) -> void:
 	if event.is_action_pressed("toggle_ocean_debug"):
-		canvas_layer.visible = not canvas_layer.visible
-		camera.motion_enabled = not canvas_layer.visible
+		displacement_view.visible = not displacement_view.visible
+		settings_view.visible = displacement_view.visible
+		camera.motion_enabled = not displacement_view.visible
 		
-		if canvas_layer.visible:
+		if displacement_view.visible:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

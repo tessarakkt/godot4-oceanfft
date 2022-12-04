@@ -50,6 +50,14 @@ custom_minimum_size = Vector2(256, 256)
 offset_right = 40.0
 offset_bottom = 40.0
 
+[node name="FPS" type="Label" parent="CanvasLayer"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -23.0
+offset_right = 40.0
+grow_vertical = 0
+
 [node name="PanelContainer" type="PanelContainer" parent="CanvasLayer"]
 custom_minimum_size = Vector2(256, 0)
 anchors_preset = 1
