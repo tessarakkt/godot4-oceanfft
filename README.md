@@ -1,8 +1,7 @@
 # Godot 4 Ocean Shader
 An early work in progress ocean shader for Godot 4 base on Jerry Tessendorf's
 FFT method for generating the waves, using compute shaders to generate the
-displacement and normal maps.
-
+displacement map.
 
 The GLSL shaders that generates the displacement map were ported into Godot 4
 from [this project](https://github.com/achalpandeyy/OceanFFT). The underlying
@@ -33,6 +32,7 @@ views for the displacement and normal maps.
 - [Assassin’s Creed III: The tech behind (or beneath) the action](https://www.fxguide.com/fxfeatured/assassins-creed-iii-the-tech-behind-or-beneath-the-action/)
 - [The technical art of Sea of Thieves](https://dl.acm.org/doi/10.1145/3214745.3214820)
 - [Ocean simulation and rendering in War Thunder](https://developer.download.nvidia.com/assets/gameworks/downloads/regular/events/cgdc15/CGDC2015_ocean_simulation_en.pdf)
-- [Claes Johanson - Real-time water rendering Introducing the projected grid concept](https://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/projgrid-lq.pdf)
+- [ARM Software - Using the Jacobian for modelling turbulent effects at wave crests](https://arm-software.github.io/opengl-es-sdk-for-android/ocean_f_f_t.html#oceanJacobian)
 - [Continuous Distance-Dependent Level of Detail for Rendering Heightmaps (CDLOD)](https://github.com/fstrugar/CDLOD/blob/master/cdlod_paper_latest.pdf)
 - [Jump Trajectory - Ocean waves simulation with Fast Fourier transform](https://www.youtube.com/watch?v=kGEqaX4Y4bQ)
+- ~~[Claes Johanson - Real-time water rendering Introducing the projected grid concept](https://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/projgrid-lq.pdf)~~ The projected grid method was not used in this project.
