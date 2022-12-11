@@ -129,7 +129,7 @@ text = "Wave Speed"
 
 [node name="WaveSpeed" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-max_value = 0.05
+max_value = 20.0
 step = 0.001
 
 [node name="WindDirectionLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
