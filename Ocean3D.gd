@@ -582,8 +582,8 @@ func global_to_pixel(global_pos:Vector3) -> Vector2i:
 	
 	## Convert to pixel coordinate
 	var pixel_pos := Vector2i.ZERO
-	pixel_pos.x = floor(fft_resolution * uv_pos.x)
-	pixel_pos.y = floor(fft_resolution * uv_pos.y)
+	pixel_pos.x = floor((fft_resolution - 1) * uv_pos.x)
+	pixel_pos.y = floor((fft_resolution - 1) * uv_pos.y)
 	
 	return pixel_pos
 

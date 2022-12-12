@@ -6,10 +6,11 @@ class_name BuoyancyBody3D
 
 
 var buoyancy_spheres:Array[BuoyancySphere3D] = []
+var ocean:Ocean3D
 
 
 func _ready() -> void:
-	var ocean := get_ocean()
+	ocean = get_ocean()
 	
 	for sphere in $BuoyancySpheres.get_children():
 		buoyancy_spheres.append(sphere)
@@ -17,12 +18,29 @@ func _ready() -> void:
 
 
 func _physics_process(delta:float) -> void:
+	var g:float = ProjectSettings.get_setting("physics/3d/default_gravity")
 	var gv:Vector3 = ProjectSettings.get_setting("physics/3d/default_gravity_vector")
-	var buoyancy := 0.0
 	
+	## Get the submerged volume for each buoyancy sphere, and the total
+	var total_submerged_volume := 0.0
 	for sphere in buoyancy_spheres:
-		buoyancy = sphere.simulate_buoyancy(delta) * buoyancy_multiplier * delta
-		apply_force(buoyancy * -gv, sphere.position)
+		var submerged_volume := sphere.get_submerged_volume()
+		total_submerged_volume += submerged_volume
+	
+	## Get the weighted average of the positions based on individual submerged
+	## volume and total submerged volume. This position will be center of
+	## buoyancy (COB).
+	var center_of_buoyancy := Vector3.ZERO
+	for sphere in buoyancy_spheres:
+		center_of_buoyancy += (sphere.global_position - global_position) * (sphere.get_submerged_volume() / total_submerged_volume)
+	
+	## Calculate the total force of buoyancy which will act at the COB
+	var depth := global_position.y - ocean.get_wave_height(global_position)
+	var buoyancy = 997.0 * g * total_submerged_volume * -depth
+	
+	## Apply the buoyancy force at the COB
+	if depth < 0.0:
+		apply_force(buoyancy * -gv * buoyancy_multiplier * delta, center_of_buoyancy)
 
 
 ## Return the Ocean3D object used for buoyancy calculations.
