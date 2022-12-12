@@ -15,16 +15,22 @@ func _process(delta:float) -> void:
 	
 	if motion_enabled:
 		if Input.is_action_pressed("free_cam_forward"):
-			motion -= basis.z
+			motion -= Vector3(basis.z.x, 0.0, basis.z.z).normalized()
 	
 		if Input.is_action_pressed("free_cam_backward"):
-			motion += basis.z
+			motion += Vector3(basis.z.x, 0.0, basis.z.z).normalized()
 	
 		if Input.is_action_pressed("free_cam_left"):
-			motion -= basis.x
+			motion -= Vector3(basis.x.x, 0.0, basis.x.z).normalized()
 	
 		if Input.is_action_pressed("free_cam_right"):
-			motion += basis.x
+			motion += Vector3(basis.x.x, 0.0, basis.x.z).normalized()
+	
+		if Input.is_action_pressed("free_cam_down"):
+			motion += Vector3.DOWN
+		
+		if Input.is_action_pressed("free_cam_up"):
+			motion += Vector3.UP
 	
 		motion = motion.normalized()
 	
