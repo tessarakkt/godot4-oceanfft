@@ -22,9 +22,9 @@ script = ExtResource("1_bbw57")
 
 [node name="Ocean3D" parent="." instance=ExtResource("1_78lg6")]
 time_scale = 1.1
-choppiness = 4.3
+choppiness = 1.8
 wave_speed = 0.003
-wave_length = 192.0
+wave_length = 9.0
 
 [node name="QuadTree3D" parent="." instance=ExtResource("6_gp4hx")]
 lod_level = 4
@@ -109,9 +109,9 @@ text = "Choppiness"
 
 [node name="Choppiness" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-max_value = 20.0
+max_value = 10.0
 step = 0.1
-value = 6.5
+value = 1.8
 
 [node name="WaveLengthLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
@@ -120,8 +120,8 @@ text = "Wave Length"
 [node name="WaveLength" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 min_value = 1.0
-max_value = 1760.0
-value = 15.0
+max_value = 1000.0
+value = 9.0
 
 [node name="WaveSpeedLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2

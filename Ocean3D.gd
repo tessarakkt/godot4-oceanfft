@@ -39,6 +39,7 @@ enum FFTResolution {
 	set(new_fft_resolution):
 		fft_resolution = new_fft_resolution
 		_is_initial_spectrum_changed = true
+		_is_spectrum_changed = true
 		_is_scale_changed = true
 		_material.set_shader_parameter("fft_resolution", fft_resolution)
 
@@ -54,9 +55,9 @@ enum FFTResolution {
 		horizontal_scale = new_horizontal_scale
 		_is_scale_changed = true
 
-@export_range(0.001, 100.0) var time_scale := 1.0
+@export_range(0.001, 5.0) var time_scale := 1.0
 
-@export_range(0.0, 100.0) var choppiness := 1.5:
+@export_range(0.0, 10.0) var choppiness := 1.5:
 	set(new_choppiness):
 		choppiness = new_choppiness
 		_is_spectrum_changed = true
@@ -69,7 +70,7 @@ enum FFTResolution {
 
 @export_range(0.0, 100.0) var wave_speed := 0.0
 
-@export_range(0.0, 1760.0) var wave_length := 300.0:
+@export_range(0.0, 1000.0) var wave_length := 300.0:
 	set(new_wave_length):
 		wave_vector = wave_vector.normalized() * new_wave_length
 	get:
@@ -636,7 +637,7 @@ func _pack_phase_settings(delta_time:float) -> PackedByteArray:
 
 func _pack_spectrum_settings() -> PackedByteArray:
 	var settings_bytes = PackedInt32Array([horizontal_dimension]).to_byte_array()
-	settings_bytes.append_array(PackedFloat32Array([choppiness]).to_byte_array())
+	settings_bytes.append_array(PackedFloat32Array([choppiness, fft_resolution]).to_byte_array())
 	return settings_bytes
 
 

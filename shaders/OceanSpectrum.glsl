@@ -2,7 +2,6 @@
 #version 460 core
 
 #define COMPUTE_WORK_GROUP_DIM 32
-#define RESOLUTION 512
 
 const float PI = 3.14159265359f;
 const float g = 9.81f;
@@ -17,6 +16,7 @@ layout(set = 0, binding = 21, rgba32f) writeonly uniform image2D u_spectrum;
 layout(set = 0, binding = 0) buffer UniformsBuffer {
     int ocean_size;
     float choppiness;
+    float resolution;
 } u;
 
 vec2 multiplyComplex(vec2 a, vec2 b) {
@@ -34,15 +34,15 @@ float omega(float k) {
 void main() {
     ivec2 pixel_coord = ivec2(gl_GlobalInvocationID.xy);
 
-    float n = (pixel_coord.x < 0.5f * RESOLUTION) ? pixel_coord.x : pixel_coord.x - RESOLUTION;
-    float m = (pixel_coord.y < 0.5f * RESOLUTION) ? pixel_coord.y : pixel_coord.y - RESOLUTION;
+    float n = (pixel_coord.x < 0.5f * u.resolution) ? pixel_coord.x : pixel_coord.x - u.resolution;
+    float m = (pixel_coord.y < 0.5f * u.resolution) ? pixel_coord.y : pixel_coord.y - u.resolution;
     vec2 wave_vector = (2.f * PI * vec2(n, m)) / u.ocean_size;
 
     float phase = imageLoad(u_phases, pixel_coord).r;
     vec2 phase_vector = vec2(cos(phase), sin(phase));
 
     vec2 h0 = vec2(imageLoad(u_initial_spectrum, pixel_coord).r, 0.f);
-    vec2 h0Star = vec2(imageLoad(u_initial_spectrum, (RESOLUTION - pixel_coord) % (RESOLUTION - 1)).r, 0.f);
+    vec2 h0Star = vec2(imageLoad(u_initial_spectrum, (int(u.resolution) - pixel_coord) % (int(u.resolution) - 1)).r, 0.f);
     h0Star.y *= -1.f;
 
     vec2 h = multiplyComplex(h0, phase_vector) + multiplyComplex(h0Star, vec2(phase_vector.x, -phase_vector.y));
