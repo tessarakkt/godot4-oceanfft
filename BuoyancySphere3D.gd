@@ -8,6 +8,7 @@ class_name BuoyancySphere3D
 		gizmo_extents = new_radius
 		_total_volume = 1.33333 * PI * pow(radius, 3.0)
 @export_range(0, 10, 1) var height_sampling_steps := 3
+@export_range(0, 10, 1) var max_cascade := 1
 
 
 var ocean:Ocean3D
@@ -18,7 +19,7 @@ var _total_volume := 0.0
 
 ## Get the wave height at this buoyancy sphere's location.
 func get_wave_height() -> float:
-	return ocean.get_wave_height(global_position, height_sampling_steps)
+	return ocean.get_wave_height(global_position, max_cascade, height_sampling_steps)
 
 
 ## Get the total volume of this buoyancy sphere.

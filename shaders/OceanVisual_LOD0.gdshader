@@ -3,7 +3,9 @@ render_mode world_vertex_coords;
 
 
 uniform float fft_resolution = 256.0;
-uniform sampler2D displacement:hint_default_black,repeat_enable;
+uniform sampler2D displacement_cascade0:hint_default_black,repeat_enable;
+uniform sampler2D displacement_cascade1:hint_default_black,repeat_enable;
+uniform sampler2D displacement_cascade2:hint_default_black,repeat_enable;
 
 uniform vec4 deep_color:source_color;
 uniform vec4 shallow_color:source_color;
@@ -30,7 +32,13 @@ vec3 rotate_y(vec3 vector, float sintheta, float costheta) {
 
 
 vec3 get_rotated_displacement(vec2 rotated_uv, float sintheta, float costheta) {
-	return rotate_y(texture(displacement, rotated_uv * uv_scale).rgb, sintheta, costheta);
+	vec3 displacement = vec3(0.0);
+	
+	displacement += rotate_y(texture(displacement_cascade0, rotated_uv * uv_scale + wind_uv_offset).rgb, sintheta, costheta);
+	displacement += rotate_y(texture(displacement_cascade1, rotated_uv * uv_scale + wind_uv_offset * 0.7).rgb, sintheta, costheta);
+	displacement += rotate_y(texture(displacement_cascade2, rotated_uv * uv_scale + wind_uv_offset * 0.3).rgb, sintheta, costheta);
+	
+	return displacement;
 }
 
 
@@ -41,7 +49,7 @@ void vertex() {
 	// Vertex Offset
 	// Use the world vertex XZ coordinates as UV for simplicity
 	vec2 rotated_uv = vec2(VERTEX.x * costheta - VERTEX.z * sintheta,
-			VERTEX.z * costheta + VERTEX.x * sintheta) + wind_uv_offset;
+			VERTEX.z * costheta + VERTEX.x * sintheta);
 	vec3 rotated_displacement = get_rotated_displacement(rotated_uv, sintheta, costheta);
 	
 	VERTEX += rotated_displacement;
