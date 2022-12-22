@@ -157,6 +157,9 @@ tick_count = 4
 ticks_on_borders = true
 
 [node name="BuoyancyBody3D" parent="." instance=ExtResource("5_h5rtj")]
+linear_damp = 0.25
+angular_damp = 0.25
+buoyancy_multiplier = 1.25001
 
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="." method="_on_simulate_enabled_toggled"]
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/CullEnabled" to="." method="_on_cull_enabled_toggled"]

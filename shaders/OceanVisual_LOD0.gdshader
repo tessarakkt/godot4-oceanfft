@@ -13,7 +13,6 @@ uniform vec4 shallow_color:source_color;
 uniform float sss_strength = 2.0;
 
 uniform float uv_scale = 1.0;
-uniform float wind_angle = 0.0;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 
 
@@ -22,52 +21,38 @@ varying vec3 world_normal;
 varying mat3 invview3;
 
 
-vec3 rotate_y(vec3 vector, float sintheta, float costheta) {
-	return vec3(
-		vector.x * costheta - vector.z * sintheta,
-		vector.y,
-		vector.z * costheta + vector.x * sintheta
-	);
-}
-
-
-vec3 get_rotated_displacement(vec2 rotated_uv, float sintheta, float costheta) {
+vec3 get_displacement(vec2 uv) {
 	vec3 displacement = vec3(0.0);
-	
-	displacement += rotate_y(texture(displacement_cascade0, rotated_uv * uv_scale + wind_uv_offset).rgb, sintheta, costheta);
-	displacement += rotate_y(texture(displacement_cascade1, rotated_uv * uv_scale + wind_uv_offset * 0.7).rgb, sintheta, costheta);
-	displacement += rotate_y(texture(displacement_cascade2, rotated_uv * uv_scale + wind_uv_offset * 0.3).rgb, sintheta, costheta);
+
+	displacement += texture(displacement_cascade0, uv * uv_scale + wind_uv_offset).rgb;
+	displacement += texture(displacement_cascade1, uv * uv_scale + wind_uv_offset * 0.7).rgb;
+	displacement += texture(displacement_cascade2, uv * uv_scale + wind_uv_offset * 0.3).rgb;
 	
 	return displacement;
 }
 
 
 void vertex() {
-	float costheta = cos(wind_angle);
-	float sintheta = sin(wind_angle);
-	
 	// Vertex Offset
 	// Use the world vertex XZ coordinates as UV for simplicity
-	vec2 rotated_uv = vec2(VERTEX.x * costheta - VERTEX.z * sintheta,
-			VERTEX.z * costheta + VERTEX.x * sintheta);
-	vec3 rotated_displacement = get_rotated_displacement(rotated_uv, sintheta, costheta);
+	vec3 displacement = get_displacement(VERTEX.xz);
 	
-	VERTEX += rotated_displacement;
+	VERTEX += displacement;
 	
 	// Surface Normals
 	float offset = 1.0 / (fft_resolution * uv_scale);
 	
-	vec3 right = vec3(1.0, get_rotated_displacement(rotated_uv + vec2(offset, 0.0), sintheta, costheta).y, 0.0) - rotated_displacement;
-	vec3 left = vec3(-1.0, get_rotated_displacement(rotated_uv + vec2(-offset, 0.0), sintheta, costheta).y, 0.0) - rotated_displacement;
-	vec3 bottom = vec3(0.0, get_rotated_displacement(rotated_uv + vec2(0.0, offset), sintheta, costheta).y, 1.0) - rotated_displacement;
-	vec3 top = vec3(0.0, get_rotated_displacement(rotated_uv + vec2(0.0, -offset), sintheta, costheta).y, -1.0) - rotated_displacement;
+	vec3 right = vec3(1.0, get_displacement(VERTEX.xz + vec2(offset, 0.0)).y, 0.0) - displacement;
+	vec3 left = vec3(-1.0, get_displacement(VERTEX.xz + vec2(-offset, 0.0)).y, 0.0) - displacement;
+	vec3 bottom = vec3(0.0, get_displacement(VERTEX.xz + vec2(0.0, offset)).y, 1.0) - displacement;
+	vec3 top = vec3(0.0, get_displacement(VERTEX.xz + vec2(0.0, -offset)).y, -1.0) - displacement;
 	
 	vec3 top_right = cross(right, top);
 	vec3 top_left = cross(top, left);
 	vec3 bottom_left = cross(left, bottom);
 	vec3 bottom_right = cross(bottom, right);
 	
-	NORMAL = normalize(rotate_y(top_right + top_left + bottom_left + bottom_right, sin(-wind_angle), cos(-wind_angle)));
+	NORMAL = normalize(top_right + top_left + bottom_left + bottom_right);
 }
 
 

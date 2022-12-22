@@ -66,7 +66,6 @@ enum FFTResolution {
 	set(new_wind_direction_degrees):
 		wind_direction_degrees = clamp(new_wind_direction_degrees, 0.0, 360.0)
 		_wind_rad = deg_to_rad(new_wind_direction_degrees)
-		_material.set_shader_parameter("wind_angle", _wind_rad)
 
 @export_range(0.0, 100.0) var wave_speed := 0.0
 
@@ -587,25 +586,24 @@ func simulate(delta:float) -> void:
 ## Convert a global position (on the horizontal XZ plane) to a pixel coordinate
 ## for sampling the wave displacement texture directly. The Y coordinate is
 ## ignored.
-func global_to_pixel(global_pos:Vector3) -> Vector2i:
+func global_to_pixel(global_pos:Vector3, cascade:int) -> Vector2i:
 	## The order of operations in this function is dependent on the order of
 	## operations used in the vertex shader to rotate and scale the displacement
 	## map before applying it. Make sure to check if the vertex shader should be
 	## updated to account for any changes made here.
+	
+	var offset_scales:Array[float] = [1.0, 0.7, 0.3]
 	
 	## Convert to UV coordinate
 	var uv_pos := Vector2.ZERO
 	uv_pos.x = global_pos.x
 	uv_pos.y = global_pos.z
 	
-	## Rotate to align with wind
-	uv_pos = uv_pos.rotated(_wind_rad)
-	
-	## Offset by wind scrolling
-	uv_pos += _wind_uv_offset
-	
 	## Apply UV scale
 	uv_pos *= 0.004
+	
+	## Offset by wind scrolling
+	uv_pos += _wind_uv_offset * offset_scales[cascade]
 	
 	## Normalize values to 0.0-1.0
 	uv_pos.x -= floorf(uv_pos.x)
@@ -632,7 +630,7 @@ func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 3) -> 
 	
 	for cascade in range(max_cascade):
 		for i in range(steps):
-			var pixel_pos := global_to_pixel(global_pos + xz_offset.rotated(Vector3.UP, _wind_rad))
+			var pixel_pos := global_to_pixel(global_pos + xz_offset, cascade)
 			
 			pixel = _waves_image_cascade[cascade].get_pixelv(pixel_pos)
 			xz_offset.x -= pixel.r
