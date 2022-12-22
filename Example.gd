@@ -1,7 +1,9 @@
 extends WorldEnvironment
 
 
-@onready var displacement_view:TextureRect = $CanvasLayer/Displacement
+@onready var displacement_cascade0_view:TextureRect = $CanvasLayer/Displacement_cascade0
+@onready var displacement_cascade1_view:TextureRect = $CanvasLayer/Displacement_cascade1
+@onready var displacement_cascade2_view:TextureRect = $CanvasLayer/Displacement_cascade2
 @onready var settings_view:PanelContainer = $CanvasLayer/PanelContainer
 @onready var fps_view:Label = $CanvasLayer/FPS
 
@@ -11,7 +13,9 @@ extends WorldEnvironment
 
 
 func _ready() -> void:
-	displacement_view.texture = ocean.get_waves_texture()
+	displacement_cascade0_view.texture = ocean.get_waves_texture(0)
+	displacement_cascade1_view.texture = ocean.get_waves_texture(1)
+	displacement_cascade2_view.texture = ocean.get_waves_texture(2)
 
 
 func _process(_delta:float) -> void:
@@ -20,11 +24,13 @@ func _process(_delta:float) -> void:
 
 func _input(event:InputEvent) -> void:
 	if event.is_action_pressed("toggle_ocean_debug"):
-		displacement_view.visible = not displacement_view.visible
-		settings_view.visible = displacement_view.visible
-		camera.motion_enabled = not displacement_view.visible
+		displacement_cascade0_view.visible = not displacement_cascade0_view.visible
+		displacement_cascade1_view.visible = displacement_cascade0_view.visible
+		displacement_cascade2_view.visible = displacement_cascade0_view.visible
+		settings_view.visible = displacement_cascade0_view.visible
+		camera.motion_enabled = not displacement_cascade0_view.visible
 		
-		if displacement_view.visible:
+		if displacement_cascade0_view.visible:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)

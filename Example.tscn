@@ -45,10 +45,22 @@ light_energy = 0.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Displacement" type="TextureRect" parent="CanvasLayer"]
+[node name="Displacement_cascade0" type="TextureRect" parent="CanvasLayer"]
 custom_minimum_size = Vector2(256, 256)
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="Displacement_cascade1" type="TextureRect" parent="CanvasLayer"]
+custom_minimum_size = Vector2(256, 256)
+offset_left = 288.0
+offset_right = 544.0
+offset_bottom = 256.0
+
+[node name="Displacement_cascade2" type="TextureRect" parent="CanvasLayer"]
+custom_minimum_size = Vector2(256, 256)
+offset_left = 576.0
+offset_right = 832.0
+offset_bottom = 256.0
 
 [node name="FPS" type="Label" parent="CanvasLayer"]
 anchors_preset = 2
@@ -129,7 +141,7 @@ text = "Wave Speed"
 
 [node name="WaveSpeed" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-max_value = 20.0
+max_value = 1.0
 step = 0.001
 
 [node name="WindDirectionLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
