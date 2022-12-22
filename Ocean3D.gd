@@ -409,6 +409,8 @@ func simulate(delta:float) -> void:
 			## Submit to GPU and wait for results
 			_rd.submit()
 			_rd.sync()
+			
+			_rd.free_rid(uniform_set)
 		
 		## Prevent this from running again until the Wind, FFT Resolution, or
 		## Horizontal Dimension inputs are changed.
@@ -449,6 +451,8 @@ func simulate(delta:float) -> void:
 	_rd.submit()
 	_rd.sync()
 	
+	_rd.free_rid(uniform_set)
+	
 	## Update Settings Buffer
 	if _is_spectrum_changed:
 		_is_spectrum_changed = false
@@ -486,6 +490,8 @@ func simulate(delta:float) -> void:
 		## Submit to GPU and wait for results
 		_rd.submit()
 		_rd.sync()
+		
+		_rd.free_rid(uniform_set)
 	
 		#### Execute Horizontal FFT Shader Cascades
 		########################################################################
@@ -524,6 +530,8 @@ func simulate(delta:float) -> void:
 			## Submit to GPU and wait for results
 			_rd.submit()
 			_rd.sync()
+			
+			_rd.free_rid(uniform_set)
 			
 			p <<= 1
 			is_sub_ping_phase = not is_sub_ping_phase
@@ -564,6 +572,8 @@ func simulate(delta:float) -> void:
 			## Submit to GPU and wait for results
 			_rd.submit()
 			_rd.sync()
+			
+			_rd.free_rid(uniform_set)
 			
 			p <<= 1
 			is_sub_ping_phase = not is_sub_ping_phase
