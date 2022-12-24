@@ -11,6 +11,7 @@ uniform vec4 deep_color:source_color;
 uniform vec4 shallow_color:source_color;
 
 uniform float sss_strength = 2.0;
+uniform float planetary_curve_strength = 0.000001;
 
 uniform float uv_scale = 1.0;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
@@ -37,7 +38,13 @@ void vertex() {
 	// Use the world vertex XZ coordinates as UV for simplicity
 	vec3 displacement = get_displacement(VERTEX.xz);
 	
+	// Planetary Curve
+	// Take distance squared from camera to vertex, multiply by strength factor,
+	// subtract from vertex Y.
+	float curvation = planetary_curve_strength * (pow(VERTEX.x - CAMERA_POSITION_WORLD.x, 2.0) + pow(VERTEX.z - CAMERA_POSITION_WORLD.z, 2.0));
+	
 	VERTEX += displacement;
+	VERTEX.y -= curvation;
 	
 	// Surface Normals
 	float offset = 1.0 / (fft_resolution * uv_scale);

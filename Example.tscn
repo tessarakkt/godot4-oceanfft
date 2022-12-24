@@ -27,15 +27,16 @@ wave_speed = 0.003
 wave_length = 9.0
 
 [node name="QuadTree3D" parent="." instance=ExtResource("6_gp4hx")]
-lod_level = 4
-quad_size = 4096.0
+lod_level = 6
+quad_size = 32768.0
 high_lod_mesh = ExtResource("4_ue8re")
 low_lod_mesh = ExtResource("5_ajhm6")
-ranges = [256.0, 512.0, 1024.0, 2048.0, 4096.0]
+ranges = [512.0, 1024.0, 2048.0, 4096.0, 8192.0, 16384.0, 32768.0, 65535.0]
 camera = NodePath("../Camera3D")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
+far = 16000.0
 script = ExtResource("4_4k0tt")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -104,6 +105,16 @@ layout_mode = 2
 tooltip_text = "You probably don't want to use more than 5 here. If running <20fps, any value will start to be noticable."
 max_value = 30.0
 
+[node name="PlanetaryCurveLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Planetary Curve"
+
+[node name="PlanetaryCurve" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+max_value = 1.0
+step = -1.0
+value = 0.001
+
 [node name="SpeedLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 text = "Time Scale"
@@ -164,6 +175,7 @@ buoyancy_multiplier = 1.25001
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="." method="_on_simulate_enabled_toggled"]
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/CullEnabled" to="." method="_on_cull_enabled_toggled"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Frameskip" to="." method="_on_frameskip_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/PlanetaryCurve" to="." method="_on_planetary_curve_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Speed" to="." method="_on_speed_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Choppiness" to="." method="_on_choppiness_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WaveLength" to="." method="_on_wind_speed_value_changed"]

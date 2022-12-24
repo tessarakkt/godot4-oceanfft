@@ -66,3 +66,7 @@ func _on_wave_speed_value_changed(value:float) -> void:
 
 func _on_cull_enabled_toggled(button_pressed:bool) -> void:
 	$QuadTree3D.pause_cull = not button_pressed
+
+
+func _on_planetary_curve_value_changed(value:float) -> void:
+	$QuadTree3D.planetary_curve_strength = value * 0.0001

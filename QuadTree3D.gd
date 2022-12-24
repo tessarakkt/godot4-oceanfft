@@ -3,8 +3,12 @@ class_name QuadTree3D
 
 
 @export_range(0, 1000000, 1) var lod_level := 2
-@export_range(1.0, 8192.0) var quad_size := 1024.0
+@export_range(1.0, 65535.0) var quad_size := 1024.0
 @export_range(1.0, 8192.0) var mesh_size := 256.0
+@export_range(0.0, 0.001) var planetary_curve_strength := 0.000001:
+	set(new_planetary_curve_strength):
+		planetary_curve_strength = new_planetary_curve_strength
+		material.set_shader_parameter("planetary_curve_strength", planetary_curve_strength)
 @export var high_lod_mesh:Mesh
 @export var low_lod_mesh:Mesh
 @export var ranges:Array[float] = [512.0, 1024.0, 2048.0]
@@ -51,8 +55,8 @@ func _ready() -> void:
 		_camera = get_node(camera)
 	
 	## Initialized with size only, global position is added in the setter
-	cull_box = AABB(Vector3(-quad_size * 0.5, -128.0, -quad_size * 0.5),
-			Vector3(quad_size * 1.0, 256.0, quad_size * 1.0))
+	cull_box = AABB(Vector3(-quad_size * 0.5, quad_size * -0.5, -quad_size * 0.5),
+			Vector3(quad_size * 1.0, quad_size, quad_size * 1.0))
 	
 	## If this is not the most detailed LOD level, initialize more detailed
 	## children.
