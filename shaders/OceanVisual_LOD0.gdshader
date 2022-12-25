@@ -13,9 +13,8 @@ uniform vec4 shallow_color:source_color;
 uniform float sss_strength = 2.0;
 uniform float planetary_curve_strength = 0.000001;
 
-uniform float uv_scale = 1.0;
+uniform float uv_scale = 0.001;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
-
 
 varying vec3 camera_vector;
 varying vec3 world_normal;
@@ -26,8 +25,8 @@ vec3 get_displacement(vec2 uv) {
 	vec3 displacement = vec3(0.0);
 
 	displacement += texture(displacement_cascade0, uv * uv_scale + wind_uv_offset).rgb;
-	displacement += texture(displacement_cascade1, uv * uv_scale + wind_uv_offset * 0.7).rgb;
-	displacement += texture(displacement_cascade2, uv * uv_scale + wind_uv_offset * 0.3).rgb;
+	displacement += texture(displacement_cascade1, uv * uv_scale * 1.42857 + wind_uv_offset * 0.7).rgb;
+	displacement += texture(displacement_cascade2, uv * uv_scale * 3.33333 + wind_uv_offset * 0.3).rgb;
 	
 	return displacement;
 }
