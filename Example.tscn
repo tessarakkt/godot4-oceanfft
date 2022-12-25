@@ -142,8 +142,8 @@ text = "Wave Length"
 
 [node name="WaveLength" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-min_value = 1.0
-max_value = 1000.0
+min_value = 5.0
+max_value = 500.0
 value = 9.0
 
 [node name="WaveSpeedLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
