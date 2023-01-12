@@ -38,6 +38,8 @@ camera = NodePath("../Camera3D")
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
 far = 16000.0
 script = ExtResource("4_4k0tt")
+speed = 100.0
+sprint_speed = 500.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.906308, 0.178606, -0.383022, 0, 0.906308, 0.422618, 0.422618, 0.383022, -0.821394, 0, 2.5, 0)
