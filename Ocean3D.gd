@@ -75,7 +75,7 @@ enum FFTResolution {
 	get:
 		return wave_vector.length()
 
-@export var cascade_ranges:Array[Vector2] = [Vector2(0.0, 0.07), Vector2(0.07, 0.15), Vector2(0.15, 1.0)]
+@export var cascade_ranges:Array[Vector2] = [Vector2(0.0, 0.04), Vector2(0.04, 0.15), Vector2(0.15, 1.0)]
 @export var cascade_scales:Array[float] = [1.0, 0.7, 0.3]
 
 var wave_vector := Vector2(300.0, 0.0):
