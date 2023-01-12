@@ -13,17 +13,31 @@ uniform vec4 shallow_color:source_color;
 uniform float sss_strength = 2.0;
 uniform float planetary_curve_strength = 0.000001;
 
-uniform float uv_scale = 0.001;
+// Adjusts how strong the refraction is based on the distance between the ocean
+// pixel and the object behind it.
+uniform float refraction_depth_factor = 0.00001;
+
+// Adjusts how much the refracted image is blended with the base water color
+// based on the distance from the cameras Z Near plane to the ocean pixel.
+uniform float refraction_distance_factor = 0.0025;
+
+uniform float refraction_factor_min = 0.0;
+uniform float refraction_factor_max = 0.025;
+
+uniform float refraction_blend_factor_min = 0.6;
+uniform float refraction_blend_factor_max = 1.0;
+
+uniform float uv_scale = 0.00390625;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 
-varying vec3 camera_vector;
-varying vec3 world_normal;
 varying mat3 invview3;
 
 
+// Get the total wave displacement of a vertex from all cascades.
+// TODO: cascade scales should not be hard coded
 vec3 get_displacement(vec2 uv) {
 	vec3 displacement = vec3(0.0);
-
+	
 	displacement += texture(displacement_cascade0, uv * uv_scale + wind_uv_offset).rgb;
 	displacement += texture(displacement_cascade1, uv * uv_scale * 1.42857 + wind_uv_offset * 0.7).rgb;
 	displacement += texture(displacement_cascade2, uv * uv_scale * 3.33333 + wind_uv_offset * 0.3).rgb;
@@ -63,23 +77,42 @@ void vertex() {
 
 
 void fragment() {
+	// Setting this varying is needed in light() for subsurface scattering.
+	// Godot bug #67256 prevents accessing this variable directly from light()
+	// https://github.com/godotengine/godot/issues/67256
 	invview3 = mat3(INV_VIEW_MATRIX);
 	
-	camera_vector = normalize((VERTEX * invview3) - CAMERA_POSITION_WORLD);
-	world_normal = NORMAL * invview3;
+	// Get the linear depth between each ocean pixel and whatever is behind it.
+	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).r;
+	vec4 view = INV_PROJECTION_MATRIX * vec4(vec3(SCREEN_UV * 2.0 - 1.0, depth), 1.0);
+	view.xyz /= view.w;
+	float linear_depth = -view.z;
 	
-	ALBEDO = deep_color.rgb;
+	// Get the distance between the cameras Z near plane and the each ocean pixel.
+	vec4 view_dist = INV_PROJECTION_MATRIX * vec4(vec3(SCREEN_UV * 2.0 - 1.0, FRAGCOORD.z), 1.0);
+	view_dist.xyz /= view_dist.w;
+	float linear_dist = -view_dist.z;
+	
+	// Refraction, based on depth between ocean pixel and object behind.
+	// Fades out with distance so as to be smooth transition to lower LOD shaders
+	// which may exclude this.
+	float refraction_factor = clamp(linear_depth * refraction_depth_factor, refraction_factor_min, refraction_factor_max);
+	float refraction_blend_factor = clamp(linear_dist * refraction_distance_factor, refraction_blend_factor_min, refraction_blend_factor_max);
+	vec2 refracted_uv = SCREEN_UV - NORMAL.xz * refraction_factor;
+	vec3 background_color = textureLod(SCREEN_TEXTURE, refracted_uv, 0.0).rgb;
+	ALBEDO = mix(background_color, deep_color.rgb, refraction_blend_factor);
+	
 	ROUGHNESS = 0.02;
 	SPECULAR = 1.0;
 }
 
 
 void light() {
-	float fresnel = 1.0 - abs(dot(world_normal, camera_vector));
+	float fresnel = 1.0 - clamp(dot(NORMAL, normalize(VIEW)), 0.0, 1.0);
 	
 	// Specular
 	float spec = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), 1500.0), 0.0, 1.0);
-	float spec_glare = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), 850.0), 0.0, 1.0) * 1.0;
+	float spec_glare = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), 850.0), 0.0, 1.0);
 	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * fresnel;
 	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * (spec + spec_glare) * fresnel;
 	

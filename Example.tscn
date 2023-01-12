@@ -5,7 +5,7 @@
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://Environment.tres" id="1_hcce8"]
 [ext_resource type="Script" path="res://Camera.gd" id="4_4k0tt"]
 [ext_resource type="ArrayMesh" uid="uid://d1hw8grely66o" path="res://meshes/Ocean256.obj" id="4_ue8re"]
-[ext_resource type="ArrayMesh" uid="uid://bot30p84w6jo1" path="res://meshes/Ocean128.obj" id="5_ajhm6"]
+[ext_resource type="ArrayMesh" uid="uid://dnm7tuihoulle" path="res://meshes/Ocean512.obj" id="5_8a17c"]
 [ext_resource type="PackedScene" uid="uid://bdlade7ptf25e" path="res://BuoyancyBody3D.tscn" id="5_h5rtj"]
 [ext_resource type="PackedScene" uid="uid://d8xemdqvv0v6" path="res://QuadTree3D.tscn" id="6_gp4hx"]
 
@@ -27,10 +27,10 @@ wave_speed = 0.003
 wave_length = 9.0
 
 [node name="QuadTree3D" parent="." instance=ExtResource("6_gp4hx")]
-lod_level = 6
+lod_level = 5
 quad_size = 32768.0
-high_lod_mesh = ExtResource("4_ue8re")
-low_lod_mesh = ExtResource("5_ajhm6")
+high_lod_mesh = ExtResource("5_8a17c")
+low_lod_mesh = ExtResource("4_ue8re")
 ranges = [512.0, 1024.0, 2048.0, 4096.0, 8192.0, 16384.0, 32768.0, 65535.0]
 camera = NodePath("../Camera3D")
 
