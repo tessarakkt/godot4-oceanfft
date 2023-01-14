@@ -1,0 +1,21 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://txv01r10kypt"
+path="res://.godot/imported/Ocean1024.obj-3bd22cb5fda5b2a4f27ea30d00d6d64f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Ocean1024.obj-3bd22cb5fda5b2a4f27ea30d00d6d64f.mesh"]
+
+source_file="res://meshes/Ocean1024.obj"
+dest_files=["res://.godot/imported/Ocean1024.obj-3bd22cb5fda5b2a4f27ea30d00d6d64f.mesh", "res://.godot/imported/Ocean1024.obj-3bd22cb5fda5b2a4f27ea30d00d6d64f.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
