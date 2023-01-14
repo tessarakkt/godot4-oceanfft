@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode world_vertex_coords;
+render_mode world_vertex_coords, depth_draw_always;
 
 
 uniform float fft_resolution = 256.0;
