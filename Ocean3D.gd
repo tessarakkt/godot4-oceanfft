@@ -307,7 +307,9 @@ func _ready() -> void:
 		## Bind the displacement map cascade texture to the visual shader
 		_waves_image_cascade[i] = Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RGF)
 		_waves_texture_cascade[i] = ImageTexture.create_from_image(_waves_image_cascade[i])
-		_material.set_shader_parameter("displacement_cascade%d" % [i], _waves_texture_cascade[i])
+	
+	_material.set_shader_parameter("cascade_displacements", _waves_texture_cascade)
+	_material.set_shader_parameter("cascade_uv_scales", cascade_scales)
 	
 	#### Compile & Initialize FFT Shaders
 	############################################################################

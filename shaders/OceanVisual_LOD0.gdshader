@@ -2,13 +2,18 @@ shader_type spatial;
 render_mode world_vertex_coords, depth_draw_always;
 
 
+const int CASCADE_COUNT = 3;
+
+
 uniform float fft_resolution = 256.0;
-uniform sampler2D displacement_cascade0:hint_default_black,repeat_enable;
-uniform sampler2D displacement_cascade1:hint_default_black,repeat_enable;
-uniform sampler2D displacement_cascade2:hint_default_black,repeat_enable;
+uniform sampler2D cascade_displacements[CASCADE_COUNT];
+uniform float cascade_uv_scales[CASCADE_COUNT];
+uniform float cascade_steepness_scales[CASCADE_COUNT];
+uniform float cascade_amplitude_scales[CASCADE_COUNT];
 
 uniform vec4 deep_color:source_color;
 uniform vec4 shallow_color:source_color;
+uniform float background_color_brightness = 0.5;
 
 uniform float sss_strength = 2.0;
 uniform float planetary_curve_strength = 0.000001;
@@ -34,13 +39,14 @@ varying mat3 invview3;
 
 
 // Get the total wave displacement of a vertex from all cascades.
-// TODO: cascade scales should not be hard coded
 vec3 get_displacement(vec2 uv) {
 	vec3 displacement = vec3(0.0);
 	
-	displacement += texture(displacement_cascade0, uv * uv_scale + wind_uv_offset).rgb;
-	displacement += texture(displacement_cascade1, uv * uv_scale * 1.42857 + wind_uv_offset * 0.7).rgb;
-	displacement += texture(displacement_cascade2, uv * uv_scale * 3.33333 + wind_uv_offset * 0.3).rgb;
+	for (int i = 0; i < CASCADE_COUNT; i++) {
+		displacement += texture(cascade_displacements[i],
+				uv * uv_scale * (1.0 / cascade_uv_scales[i]) + wind_uv_offset * cascade_uv_scales[i]).rgb
+				* vec3(cascade_steepness_scales[i], cascade_amplitude_scales[i], 1.0);
+	}
 	
 	return displacement;
 }
@@ -100,7 +106,7 @@ void fragment() {
 	float refraction_blend_factor = clamp(linear_dist * refraction_distance_factor, refraction_blend_factor_min, refraction_blend_factor_max);
 	vec2 refracted_uv = SCREEN_UV - NORMAL.xz * refraction_factor;
 	vec3 background_color = textureLod(SCREEN_TEXTURE, refracted_uv, 0.0).rgb;
-	ALBEDO = mix(background_color, deep_color.rgb, refraction_blend_factor);
+	ALBEDO = mix(background_color * background_color_brightness, deep_color.rgb, refraction_blend_factor);
 	
 	ROUGHNESS = 0.02;
 	SPECULAR = 1.0;
