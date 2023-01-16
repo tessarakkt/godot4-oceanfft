@@ -13,10 +13,17 @@ uniform float cascade_amplitude_scales[CASCADE_COUNT];
 
 uniform vec4 deep_color:source_color;
 uniform vec4 shallow_color:source_color;
-uniform float background_color_brightness = 0.5;
+uniform float background_color_brightness = 0.3;
 
-uniform float sss_strength = 2.0;
+uniform float sss_strength = 1.5;
 uniform float planetary_curve_strength = 0.000001;
+
+uniform float fresnel_strength = 0.3;
+uniform float fresnel_power = 5.0;
+uniform float fresnel_limit = 0.7;
+
+uniform float specular_strength = 0.75;
+uniform float specular_power = 500.0;
 
 // Adjusts how strong the refraction is based on the distance between the ocean
 // pixel and the object behind it.
@@ -109,18 +116,17 @@ void fragment() {
 	ALBEDO = mix(background_color * background_color_brightness, deep_color.rgb, refraction_blend_factor);
 	
 	ROUGHNESS = 0.02;
-	SPECULAR = 1.0;
+	SPECULAR = 0.0;
 }
 
 
 void light() {
-	float fresnel = 1.0 - clamp(dot(NORMAL, normalize(VIEW)), 0.0, 1.0);
+	float fresnel = pow(fresnel_limit - clamp(dot(NORMAL, normalize(VIEW)), 0.0, fresnel_limit), fresnel_power) * fresnel_strength;
 	
 	// Specular
-	float spec = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), 1500.0), 0.0, 1.0);
-	float spec_glare = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), 850.0), 0.0, 1.0);
-	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, LIGHT), 0.0, 1.0) * fresnel;
-	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * (spec + spec_glare) * fresnel;
+	float spec = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), specular_power), 0.0, 1.0) * specular_strength;
+	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, LIGHT), 0.0, 1.0) + fresnel;
+	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * spec + fresnel;
 	
 	// Sub Surface Scattering
 	float sss = clamp(smoothstep(0.65, 0.7, dot(NORMAL, VIEW) * 0.5 + 0.5) * smoothstep(0.5, 1.0, dot(-LIGHT, VIEW) * 0.5 + 0.5) * (dot(-invview3[2].xyz, vec3(0.0, 1.0, 0.0)) * 0.5 + 0.5), 0.0, 1.0) * sss_strength;
