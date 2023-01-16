@@ -4,10 +4,13 @@ extends Camera3D
 @export_range(0.0, 1000.0) var speed := 25.0
 @export_range(0.0, 1000.0) var sprint_speed := 50.0
 @export_range(0.0, 1.0) var camera_sensitivity := 0.1
+@export_range(1.0, 15.0) var zoom_speed := 5.0
+@export_range(1.0, 90.0) var zoom_fov := 25.0
 
 
 var camera_motion := Vector2.ZERO
 var motion_enabled := false
+var zoom_factor := 0.0
 
 
 func _process(delta:float) -> void:
@@ -38,6 +41,14 @@ func _process(delta:float) -> void:
 			motion *= sprint_speed
 		else:
 			motion *= speed
+		
+		if Input.is_action_pressed("free_cam_zoom"):
+			zoom_factor = clamp(zoom_factor + delta * zoom_speed, 0.0, 1.0)
+		
+		else:
+			zoom_factor = clamp(zoom_factor - delta * zoom_speed, 0.0, 1.0)
+		
+		fov = lerp(75.0, zoom_fov, zoom_factor)
 	
 		position += motion * delta
 	

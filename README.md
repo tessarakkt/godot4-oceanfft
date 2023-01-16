@@ -12,6 +12,7 @@ accessed had to be changed to work in Godots compute shader API.
 | --- | --- |
 |  `/~  |  Toggle menu/free cam modes|
 |  Mouse Motion  |  Free cam look|
+|  Right Click  |  Free cam zoom|
 |  W  |  Free cam forwards (locked to horizontal plane)|
 |  S  |  Free cam backwards (locked to horizontal plane)|
 |  A  |  Free cam strafe left (locked to horizontal plane)|
