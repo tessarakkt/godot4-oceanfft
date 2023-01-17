@@ -42,6 +42,11 @@ uniform float refraction_blend_factor_max = 1.0;
 uniform float uv_scale = 0.00390625;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 
+instance uniform float patch_size = 512.0;
+instance uniform float vertex_resolution = 256.0;
+instance uniform float min_lod_morph_distance;
+instance uniform float max_lod_morph_distance;
+
 varying mat3 invview3;
 
 
@@ -59,7 +64,17 @@ vec3 get_displacement(vec2 uv) {
 }
 
 
+vec2 lod_morph(float morph_factor, vec2 grid_pos) {
+	vec2 fracPart = fract(grid_pos.xy * vertex_resolution * 0.5) * 2.0 / vertex_resolution;
+	return fracPart * patch_size * morph_factor;
+}
+
+
 void vertex() {
+	// LOD Morph
+	float morph_factor = (clamp(length(VERTEX - CAMERA_POSITION_WORLD), min_lod_morph_distance, max_lod_morph_distance) - min_lod_morph_distance) / (max_lod_morph_distance - min_lod_morph_distance);
+	VERTEX.xz -= lod_morph(morph_factor, UV);
+	
 	// Vertex Offset
 	// Use the world vertex XZ coordinates as UV for simplicity
 	vec3 displacement = get_displacement(VERTEX.xz);

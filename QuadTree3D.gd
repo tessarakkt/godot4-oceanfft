@@ -5,12 +5,12 @@ class_name QuadTree3D
 @export_range(0, 1000000, 1) var lod_level := 2
 @export_range(1.0, 65535.0) var quad_size := 1024.0
 @export_range(1.0, 8192.0) var mesh_size := 256.0
+@export_range(0.0, 1.0) var morph_range := 0.3;
 @export_range(0.0, 0.001) var planetary_curve_strength := 0.000001:
 	set(new_planetary_curve_strength):
 		planetary_curve_strength = new_planetary_curve_strength
 		material.set_shader_parameter("planetary_curve_strength", planetary_curve_strength)
-@export var high_lod_mesh:Mesh
-@export var low_lod_mesh:Mesh
+@export_range(0.0, 32000.0, 1.0) var mesh_resolution := 256.0
 @export var ranges:Array[float] = [512.0, 1024.0, 2048.0]
 @export_node_path(Camera3D) var camera
 
@@ -24,12 +24,14 @@ var cull_box:AABB:
 	set(new_aabb):
 		_visibility_detector.aabb = new_aabb
 
-var mesh:MeshInstance3D
+var mesh_instance_high_lod:MeshInstance3D
+var mesh_instance_low_lod:MeshInstance3D
 var material:ShaderMaterial:
 	get:
-		return mesh.material_override
+		return mesh_instance_high_lod.material_override
 	set(new_material):
-		mesh.material_override = new_material
+		mesh_instance_high_lod.material_override = new_material
+		mesh_instance_low_lod.material_override = new_material
 
 
 var _subquads:Array[QuadTree3D] = []
@@ -45,9 +47,27 @@ func _ready() -> void:
 	var quad = load("res://QuadTree3D.tscn")
 	var offset_length:float = quad_size * 0.25
 	
-	mesh = $MeshInstance3D
-	mesh.mesh = high_lod_mesh
-	mesh.scale = Vector3.ONE * (quad_size / mesh_size)
+	mesh_instance_high_lod = $MeshHighLOD
+	mesh_instance_high_lod.mesh = PlaneMesh.new()
+	mesh_instance_high_lod.mesh.size = Vector2.ONE * quad_size
+	mesh_instance_high_lod.mesh.subdivide_depth = mesh_resolution
+	mesh_instance_high_lod.mesh.subdivide_width = mesh_resolution
+	
+	mesh_instance_high_lod.set_instance_shader_parameter("vertex_resolution", mesh_resolution)
+	mesh_instance_high_lod.set_instance_shader_parameter("patch_size", quad_size)
+	mesh_instance_high_lod.set_instance_shader_parameter("min_lod_morph_distance", get_min_lod_morph_distance(lod_level))
+	mesh_instance_high_lod.set_instance_shader_parameter("max_lod_morph_distance", ranges[lod_level] * 1.5)
+	
+	mesh_instance_low_lod = $MeshLowLOD
+	mesh_instance_low_lod.mesh = PlaneMesh.new()
+	mesh_instance_low_lod.mesh.size = Vector2.ONE * quad_size
+	mesh_instance_low_lod.mesh.subdivide_depth = mesh_resolution * 0.5 - 1
+	mesh_instance_low_lod.mesh.subdivide_width = mesh_resolution * 0.5 - 1
+	
+	mesh_instance_low_lod.set_instance_shader_parameter("vertex_resolution", mesh_resolution * 0.5)
+	mesh_instance_low_lod.set_instance_shader_parameter("patch_size", quad_size)
+	mesh_instance_low_lod.set_instance_shader_parameter("min_lod_morph_distance", get_min_lod_morph_distance(lod_level + 1) * 1.75)
+	mesh_instance_low_lod.set_instance_shader_parameter("max_lod_morph_distance", ranges[lod_level + 1] * 1.8)
 	
 	## If a NodePath to a Camera3D has been specified in the export, grab it.
 	## This is the camera that culling will be based on.
@@ -68,8 +88,8 @@ func _ready() -> void:
 			new_quad.ranges = ranges
 			new_quad.process_mode = PROCESS_MODE_DISABLED
 			new_quad.position = offset * offset_length
-			new_quad.high_lod_mesh = high_lod_mesh
-			new_quad.low_lod_mesh = low_lod_mesh
+			new_quad.mesh_resolution = mesh_resolution
+			new_quad.morph_range = morph_range
 			
 			$SubQuads.add_child(new_quad)
 			_subquads.append(new_quad)
@@ -116,8 +136,7 @@ func lod_select(cam_pos:Vector3, frustrum_override:bool) -> bool:
 		## Within range of selected LOD level, and at highest detailed LOD,
 		## there are no more detailed children to render this. Make this quad
 		## visible. Return true to mark the area handled.
-		mesh.mesh = high_lod_mesh
-		mesh.visible = true
+		mesh_instance_high_lod.visible = true
 		return true
 	
 	else:
@@ -127,8 +146,7 @@ func lod_select(cam_pos:Vector3, frustrum_override:bool) -> bool:
 		if not within_sphere(cam_pos, ranges[lod_level - 1]):
 			## No children are within range of their LOD levels, make this quad
 			## visible to handle the area.
-			mesh.mesh = high_lod_mesh
-			mesh.visible = true
+			mesh_instance_high_lod.visible = true
 		
 		else:
 			## At least one more detailed children is within LOD range. Recurse
@@ -137,8 +155,7 @@ func lod_select(cam_pos:Vector3, frustrum_override:bool) -> bool:
 				if not subquad.lod_select(cam_pos, frustrum_override):
 					## If a child node is out of its LOD range, we need to force
 					## it to display at a lower detailed LOD.
-					subquad.mesh.mesh = low_lod_mesh
-					subquad.mesh.visible = true
+					subquad.mesh_instance_low_lod.visible = true
 		
 		## The area has been handled.
 		return true
@@ -146,9 +163,10 @@ func lod_select(cam_pos:Vector3, frustrum_override:bool) -> bool:
 
 ## Reset all quads to invisible.
 func reset_visibility() -> void:
-	if mesh.visible:
+	if mesh_instance_high_lod.visible or mesh_instance_low_lod.visible:
 		## If this quad is visible, no children should be visible.
-		mesh.visible = false
+		mesh_instance_high_lod.visible = false
+		mesh_instance_low_lod.visible = false
 	
 	else:
 		## If this quad is not visible, there are likely children displaying it.
@@ -165,3 +183,10 @@ func within_sphere(center:Vector3, radius:float) -> bool:
 		return true
 	
 	return false
+
+
+func get_min_lod_morph_distance(lod:int) -> float:
+	if lod == 0:
+		return ranges[lod] * (1.0 - morph_range)
+	
+	return (ranges[lod] - ranges[lod - 1]) * (1.0 - morph_range) + ranges[lod - 1]
