@@ -6,11 +6,7 @@
 [node name="QuadTree3D" type="Node3D"]
 script = ExtResource("1_60upk")
 
-[node name="MeshHighLOD" type="MeshInstance3D" parent="."]
-visible = false
-material_override = ExtResource("2_do2v2")
-
-[node name="MeshLowLOD" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 visible = false
 material_override = ExtResource("2_do2v2")
 
