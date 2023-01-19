@@ -29,7 +29,6 @@ var cull_box:AABB:
 	set(new_aabb):
 		_visibility_detector.aabb = new_aabb
 
-var mesh_instance:MeshInstance3D
 var lod_meshes:Array[PlaneMesh] = []
 var material:ShaderMaterial:
 	get:
@@ -42,16 +41,24 @@ var _subquads:Array[QuadTree3D] = []
 var _camera:Camera3D
 
 
+@onready var mesh_instance:MeshInstance3D = $MeshInstance3D
 @onready var _visibility_detector:VisibleOnScreenNotifier3D = $VisibleOnScreenNotifier3D
 
 
 func _ready() -> void:
 	## If the camera NodePath is set, then this is the top level quad
 	if camera != null:
+		## This is the camera that culling will be based on.
+		_camera = get_node(camera)
+		
 		## Load self to instantiate subquads with
 		## This can't currently be preloaded due to an engine bug
 		## https://github.com/godotengine/godot/issues/70985
 		Quad = load("res://QuadTree3D.tscn")
+		
+		## Set max view distance and fade range start
+		material.set_shader_parameter("view_distance_max", _camera.far)
+		material.set_shader_parameter("view_fade_start", 0.005)
 		
 		## Initialize LOD meshes for each level
 		var current_size = quad_size
@@ -67,18 +74,11 @@ func _ready() -> void:
 	
 	var offset_length:float = quad_size * 0.25
 	
-	mesh_instance = $MeshInstance3D
 	mesh_instance.mesh = lod_meshes[lod_level]
-	
 	mesh_instance.set_instance_shader_parameter("vertex_resolution", float(mesh_vertex_resolution))
 	mesh_instance.set_instance_shader_parameter("patch_size", quad_size)
 	mesh_instance.set_instance_shader_parameter("min_lod_morph_distance", ranges[lod_level] * 2 * (1.0 - morph_range))
 	mesh_instance.set_instance_shader_parameter("max_lod_morph_distance", ranges[lod_level] * 2)
-	
-	## If a NodePath to a Camera3D has been specified in the export, grab it.
-	## This is the camera that culling will be based on.
-	if camera != null:
-		_camera = get_node(camera)
 	
 	cull_box = AABB(Vector3(-quad_size * 0.5, -10, -quad_size * 0.5),
 			Vector3(quad_size, 20, quad_size))

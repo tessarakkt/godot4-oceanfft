@@ -42,6 +42,9 @@ uniform float refraction_blend_factor_max = 1.0;
 uniform float uv_scale = 0.00390625;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 
+uniform float view_distance_max = 16000.0;
+uniform float view_fade_start = 0.005;
+
 instance uniform float patch_size = 512.0;
 instance uniform float vertex_resolution = 256.0;
 instance uniform float min_lod_morph_distance;
@@ -116,10 +119,8 @@ void fragment() {
 	view.xyz /= view.w;
 	float linear_depth = -view.z;
 	
-	// Get the distance between the cameras Z near plane and the each ocean pixel.
-	vec4 view_dist = INV_PROJECTION_MATRIX * vec4(vec3(SCREEN_UV * 2.0 - 1.0, FRAGCOORD.z), 1.0);
-	view_dist.xyz /= view_dist.w;
-	float linear_dist = -view_dist.z;
+	// Get the distance between the camera and each ocean pixel.
+	float linear_dist = length(VERTEX - CAMERA_POSITION_WORLD); //-view_dist.z;
 	
 	// Refraction, based on depth between ocean pixel and object behind.
 	// Fades out with distance so as to be smooth transition to lower LOD shaders
@@ -129,6 +130,9 @@ void fragment() {
 	vec2 refracted_uv = SCREEN_UV - NORMAL.xz * refraction_factor;
 	vec3 background_color = textureLod(SCREEN_TEXTURE, refracted_uv, 0.0).rgb;
 	ALBEDO = mix(background_color * background_color_brightness, deep_color.rgb, refraction_blend_factor);
+	
+	// Distance Fade
+	ALPHA = 1.0 - clamp(linear_dist, view_distance_max * view_fade_start, view_distance_max) / view_distance_max;
 	
 	ROUGHNESS = 0.02;
 	SPECULAR = 0.0;
