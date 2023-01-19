@@ -51,6 +51,7 @@ instance uniform float min_lod_morph_distance;
 instance uniform float max_lod_morph_distance;
 
 varying mat3 invview3;
+varying vec3 world_vertex;
 
 
 // Get the total wave displacement of a vertex from all cascades.
@@ -90,6 +91,8 @@ void vertex() {
 	VERTEX += displacement;
 	VERTEX.y -= curvation;
 	
+	world_vertex = VERTEX;
+	
 	// Surface Normals
 	float offset = 1.0 / (fft_resolution * uv_scale);
 	
@@ -120,7 +123,7 @@ void fragment() {
 	float linear_depth = -view.z;
 	
 	// Get the distance between the camera and each ocean pixel.
-	float linear_dist = length(VERTEX - CAMERA_POSITION_WORLD); //-view_dist.z;
+	float linear_dist = length(world_vertex - CAMERA_POSITION_WORLD); //-view_dist.z;
 	
 	// Refraction, based on depth between ocean pixel and object behind.
 	// Fades out with distance so as to be smooth transition to lower LOD shaders
