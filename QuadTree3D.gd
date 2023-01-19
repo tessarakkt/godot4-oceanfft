@@ -21,14 +21,7 @@ var Quad
 
 
 var pause_cull := false
-var cull_box:AABB:
-	get:
-		return AABB(
-				global_position + _visibility_detector.aabb.position,
-				_visibility_detector.aabb.size)
-	set(new_aabb):
-		_visibility_detector.aabb = new_aabb
-
+var cull_box:AABB
 var lod_meshes:Array[PlaneMesh] = []
 var material:ShaderMaterial:
 	get:
@@ -80,7 +73,10 @@ func _ready() -> void:
 	mesh_instance.set_instance_shader_parameter("min_lod_morph_distance", ranges[lod_level] * 2 * (1.0 - morph_range))
 	mesh_instance.set_instance_shader_parameter("max_lod_morph_distance", ranges[lod_level] * 2)
 	
-	cull_box = AABB(Vector3(-quad_size * 0.5, -10, -quad_size * 0.5),
+	_visibility_detector.aabb = AABB(Vector3(-quad_size * 0.75, -quad_size * 0.5, -quad_size * 0.75),
+			Vector3(quad_size * 1.5, quad_size, quad_size * 1.5))
+	mesh_instance.custom_aabb = _visibility_detector.aabb
+	cull_box = AABB(global_position + Vector3(-quad_size * 0.5, -10, -quad_size * 0.5),
 			Vector3(quad_size, 20, quad_size))
 	
 	## If this is not the most detailed LOD level, initialize more detailed
