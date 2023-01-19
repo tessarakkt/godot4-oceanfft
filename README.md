@@ -1,7 +1,9 @@
 # Godot 4 Ocean Shader
 An early work in progress ocean shader for Godot 4 base on Jerry Tessendorf's
 FFT method for generating the waves, using compute shaders to generate the
-displacement map.
+displacement map, and a quad tree based continuous distant dependant level of
+detail (CDLOD) system to dynamically manage the polygon density without
+popping or snapping between LOD levels.
 
 The GLSL shaders that generates the displacement map were ported into Godot 4
 from [this project](https://github.com/achalpandeyy/OceanFFT). The underlying
@@ -21,21 +23,23 @@ accessed had to be changed to work in Godots compute shader API.
 |  Ctrl  |  Free cam down (locked to vertical axis)|
 |  Shift  |  Free cam sprint/move faster|
 
-![Ocean](https://user-images.githubusercontent.com/118585625/212502974-757f7f29-684a-4821-a280-bf406ce1ffe6.png)
+![Ocean](https://user-images.githubusercontent.com/118585625/213395845-b0fedcbc-cc7a-4be8-b365-3ff275f482bc.png)
 
 ## Todo List
 - Refactor project as Godot addon
 - Improve visual rendering
   - Foam
   - Splash particles
-  - Improve light interactions (transparency, reflections refractions)
-- Improve quad tree LOD transitions, and lower detail but faster visual shader for lower LOD quads
+  - Improve light interactions (transparency, reflections, refractions)
+- Lower detail but faster visual shader for lower LOD quads
 - Improve buoyancy system
 - Beach/cliff/rocks interactions
 - Wave collision interactions (boat wakes, splashes, etc.)
 - Multiplayer synchronization? [This reference](https://developer.download.nvidia.com/assets/gameworks/downloads/regular/events/cgdc15/CGDC2015_ocean_simulation_en.pdf) may be helpful for this.
 
-![OceanCurve](https://user-images.githubusercontent.com/118585625/212503106-9f6eb378-9d6d-4d5e-8fbf-f058a857088b.png)
+![OceanCDLOD](https://user-images.githubusercontent.com/118585625/213395892-4c6e6b2e-82b5-4708-9689-6cbb93dad340.png)
+
+![OceanCurve](https://user-images.githubusercontent.com/118585625/213397029-6d327b02-a701-474d-b56a-da7b13a054ab.png)
 
 ## References
 ### Wave Generation Theory
