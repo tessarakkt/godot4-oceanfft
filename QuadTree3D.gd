@@ -4,14 +4,20 @@ class_name QuadTree3D
 
 @export_range(0, 1000000, 1) var lod_level := 2
 @export_range(1.0, 65535.0) var quad_size := 1024.0
-@export_range(0.0, 1.0) var morph_range := 0.15;
+@export_range(0.0, 1.0) var morph_range := 0.15
 @export_range(0.0, 0.001) var planetary_curve_strength := 0.000001:
 	set(new_planetary_curve_strength):
 		planetary_curve_strength = new_planetary_curve_strength
 		material.set_shader_parameter("planetary_curve_strength", planetary_curve_strength)
-@export_range(0.0, 32000.0, 1.0) var mesh_vertex_resolution := 64.0
+@export_range(0, 32000, 1) var mesh_vertex_resolution := 512
 @export var ranges:Array[float] = [512.0, 1024.0, 2048.0]
 @export_node_path(Camera3D) var camera
+
+
+## Will hold this resource loaded so as to instantiate subquads
+## This can't currently be preloaded due to an engine bug
+## https://github.com/godotengine/godot/issues/70985
+var Quad
 
 
 var pause_cull := false
@@ -24,6 +30,7 @@ var cull_box:AABB:
 		_visibility_detector.aabb = new_aabb
 
 var mesh_instance:MeshInstance3D
+var lod_meshes:Array[PlaneMesh] = []
 var material:ShaderMaterial:
 	get:
 		return mesh_instance.material_override
@@ -39,18 +46,31 @@ var _camera:Camera3D
 
 
 func _ready() -> void:
-	## For some reason this doesn't work as a preload()? I'm probably doing
-	## something wrong... It's not enough of a problem to care right now.
-	var quad = load("res://QuadTree3D.tscn")
+	## If the camera NodePath is set, then this is the top level quad
+	if camera != null:
+		## Load self to instantiate subquads with
+		## This can't currently be preloaded due to an engine bug
+		## https://github.com/godotengine/godot/issues/70985
+		Quad = load("res://QuadTree3D.tscn")
+		
+		## Initialize LOD meshes for each level
+		var current_size = quad_size
+		
+		for i in range(lod_level + 1):
+			var mesh := PlaneMesh.new()
+			mesh.size = Vector2.ONE * current_size
+			mesh.subdivide_depth = mesh_vertex_resolution - 1
+			mesh.subdivide_width = mesh_vertex_resolution - 1
+			
+			lod_meshes.insert(0, mesh)
+			current_size *= 0.5
+	
 	var offset_length:float = quad_size * 0.25
 	
 	mesh_instance = $MeshInstance3D
-	mesh_instance.mesh = PlaneMesh.new()
-	mesh_instance.mesh.size = Vector2.ONE * quad_size
-	mesh_instance.mesh.subdivide_depth = mesh_vertex_resolution - 1
-	mesh_instance.mesh.subdivide_width = mesh_vertex_resolution - 1
+	mesh_instance.mesh = lod_meshes[lod_level]
 	
-	mesh_instance.set_instance_shader_parameter("vertex_resolution", mesh_vertex_resolution)
+	mesh_instance.set_instance_shader_parameter("vertex_resolution", float(mesh_vertex_resolution))
 	mesh_instance.set_instance_shader_parameter("patch_size", quad_size)
 	mesh_instance.set_instance_shader_parameter("min_lod_morph_distance", ranges[lod_level] * 2 * (1.0 - morph_range))
 	mesh_instance.set_instance_shader_parameter("max_lod_morph_distance", ranges[lod_level] * 2)
@@ -60,7 +80,6 @@ func _ready() -> void:
 	if camera != null:
 		_camera = get_node(camera)
 	
-	## Initialized with size only, global position is added in the setter
 	cull_box = AABB(Vector3(-quad_size * 0.5, -10, -quad_size * 0.5),
 			Vector3(quad_size, 20, quad_size))
 	
@@ -68,7 +87,7 @@ func _ready() -> void:
 	## children.
 	if lod_level > 0:
 		for offset in [Vector3(1, 0, 1), Vector3(-1, 0, 1), Vector3(1, 0, -1), Vector3(-1, 0, -1)]:
-			var new_quad = quad.instantiate()
+			var new_quad = Quad.instantiate()
 			new_quad.lod_level = lod_level - 1
 			new_quad.quad_size = quad_size * 0.5
 			new_quad.ranges = ranges
@@ -76,6 +95,8 @@ func _ready() -> void:
 			new_quad.position = offset * offset_length
 			new_quad.mesh_vertex_resolution = mesh_vertex_resolution
 			new_quad.morph_range = morph_range
+			new_quad.Quad = Quad
+			new_quad.lod_meshes = lod_meshes
 			
 			$SubQuads.add_child(new_quad)
 			_subquads.append(new_quad)
@@ -93,9 +114,6 @@ func _process(_delta:float) -> void:
 ## true marks the node as handled, and a value of false indicates the parent
 ## node must handle it.
 ## cam_pos is the camera/player position in global coordinates.
-## frustrum_override, if true, forces all quads to be considered within the
-## camera frustrum. If this is false, this will be determined by a
-## VisibleOnScreenNotifier3D for each quad.
 func lod_select(cam_pos:Vector3) -> bool:
 	## Beginning at the root node of lowest LOD, and working towards the most
 	## detailed LOD 0.
@@ -133,8 +151,6 @@ func lod_select(cam_pos:Vector3) -> bool:
 			## through them and select them if appropriate.
 			for subquad in _subquads:
 				if not subquad.lod_select(cam_pos):
-					## If a child node is out of its LOD range, we need to force
-					## it to display at a lower detailed LOD.
 					subquad.mesh_instance.visible = true
 		
 		## The area has been handled.
@@ -167,10 +183,3 @@ func within_sphere(center:Vector3, radius:float) -> bool:
 			dmin += pow(center[i] - cull_box.end[i], 2.0)
 	
 	return dmin <= radius_squared
-
-
-func get_min_lod_morph_distance(lod:int) -> float:
-	if lod == 0:
-		return ranges[lod] * (1.0 - morph_range)
-	
-	return (ranges[lod] - ranges[lod - 1]) * (1.0 - morph_range) + ranges[lod - 1]
