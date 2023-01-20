@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="1_a84yj"]
+
+[node name="Ocean3D" type="Node3D" groups=["ocean"]]
+script = ExtResource("1_a84yj")
