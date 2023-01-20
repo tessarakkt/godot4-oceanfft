@@ -1,11 +1,19 @@
-[gd_scene load_steps=8 format=3 uid="uid://bjrox2llj64pm"]
+[gd_scene load_steps=12 format=3 uid="uid://bjrox2llj64pm"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://example/Example.gd" id="2_hewa1"]
-[ext_resource type="PackedScene" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.tscn" id="3_xtc7m"]
-[ext_resource type="PackedScene" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.tscn" id="4_0dr24"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/BuoyancyBody3D.gd" id="5_7l8pd"]
 [ext_resource type="Script" path="res://example/Camera.gd" id="5_eso43"]
-[ext_resource type="PackedScene" path="res://addons/tessarakkt.oceanfft/components/BuoyancyBody3D.tscn" id="6_n8k3t"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
+[ext_resource type="Material" uid="uid://dbq5y5brnm626" path="res://addons/tessarakkt.oceanfft/Ocean.material" id="5_sn4uk"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/BuoyancySphere3D.gd" id="6_0ba5x"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="7_xa10r"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_s2ec8"]
+size = Vector3(75, 15, 25)
+
+[sub_resource type="BoxMesh" id="BoxMesh_diwhn"]
+size = Vector3(75, 15, 25)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i8f6a"]
 bg_color = Color(0.188235, 0.188235, 0.188235, 1)
@@ -18,17 +26,158 @@ expand_margin_bottom = 10.0
 environment = ExtResource("1_o40li")
 script = ExtResource("2_hewa1")
 
-[node name="Ocean3D" parent="." instance=ExtResource("3_xtc7m")]
+[node name="Ocean3D" type="Node3D" parent="."]
+script = ExtResource("7_xa10r")
 time_scale = 1.1
 choppiness = 1.8
 wave_speed = 0.003
 wave_length = 9.0
 
-[node name="QuadTree3D" parent="." instance=ExtResource("4_0dr24")]
+[node name="QuadTree3D" type="Node3D" parent="." node_paths=PackedStringArray("camera")]
+script = ExtResource("5_li4kg")
 lod_level = 6
 quad_size = 32768.0
 ranges = [500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0]
 camera = NodePath("../Camera3D")
+material = ExtResource("5_sn4uk")
+
+[node name="BuoyancyBody3D" type="RigidBody3D" parent="."]
+mass = 35000.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -5, 0)
+linear_damp = 0.25
+angular_damp = 0.25
+script = ExtResource("5_7l8pd")
+buoyancy_multiplier = 1.25001
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BuoyancyBody3D"]
+shape = SubResource("BoxShape3D_s2ec8")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BuoyancyBody3D"]
+mesh = SubResource("BoxMesh_diwhn")
+skeleton = NodePath("../..")
+
+[node name="BuoyancySpheres" type="Node3D" parent="BuoyancyBody3D"]
+
+[node name="BuoyancySphere3D" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, -7, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D2" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, -7, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D3" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, -7, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D4" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, -7, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D5" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D6" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D7" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, -7, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D8" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, -7, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D9" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, -7, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D10" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, -7, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D11" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D12" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 0, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D13" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 0, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D14" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 0, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D15" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D16" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D17" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D18" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D19" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0, -10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
+
+[node name="BuoyancySphere3D20" type="Marker3D" parent="BuoyancyBody3D/BuoyancySpheres"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 0, 10)
+gizmo_extents = 2.0
+script = ExtResource("6_0ba5x")
+radius = 2.5
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
@@ -164,11 +313,6 @@ max_value = 360.0
 step = 0.001
 tick_count = 4
 ticks_on_borders = true
-
-[node name="BuoyancyBody3D" parent="." instance=ExtResource("6_n8k3t")]
-linear_damp = 0.25
-angular_damp = 0.25
-buoyancy_multiplier = 1.25001
 
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="." method="_on_simulate_enabled_toggled"]
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/CullEnabled" to="." method="_on_cull_enabled_toggled"]

@@ -384,6 +384,10 @@ func _process(delta:float) -> void:
 		_accumulated_delta = 0.0
 
 
+func _enter_tree() -> void:
+	add_to_group("ocean")
+
+
 ## Simulate a single iteration of the ocean. If simulation_enabled is true, this
 ## will be run every frame, excluding frameskips. The resulting displacement map
 ## texture can be retrieved using the get_waves_texture() function.

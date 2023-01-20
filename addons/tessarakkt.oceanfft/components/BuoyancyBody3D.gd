@@ -45,6 +45,7 @@ func _physics_process(delta:float) -> void:
 
 ## Return the Ocean3D object used for buoyancy calculations.
 ## Return null if no ocean is found.
+## TODO: This is not a good way of doing this
 func get_ocean() -> Ocean3D:
 	var oceans = get_tree().get_nodes_in_group("ocean")
 	

@@ -11,7 +11,8 @@ class_name QuadTree3D
 		material.set_shader_parameter("planetary_curve_strength", planetary_curve_strength)
 @export_range(0, 32000, 1) var mesh_vertex_resolution := 512
 @export var ranges:Array[float] = [512.0, 1024.0, 2048.0]
-@export_node_path(Camera3D) var camera
+@export var camera:Camera3D
+@export var material:ShaderMaterial
 
 
 ## Will hold this resource loaded so as to instantiate subquads
@@ -20,37 +21,28 @@ class_name QuadTree3D
 var Quad
 
 
+var is_root_quad := true
 var pause_cull := false
 var cull_box:AABB
 var lod_meshes:Array[PlaneMesh] = []
-var material:ShaderMaterial:
-	get:
-		return mesh_instance.material_override
-	set(new_material):
-		mesh_instance.material_override = new_material
+var mesh_instance:MeshInstance3D
 
 
+var _visibility_detector:VisibleOnScreenNotifier3D
 var _subquads:Array[QuadTree3D] = []
-var _camera:Camera3D
-
-
-@onready var mesh_instance:MeshInstance3D = $MeshInstance3D
-@onready var _visibility_detector:VisibleOnScreenNotifier3D = $VisibleOnScreenNotifier3D
 
 
 func _ready() -> void:
-	## If the camera NodePath is set, then this is the top level quad
-	if camera != null:
-		## This is the camera that culling will be based on.
-		_camera = get_node(camera)
-		
+	var subquad_node
+	
+	if is_root_quad:
 		## Load self to instantiate subquads with
 		## This can't currently be preloaded due to an engine bug
 		## https://github.com/godotengine/godot/issues/70985
 		Quad = load("res://addons/tessarakkt.oceanfft/components/QuadTree3D.tscn")
 		
 		## Set max view distance and fade range start
-		material.set_shader_parameter("view_distance_max", _camera.far)
+		material.set_shader_parameter("view_distance_max", camera.far)
 		material.set_shader_parameter("view_fade_start", 0.005)
 		
 		## Initialize LOD meshes for each level
@@ -64,10 +56,25 @@ func _ready() -> void:
 			
 			lod_meshes.insert(0, mesh)
 			current_size *= 0.5
+		
+		mesh_instance = MeshInstance3D.new()
+		subquad_node = Node3D.new()
+		_visibility_detector = VisibleOnScreenNotifier3D.new()
+		
+		add_child(subquad_node)
+		add_child(mesh_instance)
+		add_child(_visibility_detector)
+	
+	else:
+		mesh_instance = $MeshInstance3D
+		subquad_node = $SubQuads
+		_visibility_detector = $VisibleOnScreenNotifier3D
 	
 	var offset_length:float = quad_size * 0.25
 	
+	mesh_instance.visible = false
 	mesh_instance.mesh = lod_meshes[lod_level]
+	mesh_instance.material_override = material
 	mesh_instance.set_instance_shader_parameter("vertex_resolution", float(mesh_vertex_resolution))
 	mesh_instance.set_instance_shader_parameter("patch_size", quad_size)
 	mesh_instance.set_instance_shader_parameter("min_lod_morph_distance", ranges[lod_level] * 2 * (1.0 - morph_range))
@@ -93,8 +100,10 @@ func _ready() -> void:
 			new_quad.morph_range = morph_range
 			new_quad.Quad = Quad
 			new_quad.lod_meshes = lod_meshes
+			new_quad.is_root_quad = false
+			new_quad.material = material
 			
-			$SubQuads.add_child(new_quad)
+			subquad_node.add_child(new_quad)
 			_subquads.append(new_quad)
 
 
@@ -103,7 +112,7 @@ func _ready() -> void:
 func _process(_delta:float) -> void:
 	if not pause_cull:
 		reset_visibility()
-		lod_select(_camera.global_position)
+		lod_select(camera.global_position)
 
 
 ## Select which meshes will be displayed at which LOD level. A return value of
