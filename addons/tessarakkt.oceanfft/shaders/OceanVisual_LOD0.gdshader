@@ -45,6 +45,9 @@ uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 uniform float view_distance_max = 16000.0;
 uniform float view_fade_start = 0.005;
 
+uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
+uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
+
 instance uniform float patch_size = 512.0;
 instance uniform float vertex_resolution = 256.0;
 instance uniform float min_lod_morph_distance;
@@ -117,7 +120,7 @@ void fragment() {
 	invview3 = mat3(INV_VIEW_MATRIX);
 	
 	// Get the linear depth between each ocean pixel and whatever is behind it.
-	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).r;
+	float depth = texture(depth_texture, SCREEN_UV).r;
 	vec4 view = INV_PROJECTION_MATRIX * vec4(vec3(SCREEN_UV * 2.0 - 1.0, depth), 1.0);
 	view.xyz /= view.w;
 	float linear_depth = -view.z;
@@ -131,7 +134,7 @@ void fragment() {
 	float refraction_factor = clamp(linear_depth * refraction_depth_factor, refraction_factor_min, refraction_factor_max);
 	float refraction_blend_factor = clamp(linear_dist * refraction_distance_factor, refraction_blend_factor_min, refraction_blend_factor_max);
 	vec2 refracted_uv = SCREEN_UV - NORMAL.xz * refraction_factor;
-	vec3 background_color = textureLod(SCREEN_TEXTURE, refracted_uv, 0.0).rgb;
+	vec3 background_color = textureLod(screen_texture, refracted_uv, 0.0).rgb;
 	ALBEDO = mix(background_color * background_color_brightness, deep_color.rgb, refraction_blend_factor);
 	
 	// Distance Fade
