@@ -75,5 +75,6 @@ a higher level overview of how the whole thing comes together.
 
 ### Miscellaneous
 - [ARM Software - Using the Jacobian for modelling turbulent effects at wave crests](https://arm-software.github.io/opengl-es-sdk-for-android/ocean_f_f_t.html#oceanJacobian)
+- [Khan Academy - Computing a Jacobian matrix](https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/jacobian/v/computing-a-jacobian-matrix)
 - [Mary Yingst, Jennifer R. Alford, Ian Parberry - Very Fast Real-Time Ocean Wave Foam Rendering Using Halftoning](https://ianparberry.com/techreports/LARC-2011-05.pdf)
 - [Jump Trajectory - Ocean waves simulation with Fast Fourier transform](https://www.youtube.com/watch?v=kGEqaX4Y4bQ)
