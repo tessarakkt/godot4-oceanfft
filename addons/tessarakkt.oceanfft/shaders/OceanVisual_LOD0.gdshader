@@ -15,7 +15,12 @@ uniform vec4 deep_color:source_color;
 uniform vec4 shallow_color:source_color;
 uniform float background_color_brightness = 0.3;
 
-uniform float sss_strength = 1.5;
+uniform float sss_strength = 0.35;
+uniform float sss_fov_fade_min = 0.7;
+uniform float sss_fov_fade_max = 1.0;
+uniform float sss_slope_fade_min = 0.55;
+uniform float sss_slope_fade_max = 0.7;
+
 uniform float planetary_curve_strength = 0.000001;
 
 uniform float fresnel_strength = 0.3;
@@ -53,7 +58,6 @@ instance uniform float vertex_resolution = 256.0;
 instance uniform float min_lod_morph_distance;
 instance uniform float max_lod_morph_distance;
 
-varying mat3 invview3;
 varying vec3 world_vertex;
 
 
@@ -114,11 +118,6 @@ void vertex() {
 
 
 void fragment() {
-	// Setting this varying is needed in light() for subsurface scattering.
-	// Godot bug #67256 prevents accessing this variable directly from light()
-	// https://github.com/godotengine/godot/issues/67256
-	invview3 = mat3(INV_VIEW_MATRIX);
-	
 	// Get the linear depth between each ocean pixel and whatever is behind it.
 	float depth = texture(depth_texture, SCREEN_UV).r;
 	vec4 view = INV_PROJECTION_MATRIX * vec4(vec3(SCREEN_UV * 2.0 - 1.0, depth), 1.0);
@@ -126,7 +125,7 @@ void fragment() {
 	float linear_depth = -view.z;
 	
 	// Get the distance between the camera and each ocean pixel.
-	float linear_dist = length(world_vertex - CAMERA_POSITION_WORLD); //-view_dist.z;
+	float linear_dist = length(world_vertex - CAMERA_POSITION_WORLD);
 	
 	// Refraction, based on depth between ocean pixel and object behind.
 	// Fades out with distance so as to be smooth transition to lower LOD shaders
@@ -154,6 +153,9 @@ void light() {
 	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * spec + fresnel;
 	
 	// Sub Surface Scattering
-	float sss = clamp(smoothstep(0.65, 0.7, dot(NORMAL, VIEW) * 0.5 + 0.5) * smoothstep(0.5, 1.0, dot(-LIGHT, VIEW) * 0.5 + 0.5) * (dot(-invview3[2].xyz, vec3(0.0, 1.0, 0.0)) * 0.5 + 0.5), 0.0, 1.0) * sss_strength;
-	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * sss;
+	float sss = clamp(
+			smoothstep(sss_slope_fade_min, sss_slope_fade_max, dot(NORMAL, VIEW) * 0.5 + 0.5)
+			* smoothstep(sss_fov_fade_min, sss_fov_fade_max, dot(-LIGHT, VIEW) * 0.5 + 0.5)
+			, 0.0, 1.0) * sss_strength;
+	SPECULAR_LIGHT += (LIGHT_COLOR * shallow_color.rgb * ATTENUATION / PI) * sss;
 }
