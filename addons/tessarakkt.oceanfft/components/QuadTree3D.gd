@@ -111,7 +111,6 @@ func _ready() -> void:
 ## quad will run _process().
 func _process(_delta:float) -> void:
 	if not pause_cull:
-		reset_visibility()
 		lod_select(camera.global_position)
 
 
@@ -127,6 +126,7 @@ func lod_select(cam_pos:Vector3) -> bool:
 		## This quad is not within range of the selected LOD level, the parent
 		## will need to display this at a lower detailed LOD. Return false to
 		## mark the area as not handled.
+		reset_visibility()
 		return false
 	
 	if not _visibility_detector.is_on_screen():
@@ -146,6 +146,8 @@ func lod_select(cam_pos:Vector3) -> bool:
 		## children that may be able to display this. Check if any are within
 		## their LOD range.
 		if not within_sphere(cam_pos, ranges[lod_level - 1]):
+			reset_visibility()
+			
 			## No children are within range of their LOD levels, make this quad
 			## visible to handle the area.
 			for subquad in _subquads:
