@@ -26,7 +26,6 @@ accessed had to be changed to work in Godots compute shader API.
 ![Ocean](https://user-images.githubusercontent.com/118585625/213395845-b0fedcbc-cc7a-4be8-b365-3ff275f482bc.png)
 
 ## Todo List
-- Refactor project as Godot addon
 - Improve visual rendering
   - Foam
   - Splash particles
@@ -51,6 +50,7 @@ accessed had to be changed to work in Godots compute shader API.
 - [Jerry Tessendorf - eWave: Using an Exponential Solver on the iWave Problem](https://people.computing.clemson.edu/~jtessen/reports/papers_files/ewavealgorithm.pdf)
 - [Jerry Tessendorf - Simulation of Interactive Surface Waves](https://people.computing.clemson.edu/~jtessen/reports/papers_files/SimInterSurfWaves.pdf)
 - [Stefan Jeschke, Tomáš Skřivan, Matthias Müller-fischer, Nuttapong Chentanez, Miles Macklin, Chris Wojtan - Water Surface Wavelets](https://dl.acm.org/doi/pdf/10.1145/3197517.3201336)
+- [Jos Stam - A Simple Fluid Solver based on the FFT](https://www.dgp.toronto.edu/public_user/stam/reality/Research/pdf/jgt01.pdf)
 
 ### Water Implementation Examples
 These are not exclusively limited to ocean wave implementations, and may
@@ -59,6 +59,8 @@ techniques that are of value to reference.
 
 - The implementation behind the wave height generation: [achalpandeyy/OceanFFT](https://github.com/achalpandeyy/OceanFFT)
 - [Platinguin/Godot-Water-Shader-Prototype](https://github.com/Platinguin/Godot-Water-Shader-Prototype/)
+- [godot-extended-libraries/hydro](https://github.com/godot-extended-libraries/hydro)
+- [godot-extended-libraries/godot-realistic-water](https://github.com/godot-extended-libraries/godot-realistic-water)
 - [Crest](https://github.com/wave-harmonic/crest)
 
 ### AAA-Game Implementation Examples
@@ -73,8 +75,11 @@ a higher level overview of how the whole thing comes together.
 - [Filip Struger - Continuous Distance-Dependent Level of Detail for Rendering Heightmaps (CDLOD)](https://github.com/fstrugar/CDLOD/blob/master/cdlod_paper_latest.pdf)
 - ~~[Claes Johanson - Real-time water rendering Introducing the projected grid concept](https://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/projgrid-lq.pdf)~~ The projected grid method was not used in this project.
 
-### Miscellaneous
+### Foam/Whitecap Rendering
 - [ARM Software - Using the Jacobian for modelling turbulent effects at wave crests](https://arm-software.github.io/opengl-es-sdk-for-android/ocean_f_f_t.html#oceanJacobian)
-- [Khan Academy - Computing a Jacobian matrix](https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/jacobian/v/computing-a-jacobian-matrix)
 - [Mary Yingst, Jennifer R. Alford, Ian Parberry - Very Fast Real-Time Ocean Wave Foam Rendering Using Halftoning](https://ianparberry.com/techreports/LARC-2011-05.pdf)
+- [Lining Chen, Yicheng Jin, Yong Yin - Ocean Wave Rendering with Whitecap in the Visual System of a Maritime Simulator](https://www.semanticscholar.org/paper/Ocean-Wave-Rendering-with-Whitecap-in-the-Visual-of-Chen-Jin/557fadde5e917ba8015a825963e359bc7903b464)
+
+### Miscellaneous
+- [Khan Academy - Computing a Jacobian matrix](https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/jacobian/v/computing-a-jacobian-matrix)
 - [Jump Trajectory - Ocean waves simulation with Fast Fourier transform](https://www.youtube.com/watch?v=kGEqaX4Y4bQ)
