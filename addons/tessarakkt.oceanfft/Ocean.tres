@@ -1,0 +1,36 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://n1tjl384bhl4"]
+
+[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/OceanVisual_LOD0.gdshader" id="1_56q88"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_56q88")
+shader_parameter/fft_resolution = 256.0
+shader_parameter/cascade_uv_scales = PackedFloat32Array(1, 0.7, 0.3)
+shader_parameter/cascade_steepness_scales = PackedFloat32Array(1, 1, 1)
+shader_parameter/cascade_amplitude_scales = PackedFloat32Array(1, 1, 1)
+shader_parameter/deep_color = Color(0, 0.329412, 0.458824, 1)
+shader_parameter/shallow_color = Color(0, 0.729412, 0.988235, 1)
+shader_parameter/background_color_brightness = 0.3
+shader_parameter/sss_strength = 0.35
+shader_parameter/sss_fov_fade_min = 0.7
+shader_parameter/sss_fov_fade_max = 1.0
+shader_parameter/sss_slope_fade_min = 0.55
+shader_parameter/sss_slope_fade_max = 0.7
+shader_parameter/planetary_curve_strength = 1e-06
+shader_parameter/fresnel_strength = 0.3
+shader_parameter/fresnel_power = 5.0
+shader_parameter/fresnel_limit = 0.7
+shader_parameter/specular_strength = 0.75
+shader_parameter/specular_power = 500.0
+shader_parameter/refraction_depth_factor = 1e-05
+shader_parameter/refraction_distance_factor = 0.0025
+shader_parameter/refraction_factor_min = 0.0
+shader_parameter/refraction_factor_max = 0.025
+shader_parameter/refraction_blend_factor_min = 0.6
+shader_parameter/refraction_blend_factor_max = 1.0
+shader_parameter/uv_scale = 0.00390625
+shader_parameter/wind_uv_offset = Vector2(0, 0)
+shader_parameter/view_distance_max = 16000.0
+shader_parameter/view_fade_start = 0.005
+shader_parameter/cascade_displacements = []

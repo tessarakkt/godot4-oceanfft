@@ -1,14 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://b554xveqosfto"]
+[gd_scene load_steps=2 format=3 uid="uid://b554xveqosfto"]
 
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="1_mn2fq"]
-[ext_resource type="Material" uid="uid://dbq5y5brnm626" path="res://addons/tessarakkt.oceanfft/Ocean.material" id="2_476ip"]
 
 [node name="QuadTree3D" type="Node3D"]
 script = ExtResource("1_mn2fq")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 visible = false
-material_override = ExtResource("2_476ip")
 
 [node name="VisibleOnScreenNotifier3D" type="VisibleOnScreenNotifier3D" parent="."]
 

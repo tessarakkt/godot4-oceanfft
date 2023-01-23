@@ -141,7 +141,7 @@ var _accumulated_delta := 0.0
 var _wind_uv_offset := Vector2.ZERO
 var _wind_rad := 0.0
 
-var _material:ShaderMaterial = preload("res://addons/tessarakkt.oceanfft/Ocean.material")
+var _material:ShaderMaterial = preload("res://addons/tessarakkt.oceanfft/Ocean.tres")
 
 var _rng := RandomNumberGenerator.new()
 

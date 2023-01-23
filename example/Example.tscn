@@ -2,10 +2,10 @@
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://example/Example.gd" id="2_hewa1"]
+[ext_resource type="Material" uid="uid://n1tjl384bhl4" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="5_0jjw4"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/BuoyancyBody3D.gd" id="5_7l8pd"]
 [ext_resource type="Script" path="res://example/Camera.gd" id="5_eso43"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
-[ext_resource type="Material" uid="uid://dbq5y5brnm626" path="res://addons/tessarakkt.oceanfft/Ocean.material" id="5_sn4uk"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/BuoyancySphere3D.gd" id="6_0ba5x"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="7_xa10r"]
 
@@ -39,7 +39,7 @@ lod_level = 6
 quad_size = 32768.0
 ranges = [500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0]
 camera = NodePath("../Camera3D")
-material = ExtResource("5_sn4uk")
+material = ExtResource("5_0jjw4")
 
 [node name="BuoyancyBody3D" type="RigidBody3D" parent="."]
 mass = 35000.0
