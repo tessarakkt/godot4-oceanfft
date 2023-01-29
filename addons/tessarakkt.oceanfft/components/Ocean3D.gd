@@ -422,7 +422,7 @@ func simulate(delta:float) -> void:
 			compute_list = _rd.compute_list_begin()
 			_rd.compute_list_bind_compute_pipeline(compute_list, _initial_spectrum_pipeline)
 			_rd.compute_list_bind_uniform_set(compute_list, uniform_set, UNIFORM_SET)
-			@warning_ignore(integer_division)
+			@warning_ignore("integer_division")
 			_rd.compute_list_dispatch(compute_list, fft_resolution / WORK_GROUP_DIM, fft_resolution / WORK_GROUP_DIM, 1)
 			_rd.compute_list_end()
 			
@@ -466,7 +466,7 @@ func simulate(delta:float) -> void:
 		compute_list = _rd.compute_list_begin()
 		_rd.compute_list_bind_compute_pipeline(compute_list, _phase_pipeline)
 		_rd.compute_list_bind_uniform_set(compute_list, uniform_set, UNIFORM_SET)
-		@warning_ignore(integer_division)
+		@warning_ignore("integer_division")
 		_rd.compute_list_dispatch(compute_list, fft_resolution / WORK_GROUP_DIM, fft_resolution / WORK_GROUP_DIM, 1)
 		_rd.compute_list_end()
 		
@@ -500,7 +500,7 @@ func simulate(delta:float) -> void:
 		compute_list = _rd.compute_list_begin()
 		_rd.compute_list_bind_compute_pipeline(compute_list, _spectrum_pipeline)
 		_rd.compute_list_bind_uniform_set(compute_list, uniform_set, UNIFORM_SET)
-		@warning_ignore(integer_division)
+		@warning_ignore("integer_division")
 		_rd.compute_list_dispatch(compute_list, fft_resolution / WORK_GROUP_DIM, fft_resolution / WORK_GROUP_DIM, 1)
 		_rd.compute_list_end()
 		
