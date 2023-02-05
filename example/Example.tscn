@@ -37,7 +37,7 @@ wave_length = 9.0
 script = ExtResource("5_li4kg")
 lod_level = 6
 quad_size = 32768.0
-ranges = [500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0]
+ranges = Array[float]([500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0])
 camera = NodePath("../Camera3D")
 material = ExtResource("5_0jjw4")
 
@@ -181,6 +181,7 @@ radius = 2.5
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
+near = 1.0
 far = 16000.0
 script = ExtResource("5_eso43")
 speed = 100.0

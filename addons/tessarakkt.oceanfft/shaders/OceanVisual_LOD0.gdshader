@@ -11,8 +11,13 @@ uniform float cascade_uv_scales[CASCADE_COUNT];
 uniform float cascade_steepness_scales[CASCADE_COUNT];
 uniform float cascade_amplitude_scales[CASCADE_COUNT];
 
+uniform float amplitude_scale_min = 0.5;
+uniform float amplitude_scale_max = 1.0;
+uniform float amplitude_scale_fade_distance = 12000.0;
+
 uniform vec4 deep_color:source_color;
 uniform vec4 shallow_color:source_color;
+uniform vec4 sky_color:source_color;
 uniform float background_color_brightness = 0.3;
 
 uniform float sss_strength = 0.35;
@@ -25,7 +30,6 @@ uniform float planetary_curve_strength = 0.000001;
 
 uniform float fresnel_strength = 0.3;
 uniform float fresnel_power = 5.0;
-uniform float fresnel_limit = 0.7;
 
 uniform float specular_strength = 0.75;
 uniform float specular_power = 500.0;
@@ -44,11 +48,11 @@ uniform float refraction_factor_max = 0.025;
 uniform float refraction_blend_factor_min = 0.6;
 uniform float refraction_blend_factor_max = 1.0;
 
-uniform float uv_scale = 0.00390625;
+uniform float uv_scale = 0.001953125;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 
 uniform float view_distance_max = 16000.0;
-uniform float view_fade_start = 0.005;
+uniform float view_fade_start = 0.3;
 
 uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
@@ -62,6 +66,9 @@ varying vec3 world_vertex;
 
 
 // Get the total wave displacement of a vertex from all cascades.
+// TODO: Move scaling operations to compute shader for performance. As the
+//       displacement map is tiled, doing this calcuation in the compute shader
+//       that generates the map will avoid duplicate calculations done here.
 vec3 get_displacement(vec2 uv) {
 	vec3 displacement = vec3(0.0);
 	
@@ -82,8 +89,10 @@ vec2 lod_morph(float morph_factor, vec2 grid_pos) {
 
 
 void vertex() {
+	float linear_dist = length(VERTEX - CAMERA_POSITION_WORLD);
+	
 	// LOD Morph
-	float morph_factor = (clamp(length(VERTEX - CAMERA_POSITION_WORLD), min_lod_morph_distance, max_lod_morph_distance) - min_lod_morph_distance) / (max_lod_morph_distance - min_lod_morph_distance);
+	float morph_factor = (clamp(linear_dist, min_lod_morph_distance, max_lod_morph_distance) - min_lod_morph_distance) / (max_lod_morph_distance - min_lod_morph_distance);
 	VERTEX.xz -= lod_morph(morph_factor, UV);
 	
 	// Vertex Offset
@@ -114,6 +123,12 @@ void vertex() {
 	vec3 bottom_right = cross(bottom, right);
 	
 	NORMAL = normalize(top_right + top_left + bottom_left + bottom_right);
+	
+	// Wave Amplitude Distance Fade
+	// Flattens the waves with increasing distance from camera. This is done
+	// after surface normal calculations to retain normals in the distance.
+	float amplitude_fade_range = clamp(linear_dist, 0.0, amplitude_scale_fade_distance) / amplitude_scale_fade_distance;
+	VERTEX.y *= mix(amplitude_scale_max, amplitude_scale_min, amplitude_fade_range);
 }
 
 
@@ -137,7 +152,8 @@ void fragment() {
 	ALBEDO = mix(background_color * background_color_brightness, deep_color.rgb, refraction_blend_factor);
 	
 	// Distance Fade
-	ALPHA = 1.0 - clamp(linear_dist, view_distance_max * view_fade_start, view_distance_max) / view_distance_max;
+	float fade_start = view_distance_max * (1.0 - view_fade_start);
+	ALPHA = 1.0 - (clamp(linear_dist, fade_start, view_distance_max) - fade_start) / (view_distance_max - fade_start);
 	
 	ROUGHNESS = 0.02;
 	SPECULAR = 0.0;
@@ -145,12 +161,14 @@ void fragment() {
 
 
 void light() {
-	float fresnel = pow(fresnel_limit - clamp(dot(NORMAL, normalize(VIEW)), 0.0, fresnel_limit), fresnel_power) * fresnel_strength;
+	// Fresnel Lighting
+	float fresnel = pow(1.0 - clamp(dot(NORMAL, normalize(VIEW)), 0.0, 1.0), fresnel_power) * fresnel_strength;
+	SPECULAR_LIGHT += sky_color.rgb * ATTENUATION * fresnel;
 	
 	// Specular
 	float spec = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), specular_power), 0.0, 1.0) * specular_strength;
-	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, LIGHT), 0.0, 1.0) + fresnel;
-	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * spec + fresnel;
+	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, LIGHT), 0.0, 1.0);
+	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * spec;
 	
 	// Sub Surface Scattering
 	float sss = clamp(

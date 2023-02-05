@@ -4,6 +4,7 @@ class_name Ocean3D
 
 const UNIFORM_SET := 0
 const WORK_GROUP_DIM := 32
+const GOLDEN_RATIO := 1.618033989
 
 
 enum Binding {
@@ -75,8 +76,8 @@ enum FFTResolution {
 	get:
 		return wave_vector.length()
 
-@export var cascade_ranges:Array[Vector2] = [Vector2(0.0, 0.04), Vector2(0.04, 0.15), Vector2(0.15, 1.0)]
-@export var cascade_scales:Array[float] = [1.0, 0.7, 0.3]
+@export var cascade_ranges:Array[Vector2] = [Vector2(0.0, 0.03), Vector2(0.03, 0.15), Vector2(0.15, 1.0)]
+@export var cascade_scales:Array[float] = [GOLDEN_RATIO * 2.0, GOLDEN_RATIO, 0.5]
 
 var wave_vector := Vector2(300.0, 0.0):
 	set(new_wave_vector):
@@ -710,7 +711,7 @@ func _pack_phase_settings(delta_time:float, cascade:int) -> PackedByteArray:
 
 func _pack_spectrum_settings(cascade:int) -> PackedByteArray:
 	var settings_bytes = PackedInt32Array([horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
-	settings_bytes.append_array(PackedFloat32Array([choppiness * clamp(1.0 - cascade_scales[cascade], 0.5, 1.0), fft_resolution]).to_byte_array())
+	settings_bytes.append_array(PackedFloat32Array([choppiness, fft_resolution]).to_byte_array())
 	return settings_bytes
 
 
