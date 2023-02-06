@@ -45,10 +45,8 @@ material = ExtResource("5_0jjw4")
 mass = 35000.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -5, 0)
-linear_damp = 0.25
-angular_damp = 0.25
 script = ExtResource("5_7l8pd")
-buoyancy_multiplier = 1.25001
+buoyancy_multiplier = 1.10001
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BuoyancyBody3D"]
 shape = SubResource("BoxShape3D_s2ec8")
