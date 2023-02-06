@@ -9,7 +9,7 @@ class_name QuadTree3D
 	set(new_planetary_curve_strength):
 		planetary_curve_strength = new_planetary_curve_strength
 		material.set_shader_parameter("planetary_curve_strength", planetary_curve_strength)
-@export_range(0, 32000, 1) var mesh_vertex_resolution := 512
+@export_range(0, 32000, 1) var mesh_vertex_resolution := 256
 @export var ranges:Array[float] = [512.0, 1024.0, 2048.0]
 @export var camera:Camera3D
 @export var material:ShaderMaterial
