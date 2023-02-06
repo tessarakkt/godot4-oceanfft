@@ -78,6 +78,7 @@ enum FFTResolution {
 
 @export var cascade_ranges:Array[Vector2] = [Vector2(0.0, 0.03), Vector2(0.03, 0.15), Vector2(0.15, 1.0)]
 @export var cascade_scales:Array[float] = [GOLDEN_RATIO * 2.0, GOLDEN_RATIO, 0.5]
+@export var uv_scale := 0.001953125
 
 var wave_vector := Vector2(300.0, 0.0):
 	set(new_wave_vector):
@@ -311,6 +312,7 @@ func _ready() -> void:
 	
 	_material.set_shader_parameter("cascade_displacements", _waves_texture_cascade)
 	_material.set_shader_parameter("cascade_uv_scales", cascade_scales)
+	_material.set_shader_parameter("uv_scale", uv_scale)
 	
 	#### Compile & Initialize FFT Shaders
 	############################################################################
@@ -621,12 +623,14 @@ func global_to_pixel(global_pos:Vector3, cascade:int) -> Vector2i:
 	## updated to account for any changes made here.
 	
 	## Convert to UV coordinate
+	## The visual shader uses the global XZ coordinates as UV
 	var uv_pos := Vector2.ZERO
 	uv_pos.x = global_pos.x
 	uv_pos.y = global_pos.z
 	
 	## Apply UV scale
-	uv_pos *= 0.004
+	uv_pos *= uv_scale
+	uv_pos *= 1.0 / cascade_scales[cascade]
 	
 	## Offset by wind scrolling
 	uv_pos += _wind_uv_offset * cascade_scales[cascade]
@@ -649,7 +653,7 @@ func global_to_pixel(global_pos:Vector3, cascade:int) -> Vector2i:
 ## and horizontal displacement, we need to offset the horizontal displacement 
 ## and resample a few times to get an accurate height. The number of resample
 ## iterations is defined by steps parameter.
-func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 3) -> float:
+func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> float:
 	var pixel:Color
 	var xz_offset := Vector3.ZERO
 	var total_height := 0.0
@@ -659,8 +663,8 @@ func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 3) -> 
 			var pixel_pos := global_to_pixel(global_pos + xz_offset, cascade)
 			
 			pixel = _waves_image_cascade[cascade].get_pixelv(pixel_pos)
-			xz_offset.x -= pixel.r
-			xz_offset.z -= pixel.b
+			xz_offset.x += pixel.r
+			xz_offset.z += pixel.b
 		
 		total_height += pixel.g
 		xz_offset = Vector3.ZERO

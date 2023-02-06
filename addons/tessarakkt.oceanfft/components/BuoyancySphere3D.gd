@@ -7,7 +7,7 @@ class_name BuoyancySphere3D
 		radius = new_radius
 		gizmo_extents = new_radius
 		_total_volume = 1.33333 * PI * pow(radius, 3.0)
-@export_range(0, 10, 1) var height_sampling_steps := 3
+@export_range(0, 10, 1) var height_sampling_steps := 2
 @export_range(0, 10, 1) var max_cascade := 1
 
 
