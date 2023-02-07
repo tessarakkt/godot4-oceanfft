@@ -15,12 +15,12 @@ uniform float amplitude_scale_min = 0.5;
 uniform float amplitude_scale_max = 1.0;
 uniform float amplitude_scale_fade_distance = 12000.0;
 
-uniform vec4 deep_color:source_color;
-uniform vec4 shallow_color:source_color;
-uniform vec4 sky_color:source_color;
-uniform float background_color_brightness = 0.3;
+uniform vec4 deep_color:source_color = vec4(0.004f, 0.016f, 0.047f, 1.0);
+uniform vec4 shallow_color:source_color = vec4(0, 0.729412, 0.988235, 1);
+uniform vec4 sky_color:source_color = vec4(3.2f, 9.6f, 12.8f, 1.0);
+uniform float background_color_brightness = 0.2;
 
-uniform float sss_strength = 0.35;
+uniform float sss_strength = 0.25;
 uniform float sss_fov_fade_min = 0.7;
 uniform float sss_fov_fade_max = 1.0;
 uniform float sss_slope_fade_min = 0.55;
@@ -28,8 +28,11 @@ uniform float sss_slope_fade_max = 0.7;
 
 uniform float planetary_curve_strength = 0.000001;
 
+uniform float fresnel_offset = 0.02;
 uniform float fresnel_strength = 0.3;
 uniform float fresnel_power = 5.0;
+
+uniform float exposure = 0.01;
 
 uniform float specular_strength = 0.75;
 uniform float specular_power = 500.0;
@@ -45,8 +48,8 @@ uniform float refraction_distance_factor = 0.0025;
 uniform float refraction_factor_min = 0.0;
 uniform float refraction_factor_max = 0.025;
 
-uniform float refraction_blend_factor_min = 0.6;
-uniform float refraction_blend_factor_max = 1.0;
+uniform float refraction_distance_power = 1.65;
+uniform float refraction_distance_max = 10000.0;
 
 uniform float uv_scale = 0.001953125;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
@@ -85,6 +88,11 @@ vec3 get_displacement(vec2 uv) {
 vec2 lod_morph(float morph_factor, vec2 grid_pos) {
 	vec2 fracPart = fract(grid_pos.xy * vertex_resolution * 0.5) * 2.0 / vertex_resolution;
 	return fracPart * patch_size * morph_factor;
+}
+
+
+vec3 HDR(vec3 color, float e) {
+	return 1.0 - exp(-color * e);
 }
 
 
@@ -133,6 +141,9 @@ void vertex() {
 
 
 void fragment() {
+	// Calculate fragments Fresnel factor
+	float fresnel = pow(1.0 - dot(NORMAL, normalize(VIEW)), fresnel_power) * fresnel_strength + fresnel_offset;
+	
 	// Get the linear depth between each ocean pixel and whatever is behind it.
 	float depth = texture(depth_texture, SCREEN_UV).r;
 	vec4 view = INV_PROJECTION_MATRIX * vec4(vec3(SCREEN_UV * 2.0 - 1.0, depth), 1.0);
@@ -146,25 +157,27 @@ void fragment() {
 	// Fades out with distance so as to be smooth transition to lower LOD shaders
 	// which may exclude this.
 	float refraction_factor = clamp(linear_depth * refraction_depth_factor, refraction_factor_min, refraction_factor_max);
-	float refraction_blend_factor = clamp(linear_dist * refraction_distance_factor, refraction_blend_factor_min, refraction_blend_factor_max);
 	vec2 refracted_uv = SCREEN_UV - NORMAL.xz * refraction_factor;
 	vec3 background_color = textureLod(screen_texture, refracted_uv, 0.0).rgb;
-	ALBEDO = mix(background_color * background_color_brightness, deep_color.rgb, refraction_blend_factor);
+	float refraction_blend_factor = clamp(pow(linear_depth, refraction_distance_power), 0.0, refraction_distance_max) / refraction_distance_max;
+	vec3 water_color = mix(background_color * shallow_color.rgb * background_color_brightness, deep_color.rgb, refraction_blend_factor * (1.0 - fresnel));
+	
+	// Fresnel Shading
+	vec3 sky = sky_color.rgb * fresnel;
+	vec3 water = (1.0 - fresnel) * water_color * sky_color.rgb;
+	ALBEDO = HDR(sky + water, exposure);
 	
 	// Distance Fade
 	float fade_start = view_distance_max * (1.0 - view_fade_start);
 	ALPHA = 1.0 - (clamp(linear_dist, fade_start, view_distance_max) - fade_start) / (view_distance_max - fade_start);
 	
+	// Misc. PBR Settings
 	ROUGHNESS = 0.02;
 	SPECULAR = 0.0;
 }
 
 
 void light() {
-	// Fresnel Lighting
-	float fresnel = pow(1.0 - clamp(dot(NORMAL, normalize(VIEW)), 0.0, 1.0), fresnel_power) * fresnel_strength;
-	SPECULAR_LIGHT += sky_color.rgb * ATTENUATION * fresnel;
-	
 	// Specular
 	float spec = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), specular_power), 0.0, 1.0) * specular_strength;
 	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, LIGHT), 0.0, 1.0);
