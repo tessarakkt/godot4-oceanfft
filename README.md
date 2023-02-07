@@ -45,12 +45,7 @@ accessed had to be changed to work in Godots compute shader API.
 - [Jerry Tessendorf - Simulating Ocean Water](https://people.computing.clemson.edu/~jtessen/reports/papers_files/coursenotes2004.pdf)
 - [Fynn-Jorin Flügge - Realtime GPGPU FFT Ocean Water Simulation](https://tore.tuhh.de/bitstream/11420/1439/1/GPGPU_FFT_Ocean_Simulation.pdf)
 - [Thomas Gamper - Ocean Surface Generation and Rendering](https://www.cg.tuwien.ac.at/research/publications/2018/GAMPER-2018-OSG/GAMPER-2018-OSG-thesis.pdf)
-
-### Wave Collision Interaction
-- [Jerry Tessendorf - eWave: Using an Exponential Solver on the iWave Problem](https://people.computing.clemson.edu/~jtessen/reports/papers_files/ewavealgorithm.pdf)
-- [Jerry Tessendorf - Simulation of Interactive Surface Waves](https://people.computing.clemson.edu/~jtessen/reports/papers_files/SimInterSurfWaves.pdf)
-- [Stefan Jeschke, Tomáš Skřivan, Matthias Müller-fischer, Nuttapong Chentanez, Miles Macklin, Chris Wojtan - Water Surface Wavelets](https://dl.acm.org/doi/pdf/10.1145/3197517.3201336)
-- [Jos Stam - A Simple Fluid Solver based on the FFT](https://www.dgp.toronto.edu/public_user/stam/reality/Research/pdf/jgt01.pdf)
+- [T. Elfouhaily, B. Chapron, K. Katsaros, D. Vandemark - A unified directional spectrum for long and short wind-driven waves](https://archimer.ifremer.fr/doc/00091/20226/17877.pdf)
 
 ### Water Implementation Examples
 These are not exclusively limited to ocean wave implementations, and may
@@ -71,15 +66,22 @@ a higher level overview of how the whole thing comes together.
 - [The technical art of Sea of Thieves](https://dl.acm.org/doi/10.1145/3214745.3214820)
 - [Ocean simulation and rendering in War Thunder](https://developer.download.nvidia.com/assets/gameworks/downloads/regular/events/cgdc15/CGDC2015_ocean_simulation_en.pdf)
 
-### LOD Theory/Implementation
+### Level Of Detail Implementation
 - [Filip Struger - Continuous Distance-Dependent Level of Detail for Rendering Heightmaps (CDLOD)](https://github.com/fstrugar/CDLOD/blob/master/cdlod_paper_latest.pdf)
-- ~~[Claes Johanson - Real-time water rendering Introducing the projected grid concept](https://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/projgrid-lq.pdf)~~ The projected grid method was not used in this project.
+- [Claes Johanson - Real-time water rendering Introducing the projected grid concept](https://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/projgrid-lq.pdf)
 
 ### Foam/Whitecap Rendering
 - [ARM Software - Using the Jacobian for modelling turbulent effects at wave crests](https://arm-software.github.io/opengl-es-sdk-for-android/ocean_f_f_t.html#oceanJacobian)
 - [Mary Yingst, Jennifer R. Alford, Ian Parberry - Very Fast Real-Time Ocean Wave Foam Rendering Using Halftoning](https://ianparberry.com/techreports/LARC-2011-05.pdf)
 - [Lining Chen, Yicheng Jin, Yong Yin - Ocean Wave Rendering with Whitecap in the Visual System of a Maritime Simulator](https://www.semanticscholar.org/paper/Ocean-Wave-Rendering-with-Whitecap-in-the-Visual-of-Chen-Jin/557fadde5e917ba8015a825963e359bc7903b464)
 
+### Wave Collision Interaction
+- [Jerry Tessendorf - eWave: Using an Exponential Solver on the iWave Problem](https://people.computing.clemson.edu/~jtessen/reports/papers_files/ewavealgorithm.pdf)
+- [Jerry Tessendorf - Simulation of Interactive Surface Waves](https://people.computing.clemson.edu/~jtessen/reports/papers_files/SimInterSurfWaves.pdf)
+- [Stefan Jeschke, Tomáš Skřivan, Matthias Müller-fischer, Nuttapong Chentanez, Miles Macklin, Chris Wojtan - Water Surface Wavelets](https://dl.acm.org/doi/pdf/10.1145/3197517.3201336)
+- [Jos Stam - A Simple Fluid Solver based on the FFT](https://www.dgp.toronto.edu/public_user/stam/reality/Research/pdf/jgt01.pdf)
+
 ### Miscellaneous
 - [Khan Academy - Computing a Jacobian matrix](https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/jacobian/v/computing-a-jacobian-matrix)
 - [Jump Trajectory - Ocean waves simulation with Fast Fourier transform](https://www.youtube.com/watch?v=kGEqaX4Y4bQ)
+- [Tiago Sousa - GPU Gems 2: Chapter 19. Generic Refraction Simulation](https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-19-generic-refraction-simulation)
