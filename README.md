@@ -57,6 +57,7 @@ techniques that are of value to reference.
 - [godot-extended-libraries/hydro](https://github.com/godot-extended-libraries/hydro)
 - [godot-extended-libraries/godot-realistic-water](https://github.com/godot-extended-libraries/godot-realistic-water)
 - [Crest](https://github.com/wave-harmonic/crest)
+- [Virtual Terrain Project](http://vterrain.org/)
 
 ### AAA-Game Implementation Examples
 These generally don't give much in the way of code examples, but do give
@@ -69,6 +70,8 @@ a higher level overview of how the whole thing comes together.
 ### Level Of Detail Implementation
 - [Filip Struger - Continuous Distance-Dependent Level of Detail for Rendering Heightmaps (CDLOD)](https://github.com/fstrugar/CDLOD/blob/master/cdlod_paper_latest.pdf)
 - [Claes Johanson - Real-time water rendering Introducing the projected grid concept](https://fileadmin.cs.lth.se/graphics/theses/projects/projgrid/projgrid-lq.pdf)
+- [Willem H. de Boer - Fast Terrain Rendering Using Geometrical MipMapping](https://www.flipcode.com/archives/article_geomipmaps.pdf)
+- [Frank Losasso, Hugues Hoppe - Geometry Clipmaps: Terrain Rendering Using Nested Regular Grids](https://hhoppe.com/geomclipmap.pdf)
 
 ### Foam/Whitecap Rendering
 - [ARM Software - Using the Jacobian for modelling turbulent effects at wave crests](https://arm-software.github.io/opengl-es-sdk-for-android/ocean_f_f_t.html#oceanJacobian)
