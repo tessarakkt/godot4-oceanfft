@@ -8,7 +8,7 @@ extends WorldEnvironment
 @onready var fps_view:Label = $CanvasLayer/FPS
 
 @onready var ocean = $Ocean3D
-
+@onready var wave_height_sampler = $WaveHeightSampler
 @onready var camera = $Camera3D
 
 
@@ -20,6 +20,7 @@ func _ready() -> void:
 
 func _process(_delta:float) -> void:
 	fps_view.text = "%.1f FPS" % [Engine.get_frames_per_second()]
+	wave_height_sampler.position.y = ocean.get_wave_height(wave_height_sampler.position, 3)
 
 
 func _input(event:InputEvent) -> void:

@@ -660,7 +660,7 @@ func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> 
 	
 	for cascade in range(max_cascade):
 		for i in range(steps):
-			var pixel_pos := global_to_pixel(global_pos + xz_offset, cascade)
+			var pixel_pos := global_to_pixel(global_pos - xz_offset, cascade)
 			
 			pixel = _waves_image_cascade[cascade].get_pixelv(pixel_pos)
 			xz_offset.x += pixel.r
