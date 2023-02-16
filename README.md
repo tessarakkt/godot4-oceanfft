@@ -58,6 +58,8 @@ techniques that are of value to reference.
 - [godot-extended-libraries/godot-realistic-water](https://github.com/godot-extended-libraries/godot-realistic-water)
 - [Crest](https://github.com/wave-harmonic/crest)
 - [Virtual Terrain Project](http://vterrain.org/)
+- [jdupuy/whitecaps](https://github.com/jdupuy/whitecaps)
+- [AlphaMistral/Mistral-Water](https://github.com/AlphaMistral/Mistral-Water)
 
 ### AAA-Game Implementation Examples
 These generally don't give much in the way of code examples, but do give
@@ -66,6 +68,7 @@ a higher level overview of how the whole thing comes together.
 - [Assassin’s Creed III: The tech behind (or beneath) the action](https://www.fxguide.com/fxfeatured/assassins-creed-iii-the-tech-behind-or-beneath-the-action/)
 - [The technical art of Sea of Thieves](https://dl.acm.org/doi/10.1145/3214745.3214820)
 - [Ocean simulation and rendering in War Thunder](https://developer.download.nvidia.com/assets/gameworks/downloads/regular/events/cgdc15/CGDC2015_ocean_simulation_en.pdf)
+- [Wakes, Explosions And Lighting: Interactive Water Simulation in 'Atlas'](https://gpuopen.com/gdc-presentations/2019/gdc-2019-agtd6-interactive-water-simulation-in-atlas.pdf)
 
 ### Level Of Detail Implementation
 - [Filip Struger - Continuous Distance-Dependent Level of Detail for Rendering Heightmaps (CDLOD)](https://github.com/fstrugar/CDLOD/blob/master/cdlod_paper_latest.pdf)
@@ -77,6 +80,7 @@ a higher level overview of how the whole thing comes together.
 - [ARM Software - Using the Jacobian for modelling turbulent effects at wave crests](https://arm-software.github.io/opengl-es-sdk-for-android/ocean_f_f_t.html#oceanJacobian)
 - [Mary Yingst, Jennifer R. Alford, Ian Parberry - Very Fast Real-Time Ocean Wave Foam Rendering Using Halftoning](https://ianparberry.com/techreports/LARC-2011-05.pdf)
 - [Lining Chen, Yicheng Jin, Yong Yin - Ocean Wave Rendering with Whitecap in the Visual System of a Maritime Simulator](https://www.semanticscholar.org/paper/Ocean-Wave-Rendering-with-Whitecap-in-the-Visual-of-Chen-Jin/557fadde5e917ba8015a825963e359bc7903b464)
+- [Jonathan Dupuy, Eric Bruneton - Real-time Animation and Rendering of Ocean Whitecaps](https://hal.inria.fr/hal-00967078/file/Whitecaps-presentation.pdf)
 
 ### Wave Collision Interaction
 - [Jerry Tessendorf - eWave: Using an Exponential Solver on the iWave Problem](https://people.computing.clemson.edu/~jtessen/reports/papers_files/ewavealgorithm.pdf)
@@ -88,3 +92,4 @@ a higher level overview of how the whole thing comes together.
 - [Khan Academy - Computing a Jacobian matrix](https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/jacobian/v/computing-a-jacobian-matrix)
 - [Jump Trajectory - Ocean waves simulation with Fast Fourier transform](https://www.youtube.com/watch?v=kGEqaX4Y4bQ)
 - [Tiago Sousa - GPU Gems 2: Chapter 19. Generic Refraction Simulation](https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-19-generic-refraction-simulation)
+- [Matt Pharr, Wenzel Jakob, Greg Humphreys - Physically Based Rendering: From Theory To Implementation: 8.4 Microfacet Models](https://www.pbr-book.org/3ed-2018/Reflection_Models/Microfacet_Models)
