@@ -31,10 +31,7 @@ void main() {
     vec2 wave_vector = (2.f * PI * vec2(n, m)) / u.ocean_size;
     float k = length(wave_vector);
 
-    // Note: An ad-hoc factor to make the phase change per-frame slow
-    float slowdown_factor = 1.f;
-
-    float delta_phase = omega(k) * u.delta_time * slowdown_factor;
+    float delta_phase = omega(k) * u.delta_time;
     float phase = imageLoad(u_phases, pixel_coord).r;
     phase = mod(phase + delta_phase, 2.f * PI);
 

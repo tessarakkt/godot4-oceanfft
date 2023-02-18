@@ -41,10 +41,6 @@ uniform float specular_power = 500.0;
 // pixel and the object behind it.
 uniform float refraction_depth_factor = 0.00001;
 
-// Adjusts how much the refracted image is blended with the base water color
-// based on the distance from the cameras Z Near plane to the ocean pixel.
-uniform float refraction_distance_factor = 0.0025;
-
 uniform float refraction_factor_min = 0.0;
 uniform float refraction_factor_max = 0.025;
 
