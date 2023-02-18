@@ -57,6 +57,11 @@ uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 uniform float view_distance_max = 16000.0;
 uniform float view_fade_start = 0.3;
 
+uniform float foam_strength = 1.0;
+uniform float foam_strength2 = 1.0;
+uniform float foam_jacobian_limit = 0.3;
+uniform sampler2D foam_texture : hint_default_white;
+
 uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
 
@@ -66,6 +71,7 @@ instance uniform float min_lod_morph_distance;
 instance uniform float max_lod_morph_distance;
 
 varying vec3 world_vertex;
+varying float jacobian_determinant;
 
 
 // Get the total wave displacement of a vertex from all cascades.
@@ -120,10 +126,10 @@ void vertex() {
 	// Surface Normals
 	float offset = 1.0 / (fft_resolution * uv_scale);
 	
-	vec3 right = vec3(1.0, get_displacement(VERTEX.xz + vec2(offset, 0.0)).y, 0.0) - displacement;
-	vec3 left = vec3(-1.0, get_displacement(VERTEX.xz + vec2(-offset, 0.0)).y, 0.0) - displacement;
-	vec3 bottom = vec3(0.0, get_displacement(VERTEX.xz + vec2(0.0, offset)).y, 1.0) - displacement;
-	vec3 top = vec3(0.0, get_displacement(VERTEX.xz + vec2(0.0, -offset)).y, -1.0) - displacement;
+	vec3 right = (vec3(offset, 0.0, 0.0) + get_displacement(VERTEX.xz + vec2(offset, 0.0))) - displacement;
+	vec3 left = (vec3(-offset, 0.0, 0.0) + get_displacement(VERTEX.xz + vec2(-offset, 0.0))) - displacement;
+	vec3 bottom = (vec3(0.0, 0.0, offset) + get_displacement(VERTEX.xz + vec2(0.0, offset))) - displacement;
+	vec3 top = (vec3(0.0, 0.0, -offset) + get_displacement(VERTEX.xz + vec2(0.0, -offset))) - displacement;
 	
 	vec3 top_right = cross(right, top);
 	vec3 top_left = cross(top, left);
@@ -131,6 +137,14 @@ void vertex() {
 	vec3 bottom_right = cross(bottom, right);
 	
 	NORMAL = normalize(top_right + top_left + bottom_left + bottom_right);
+	
+	// Jacobian Determinant
+	// Used for foam/whitecap rendering
+	float jxx = right.x / offset;
+	float jxy = right.y / offset;
+	float jyx = bottom.x / offset;
+	float jyy = bottom.y / offset;
+	jacobian_determinant = (jxx * jyy) - (jxy * jyx);
 	
 	// Wave Amplitude Distance Fade
 	// Flattens the waves with increasing distance from camera. This is done
@@ -165,7 +179,12 @@ void fragment() {
 	// Fresnel Shading
 	vec3 sky = sky_color.rgb * fresnel;
 	vec3 water = (1.0 - fresnel) * water_color * sky_color.rgb;
-	ALBEDO = HDR(sky + water, exposure);
+	water_color = HDR(sky + water, exposure);
+	
+	// Whitecap Rendering
+	float foam_mix_factor = clamp((-jacobian_determinant + foam_jacobian_limit) * foam_strength, 0.0, 1.0);
+	foam_mix_factor = (foam_mix_factor * foam_mix_factor) * foam_strength2;
+	ALBEDO = mix(water_color, texture(foam_texture, world_vertex.xz * uv_scale).rgb, foam_mix_factor);
 	
 	// Distance Fade
 	float fade_start = view_distance_max * (1.0 - view_fade_start);

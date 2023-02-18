@@ -1,6 +1,16 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://n1tjl384bhl4"]
+[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://n1tjl384bhl4"]
 
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/OceanVisual_LOD0.gdshader" id="1_56q88"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_gub2d"]
+noise_type = 3
+fractal_octaves = 7
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_h2j7u"]
+width = 2048
+height = 2048
+seamless = true
+noise = SubResource("FastNoiseLite_gub2d")
 
 [resource]
 render_priority = 0
@@ -29,7 +39,6 @@ shader_parameter/exposure = 0.02
 shader_parameter/specular_strength = 1.0
 shader_parameter/specular_power = 100.0
 shader_parameter/refraction_depth_factor = 1e-05
-shader_parameter/refraction_distance_factor = 0.0025
 shader_parameter/refraction_factor_min = 0.0
 shader_parameter/refraction_factor_max = 0.025
 shader_parameter/refraction_distance_power = 1.65
@@ -38,4 +47,8 @@ shader_parameter/uv_scale = 0.00195312
 shader_parameter/wind_uv_offset = Vector2(0, 0)
 shader_parameter/view_distance_max = 16000.0
 shader_parameter/view_fade_start = 0.3
+shader_parameter/foam_strength = 0.25
+shader_parameter/foam_strength2 = 1.0
+shader_parameter/foam_jacobian_limit = 0.0
 shader_parameter/cascade_displacements = []
+shader_parameter/foam_texture = SubResource("NoiseTexture2D_h2j7u")
