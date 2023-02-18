@@ -23,11 +23,10 @@ accessed had to be changed to work in Godots compute shader API.
 |  Ctrl  |  Free cam down (locked to vertical axis)|
 |  Shift  |  Free cam sprint/move faster|
 
-![Ocean](https://user-images.githubusercontent.com/118585625/213395845-b0fedcbc-cc7a-4be8-b365-3ff275f482bc.png)
+![Ocean](https://user-images.githubusercontent.com/118585625/219852736-67086632-27de-441e-94b8-8e751a0df3ea.png)
 
 ## Todo List
 - Improve visual rendering
-  - Foam
   - Splash particles
   - Improve light interactions (transparency, reflections, refractions)
 - Lower detail but faster visual shader for lower LOD quads
@@ -93,3 +92,4 @@ a higher level overview of how the whole thing comes together.
 - [Jump Trajectory - Ocean waves simulation with Fast Fourier transform](https://www.youtube.com/watch?v=kGEqaX4Y4bQ)
 - [Tiago Sousa - GPU Gems 2: Chapter 19. Generic Refraction Simulation](https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-19-generic-refraction-simulation)
 - [Matt Pharr, Wenzel Jakob, Greg Humphreys - Physically Based Rendering: From Theory To Implementation: 8.4 Microfacet Models](https://www.pbr-book.org/3ed-2018/Reflection_Models/Microfacet_Models)
+- [Eric Bruneton, Fabrice Neyret, Nicolas Holzschuch - Real-time Realistic Ocean Lighting using Seamless Transitions from Geometry to BRDF](https://hal.inria.fr/inria-00443630v3/document)
