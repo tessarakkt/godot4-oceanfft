@@ -20,11 +20,12 @@ uniform vec4 shallow_color:source_color = vec4(0, 0.729412, 0.988235, 1);
 uniform vec4 sky_color:source_color = vec4(3.2f, 9.6f, 12.8f, 1.0);
 uniform float background_color_brightness = 0.2;
 
-uniform float sss_strength = 0.25;
-uniform float sss_fov_fade_min = 0.7;
-uniform float sss_fov_fade_max = 1.0;
-uniform float sss_slope_fade_min = 0.55;
-uniform float sss_slope_fade_max = 0.7;
+uniform float sss_backlight_strength = 0.025;
+uniform float sss_backlight_fov = 5.0;
+uniform float sss_upwelling = 0.2;
+uniform float sss_bubbles_density = 0.6;
+uniform vec4 scatter_color:source_color = vec4(0, 0.729412, 0.988235, 1);
+uniform vec4 bubbles_color:source_color;
 
 uniform float planetary_curve_strength = 0.000001;
 
@@ -53,8 +54,8 @@ uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 uniform float view_distance_max = 16000.0;
 uniform float view_fade_start = 0.3;
 
-uniform float foam_strength = 1.0;
-uniform float foam_strength2 = 1.0;
+uniform float foam_strength_pre = 0.1;
+uniform float foam_strength_post = 3.0;
 uniform float foam_jacobian_limit = 0.3;
 uniform sampler2D foam_texture : hint_default_white;
 
@@ -68,6 +69,8 @@ instance uniform float max_lod_morph_distance;
 
 varying vec3 world_vertex;
 varying float jacobian_determinant;
+varying float wave_height;
+varying float foam_mix_factor;
 
 
 // Get the total wave displacement of a vertex from all cascades.
@@ -178,8 +181,8 @@ void fragment() {
 	water_color = HDR(sky + water, exposure);
 	
 	// Whitecap Rendering
-	float foam_mix_factor = clamp((-jacobian_determinant + foam_jacobian_limit) * foam_strength, 0.0, 1.0);
-	foam_mix_factor = (foam_mix_factor * foam_mix_factor) * foam_strength2;
+	foam_mix_factor = clamp((-jacobian_determinant + foam_jacobian_limit) * foam_strength_pre, 0.0, 1.0);
+	foam_mix_factor = (foam_mix_factor * foam_mix_factor) * foam_strength_post;
 	ALBEDO = mix(water_color, texture(foam_texture, world_vertex.xz * uv_scale).rgb, foam_mix_factor);
 	
 	// Distance Fade
@@ -187,21 +190,34 @@ void fragment() {
 	ALPHA = 1.0 - (clamp(linear_dist, fade_start, view_distance_max) - fade_start) / (view_distance_max - fade_start);
 	
 	// Misc. PBR Settings
-	ROUGHNESS = 0.02;
+	ROUGHNESS = foam_mix_factor * 0.5;
 	SPECULAR = 0.0;
+	
+	wave_height = world_vertex.y;
 }
 
 
 void light() {
+	vec3 half_vector = normalize(LIGHT + VIEW);
+	
 	// Specular
-	float spec = clamp(pow(dot(reflect(LIGHT, NORMAL), -VIEW), specular_power), 0.0, 1.0) * specular_strength;
-	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, LIGHT), 0.0, 1.0);
+	float spec = clamp(pow(dot(NORMAL, half_vector), specular_power), 0.0, 1.0) * specular_strength;
+	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, half_vector), 0.0, 1.0);
 	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * spec;
 	
 	// Sub Surface Scattering
-	float sss = clamp(
-			smoothstep(sss_slope_fade_min, sss_slope_fade_max, dot(NORMAL, VIEW) * 0.5 + 0.5)
-			* smoothstep(sss_fov_fade_min, sss_fov_fade_max, dot(-LIGHT, VIEW) * 0.5 + 0.5)
-			, 0.0, 1.0) * sss_strength;
-	SPECULAR_LIGHT += (LIGHT_COLOR * shallow_color.rgb * ATTENUATION / PI) * sss;
+	vec3 sss_sun_light = scatter_color.rgb * ATTENUATION;
+	
+	// SSS Wave Backlight
+	float sss = sss_backlight_strength * max(0.0, wave_height) * pow(max(0.0, dot(-LIGHT, VIEW)), 4.0);
+	sss *= pow(0.5 - 0.5 * dot(-LIGHT, half_vector), 3.0);
+	sss *= sss_backlight_fov * pow(max(0.0, dot(VIEW, half_vector)) , 2.0);
+	vec3 sss_result = sss * sss_sun_light;
+	
+	// SSS Upwelling Light
+	sss_result += sss_upwelling * max(0.0, dot(LIGHT, half_vector)) * sss_sun_light;
+	
+	// SSS Bubbles Contribution
+	sss_result += sss_bubbles_density * foam_mix_factor * bubbles_color.rgb * ATTENUATION;
+	SPECULAR_LIGHT += sss_result;
 }
