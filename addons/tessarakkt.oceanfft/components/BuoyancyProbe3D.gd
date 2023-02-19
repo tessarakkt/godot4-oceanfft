@@ -1,5 +1,5 @@
 extends Marker3D
-class_name BuoyancySphere3D
+class_name BuoyancyProbe3D
 
 
 @export_range(0.0, 100.0) var radius := 1.0:
