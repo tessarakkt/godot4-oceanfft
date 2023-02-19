@@ -22,6 +22,7 @@ uniform float background_color_brightness = 0.2;
 
 uniform float sss_backlight_strength = 0.025;
 uniform float sss_backlight_fov = 5.0;
+uniform float sss_backlight_depth = 15.0;
 uniform float sss_upwelling = 0.2;
 uniform float sss_bubbles_density = 0.6;
 uniform vec4 scatter_color:source_color = vec4(0, 0.729412, 0.988235, 1);
@@ -125,10 +126,10 @@ void vertex() {
 	// Surface Normals
 	float offset = 1.0 / (fft_resolution * uv_scale);
 	
-	vec3 right = (vec3(offset, 0.0, 0.0) + get_displacement(VERTEX.xz + vec2(offset, 0.0))) - displacement;
-	vec3 left = (vec3(-offset, 0.0, 0.0) + get_displacement(VERTEX.xz + vec2(-offset, 0.0))) - displacement;
-	vec3 bottom = (vec3(0.0, 0.0, offset) + get_displacement(VERTEX.xz + vec2(0.0, offset))) - displacement;
-	vec3 top = (vec3(0.0, 0.0, -offset) + get_displacement(VERTEX.xz + vec2(0.0, -offset))) - displacement;
+	vec3 right = (vec3(offset, get_displacement(VERTEX.xz + vec2(offset, 0.0)).y, 0.0)) - displacement;
+	vec3 left = (vec3(-offset, get_displacement(VERTEX.xz + vec2(-offset, 0.0)).y, 0.0)) - displacement;
+	vec3 bottom = (vec3(0.0, get_displacement(VERTEX.xz + vec2(0.0, offset)).y, offset)) - displacement;
+	vec3 top = (vec3(0.0, get_displacement(VERTEX.xz + vec2(0.0, -offset)).y, -offset)) - displacement;
 	
 	vec3 top_right = cross(right, top);
 	vec3 top_left = cross(top, left);
@@ -209,7 +210,7 @@ void light() {
 	vec3 sss_sun_light = scatter_color.rgb * ATTENUATION;
 	
 	// SSS Wave Backlight
-	float sss = sss_backlight_strength * max(0.0, wave_height) * pow(max(0.0, dot(-LIGHT, VIEW)), 4.0);
+	float sss = sss_backlight_strength * max(0.0, wave_height + sss_backlight_depth) * pow(max(0.0, dot(-LIGHT, VIEW)), 4.0);
 	sss *= pow(0.5 - 0.5 * dot(-LIGHT, half_vector), 3.0);
 	sss *= sss_backlight_fov * pow(max(0.0, dot(VIEW, half_vector)) , 2.0);
 	vec3 sss_result = sss * sss_sun_light;

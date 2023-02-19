@@ -78,7 +78,7 @@ enum FFTResolution {
 
 @export var cascade_ranges:Array[Vector2] = [Vector2(0.0, 0.03), Vector2(0.03, 0.15), Vector2(0.15, 1.0)]
 @export var cascade_scales:Array[float] = [GOLDEN_RATIO * 2.0, GOLDEN_RATIO, 0.5]
-@export var uv_scale := 0.001953125
+@export var uv_scale := 0.00390625
 
 var wave_vector := Vector2(300.0, 0.0):
 	set(new_wave_vector):
