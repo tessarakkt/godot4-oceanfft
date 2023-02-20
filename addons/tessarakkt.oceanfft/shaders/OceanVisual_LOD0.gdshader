@@ -11,33 +11,35 @@ uniform float cascade_uv_scales[CASCADE_COUNT];
 uniform float cascade_steepness_scales[CASCADE_COUNT];
 uniform float cascade_amplitude_scales[CASCADE_COUNT];
 
-uniform float amplitude_scale_min = 0.5;
+uniform float amplitude_scale_min = 0.25;
 uniform float amplitude_scale_max = 1.0;
 uniform float amplitude_scale_fade_distance = 12000.0;
 
 uniform vec4 deep_color:source_color = vec4(0.004f, 0.016f, 0.047f, 1.0);
 uniform vec4 shallow_color:source_color = vec4(0, 0.729412, 0.988235, 1);
-uniform vec4 sky_color:source_color = vec4(3.2f, 9.6f, 12.8f, 1.0);
+uniform vec4 sky_color:source_color = vec4(1.6f, 4.8f, 6.4f, 1.0);
 uniform float background_color_brightness = 0.2;
 
-uniform float sss_backlight_strength = 0.025;
-uniform float sss_backlight_fov = 5.0;
+uniform float sss_backlight_strength = 0.0125;
+uniform float sss_backlight_fov = 10.0;
 uniform float sss_backlight_depth = 15.0;
-uniform float sss_upwelling = 0.2;
-uniform float sss_bubbles_density = 0.6;
+uniform float sss_upwelling = 0.075;
+uniform float sss_bubbles_density = 1.0;
 uniform vec4 scatter_color:source_color = vec4(0, 0.729412, 0.988235, 1);
 uniform vec4 bubbles_color:source_color;
 
 uniform float planetary_curve_strength = 0.000001;
 
+uniform float metallic_strength = 0.1;
+
 uniform float fresnel_offset = 0.02;
-uniform float fresnel_strength = 0.3;
+uniform float fresnel_strength = 0.02;
 uniform float fresnel_power = 5.0;
 
-uniform float exposure = 0.01;
+uniform float exposure = 0.03;
 
-uniform float specular_strength = 0.75;
-uniform float specular_power = 500.0;
+uniform float specular_strength = 1.0;
+uniform float specular_power = 1500.0;
 
 // Adjusts how strong the refraction is based on the distance between the ocean
 // pixel and the object behind it.
@@ -46,18 +48,18 @@ uniform float refraction_depth_factor = 0.00001;
 uniform float refraction_factor_min = 0.0;
 uniform float refraction_factor_max = 0.025;
 
-uniform float refraction_distance_power = 1.65;
+uniform float refraction_distance_power = 1.55;
 uniform float refraction_distance_max = 10000.0;
 
 uniform float uv_scale = 0.001953125;
 uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 
 uniform float view_distance_max = 16000.0;
-uniform float view_fade_start = 0.3;
+uniform float view_fade_start = 0.05;
 
 uniform float foam_strength_pre = 0.1;
-uniform float foam_strength_post = 3.0;
-uniform float foam_jacobian_limit = 0.3;
+uniform float foam_strength_post = 0.5;
+uniform float foam_jacobian_limit = -0.1;
 uniform sampler2D foam_texture : hint_default_white;
 
 uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
@@ -82,8 +84,8 @@ vec3 get_displacement(vec2 uv) {
 	vec3 displacement = vec3(0.0);
 	
 	for (int i = 0; i < CASCADE_COUNT; i++) {
-		displacement += texture(cascade_displacements[i],
-				uv * uv_scale * (1.0 / cascade_uv_scales[i]) + wind_uv_offset * cascade_uv_scales[i]).rgb
+		displacement += textureLod(cascade_displacements[i],
+				uv * uv_scale * (1.0 / cascade_uv_scales[i]) + wind_uv_offset * cascade_uv_scales[i], 1.0).rgb
 				* vec3(cascade_steepness_scales[i], cascade_amplitude_scales[i], 1.0);
 	}
 	
@@ -124,7 +126,7 @@ void vertex() {
 	world_vertex = VERTEX;
 	
 	// Surface Normals
-	float offset = 1.0 / (fft_resolution * uv_scale);
+	float offset = 1.0 / (fft_resolution * (1.0 / fft_resolution));
 	
 	vec3 right = (vec3(offset, get_displacement(VERTEX.xz + vec2(offset, 0.0)).y, 0.0)) - displacement;
 	vec3 left = (vec3(-offset, get_displacement(VERTEX.xz + vec2(-offset, 0.0)).y, 0.0)) - displacement;
@@ -192,6 +194,7 @@ void fragment() {
 	
 	// Misc. PBR Settings
 	ROUGHNESS = foam_mix_factor * 0.5;
+	METALLIC = metallic_strength;
 	SPECULAR = 0.0;
 	
 	wave_height = world_vertex.y;

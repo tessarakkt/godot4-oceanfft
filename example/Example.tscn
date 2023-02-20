@@ -25,17 +25,19 @@ script = ExtResource("2_hewa1")
 
 [node name="Ocean3D" type="Node3D" parent="."]
 script = ExtResource("7_xa10r")
+simulation_frameskip = 3
+fft_resolution = 128
 horizontal_dimension = 512
 time_scale = 1.1
-choppiness = 1.8
+choppiness = 0.5
 wave_speed = 0.003
 wave_length = 15.0
 
 [node name="QuadTree3D" type="Node3D" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("5_li4kg")
-lod_level = 6
+lod_level = 8
 quad_size = 32768.0
-ranges = Array[float]([500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0])
+ranges = Array[float]([125.0, 250.0, 500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0])
 camera = NodePath("../Camera3D")
 material = ExtResource("5_0jjw4")
 
@@ -44,19 +46,28 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -55.5801)
 mesh = SubResource("SphereMesh_84wiv")
 
 [node name="FloatingRectangle" parent="." instance=ExtResource("6_q2mn5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 52.6454)
 mass = 5000.0
+gravity_scale = 4.0
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="ReflectionProbe" type="ReflectionProbe" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0)
+max_distance = 1000.0
+size = Vector3(200, 200, 200)
+ambient_mode = 0
+
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("reflection_probe")]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
+current = true
 near = 1.0
 far = 16000.0
 script = ExtResource("5_eso43")
 speed = 100.0
 sprint_speed = 500.0
+reflection_probe = NodePath("../ReflectionProbe")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.906308, 0.178606, -0.383022, 0, 0.906308, 0.422618, 0.422618, 0.383022, -0.821394, 0, 2.5, 0)
-rotation_edit_mode = 2
+transform = Transform3D(0.848048, 0.223954, -0.48027, 0, 0.906308, 0.422618, 0.529919, -0.358401, 0.768593, 0, 2.5, 0)
 light_energy = 0.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -149,7 +160,7 @@ text = "Choppiness"
 layout_mode = 2
 max_value = 2.5
 step = 0.1
-value = 1.8
+value = 0.5
 
 [node name="WaveLengthLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2

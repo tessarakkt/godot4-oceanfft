@@ -7,6 +7,8 @@ extends Camera3D
 @export_range(1.0, 15.0) var zoom_speed := 5.0
 @export_range(1.0, 90.0) var zoom_fov := 25.0
 
+@export var reflection_probe:ReflectionProbe
+
 
 var camera_motion := Vector2.ZERO
 var motion_enabled := false
@@ -49,8 +51,10 @@ func _process(delta:float) -> void:
 			zoom_factor = clamp(zoom_factor - delta * zoom_speed, 0.0, 1.0)
 		
 		fov = lerp(75.0, zoom_fov, zoom_factor)
-	
-		position += motion * delta
+		
+		if not motion.is_zero_approx():
+			position += motion * delta
+			reflection_probe.position = position
 	
 		rotate(Vector3.UP, camera_motion.x * -camera_sensitivity * delta)
 		rotate(basis.x, camera_motion.y * -camera_sensitivity * delta)
