@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bjrox2llj64pm"]
+[gd_scene load_steps=11 format=3 uid="uid://bjrox2llj64pm"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://example/Example.gd" id="2_hewa1"]
@@ -69,6 +69,8 @@ world = NodePath("..")
 ocean = NodePath("../Ocean3D")
 sun_light = NodePath("../DirectionalLight3D_Sun")
 sky_light = NodePath("../DirectionalLight3D_Sky")
+surfaced_ocean_metallic = 0.0
+underwater_ocean_metallic = 0.0
 
 [node name="DirectionalLight3D_Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.848048, 0.223954, -0.48027, 0, 0.906308, 0.422618, 0.529919, -0.358401, 0.768593, 0, 2.5, 0)

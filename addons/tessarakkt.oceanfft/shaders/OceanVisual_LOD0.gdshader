@@ -38,6 +38,8 @@ uniform float fresnel_power = 5.0;
 
 uniform float exposure = 0.03;
 
+uniform float specular_pbr_strength = 0.5;
+uniform float specular_pbr_offset = 0.1;
 uniform float specular_strength = 1.0;
 uniform float specular_power = 1500.0;
 
@@ -86,9 +88,9 @@ vec3 get_displacement(vec2 uv) {
 	vec3 displacement = vec3(0.0);
 	
 	for (int i = 0; i < CASCADE_COUNT; i++) {
-		displacement += textureLod(cascade_displacements[i],
-				uv * uv_scale * (1.0 / cascade_uv_scales[i]) + wind_uv_offset * cascade_uv_scales[i], 1.0).rgb
-				* vec3(cascade_steepness_scales[i], cascade_amplitude_scales[i], 1.0);
+		displacement += texture(cascade_displacements[i],
+				uv * uv_scale * (1.0 / cascade_uv_scales[i]) + wind_uv_offset * cascade_uv_scales[i]).rgb
+				* vec3(cascade_steepness_scales[i], cascade_amplitude_scales[i], 0.0);
 	}
 	
 	return displacement;
@@ -160,7 +162,8 @@ void vertex() {
 
 void fragment() {
 	// Calculate fragments Fresnel factor
-	float fresnel = pow(1.0 - dot(NORMAL, normalize(VIEW)), fresnel_power) * fresnel_strength + fresnel_offset;
+	float fresnel_factor = pow(1.0 - dot(NORMAL, normalize(VIEW)), fresnel_power);
+	float fresnel = fresnel_factor * fresnel_strength + fresnel_offset;
 	
 	// Get the linear depth between each ocean pixel and whatever is behind it.
 	float depth = texture(depth_texture, SCREEN_UV).r;
@@ -195,9 +198,9 @@ void fragment() {
 	ALPHA = 1.0 - (clamp(linear_dist, fade_start, view_distance_max) - fade_start) / (view_distance_max - fade_start);
 	
 	// Misc. PBR Settings
-	ROUGHNESS = foam_mix_factor;
+	ROUGHNESS = foam_mix_factor + 0.02;
 	METALLIC = metallic_strength * (1.0 - foam_mix_factor);
-	SPECULAR = 0.0;
+	SPECULAR = specular_pbr_strength * (1.0 - foam_mix_factor) * fresnel_factor + specular_pbr_offset;
 	
 	wave_height = world_vertex.y;
 }
