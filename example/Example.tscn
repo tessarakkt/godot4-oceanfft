@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bjrox2llj64pm"]
+[gd_scene load_steps=10 format=3 uid="uid://bjrox2llj64pm"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://example/Example.gd" id="2_hewa1"]
@@ -25,7 +25,7 @@ script = ExtResource("2_hewa1")
 
 [node name="Ocean3D" type="Node3D" parent="."]
 script = ExtResource("7_xa10r")
-simulation_frameskip = 3
+simulation_frameskip = 1
 fft_resolution = 128
 horizontal_dimension = 512
 time_scale = 1.1
@@ -141,6 +141,7 @@ text = "Frameskip"
 layout_mode = 2
 tooltip_text = "You probably don't want to use more than 5 here. If running <20fps, any value will start to be noticable."
 max_value = 30.0
+value = 1.0
 
 [node name="PlanetaryCurveLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
