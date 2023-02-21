@@ -195,8 +195,8 @@ void fragment() {
 	ALPHA = 1.0 - (clamp(linear_dist, fade_start, view_distance_max) - fade_start) / (view_distance_max - fade_start);
 	
 	// Misc. PBR Settings
-	ROUGHNESS = foam_mix_factor * 0.5;
-	METALLIC = metallic_strength;
+	ROUGHNESS = foam_mix_factor;
+	METALLIC = metallic_strength * (1.0 - foam_mix_factor);
 	SPECULAR = 0.0;
 	
 	wave_height = world_vertex.y;
@@ -208,8 +208,8 @@ void light() {
 	
 	// Specular
 	float spec = clamp(pow(dot(NORMAL, half_vector), specular_power), 0.0, 1.0) * specular_strength;
-	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, half_vector), 0.0, 1.0);
-	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * spec;
+	SPECULAR_LIGHT += (LIGHT_COLOR * ALBEDO * ATTENUATION / PI) * clamp(dot(NORMAL, half_vector), 0.0, 1.0) * (1.0 - foam_mix_factor);
+	SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * spec * (1.0 - foam_mix_factor);
 	
 	// Sub Surface Scattering
 	vec3 sss_sun_light = scatter_color.rgb * ATTENUATION;
@@ -222,8 +222,8 @@ void light() {
 	
 	// SSS Upwelling Light
 	sss_result += sss_upwelling * max(0.0, dot(LIGHT, half_vector)) * sss_sun_light;
+	SPECULAR_LIGHT += sss_result * (1.0 - foam_mix_factor);
 	
-	// SSS Bubbles Contribution
-	sss_result += sss_bubbles_density * foam_mix_factor * bubbles_color.rgb * ATTENUATION;
-	SPECULAR_LIGHT += sss_result;
+	// Foam Lighting
+	DIFFUSE_LIGHT += sss_bubbles_density * foam_mix_factor * bubbles_color.rgb * ATTENUATION;
 }
