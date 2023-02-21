@@ -1,5 +1,5 @@
-# Godot 4 Ocean Shader
-An early work in progress ocean shader for Godot 4 base on Jerry Tessendorf's
+# Godot 4 Ocean Addon
+An early work in progress ocean addon for Godot 4 base on Jerry Tessendorf's
 FFT method for generating the waves, using compute shaders to generate the
 displacement map, and a quad tree based continuous distant dependant level of
 detail (CDLOD) system to dynamically manage the polygon density without
@@ -10,6 +10,21 @@ from [this project](https://github.com/achalpandeyy/OceanFFT). The underlying
 math is identical, but some things like binding points and how uniforms were
 accessed had to be changed to work in Godots compute shader API.
 
+![Ocean](https://user-images.githubusercontent.com/118585625/220286315-b2b4ccb5-1700-467c-aa2f-2b5983d9909a.png)
+
+## Features
+- FFT ocean wave simulation, wave energy derived from Unified Spectrum
+- Integrated LOD for surface (CDLOD)
+- Basic buoyancy system
+- Basic underwater effect
+- Basic whitecap rendering
+- Surface shading:
+  - Transparency
+  - Reflections (provided by ReflectionProbe)
+  - Refractions
+  - Sub surface scattering
+
+### Example Scene Controls
 |  Button  |  Action  |
 | --- | --- |
 |  `/~  |  Toggle menu/free cam modes|
@@ -23,19 +38,20 @@ accessed had to be changed to work in Godots compute shader API.
 |  Ctrl  |  Free cam down (locked to vertical axis)|
 |  Shift  |  Free cam sprint/move faster|
 
-![Ocean](https://user-images.githubusercontent.com/118585625/219852736-67086632-27de-441e-94b8-8e751a0df3ea.png)
-
 ## Todo List
 - Improve visual rendering
   - Splash particles
-  - Improve light interactions (transparency, reflections, refractions)
+  - Improve refractions
+  - Improve underwater effect
 - Lower detail but faster visual shader for lower LOD quads
-- Improve buoyancy system
+- Optimize Quadtree3D at large depths
 - Beach/cliff/rocks interactions
 - Wave collision interactions (boat wakes, splashes, etc.)
 - Multiplayer synchronization? [This reference](https://developer.download.nvidia.com/assets/gameworks/downloads/regular/events/cgdc15/CGDC2015_ocean_simulation_en.pdf) may be helpful for this.
 
 ![OceanCDLOD](https://user-images.githubusercontent.com/118585625/213395892-4c6e6b2e-82b5-4708-9689-6cbb93dad340.png)
+
+![OceanUnderwater](https://user-images.githubusercontent.com/118585625/220287411-52c7df03-6197-430b-9990-5e16b1825f2d.png)
 
 ![OceanCurve](https://user-images.githubusercontent.com/118585625/213397029-6d327b02-a701-474d-b56a-da7b13a054ab.png)
 
@@ -91,5 +107,6 @@ a higher level overview of how the whole thing comes together.
 - [Khan Academy - Computing a Jacobian matrix](https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/jacobian/v/computing-a-jacobian-matrix)
 - [Jump Trajectory - Ocean waves simulation with Fast Fourier transform](https://www.youtube.com/watch?v=kGEqaX4Y4bQ)
 - [Tiago Sousa - GPU Gems 2: Chapter 19. Generic Refraction Simulation](https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-19-generic-refraction-simulation)
+- [Kenny Mitchell - GPU Gems 3: Chapter 13. Volumetric Light Scattering as a Post-Process](https://developer.nvidia.com/gpugems/gpugems3/part-ii-light-and-shadows/chapter-13-volumetric-light-scattering-post-process)
 - [Matt Pharr, Wenzel Jakob, Greg Humphreys - Physically Based Rendering: From Theory To Implementation: 8.4 Microfacet Models](https://www.pbr-book.org/3ed-2018/Reflection_Models/Microfacet_Models)
 - [Eric Bruneton, Fabrice Neyret, Nicolas Holzschuch - Real-time Realistic Ocean Lighting using Seamless Transitions from Geometry to BRDF](https://hal.inria.fr/inria-00443630v3/document)
