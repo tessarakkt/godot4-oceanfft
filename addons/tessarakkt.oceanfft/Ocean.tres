@@ -53,5 +53,6 @@ shader_parameter/view_fade_start = 0.05
 shader_parameter/foam_strength_pre = 0.1
 shader_parameter/foam_strength_post = 0.5
 shader_parameter/foam_jacobian_limit = -0.1
+shader_parameter/normal_factor = 1.0
 shader_parameter/cascade_displacements = []
 shader_parameter/foam_texture = SubResource("NoiseTexture2D_h2j7u")

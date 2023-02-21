@@ -11,11 +11,14 @@ sky_material = SubResource("PanoramaSkyMaterial_xouol")
 [resource]
 background_mode = 2
 sky = SubResource("Sky_m6hur")
-ambient_light_sky_contribution = 0.25
 tonemap_mode = 3
 fog_enabled = true
 fog_light_color = Color(0.34902, 0.607843, 0.890196, 1)
 fog_light_energy = 0.75
-fog_density = 5e-05
+fog_density = 0.0001
 fog_sky_affect = 0.0
-volumetric_fog_density = 0.025
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.0075
+volumetric_fog_albedo = Color(0.121569, 0.333333, 0.545098, 1)
+volumetric_fog_length = 1024.0
+adjustment_enabled = true

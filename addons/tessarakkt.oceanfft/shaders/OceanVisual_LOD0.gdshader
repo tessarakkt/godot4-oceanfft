@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode world_vertex_coords, depth_draw_always;
+render_mode world_vertex_coords, depth_draw_always, cull_disabled;
 
 
 const int CASCADE_COUNT = 3;
@@ -61,6 +61,8 @@ uniform float foam_strength_pre = 0.1;
 uniform float foam_strength_post = 0.5;
 uniform float foam_jacobian_limit = -0.1;
 uniform sampler2D foam_texture : hint_default_white;
+
+uniform float normal_factor = 1.0;
 
 uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
@@ -138,7 +140,7 @@ void vertex() {
 	vec3 bottom_left = cross(left, bottom);
 	vec3 bottom_right = cross(bottom, right);
 	
-	NORMAL = normalize(top_right + top_left + bottom_left + bottom_right);
+	NORMAL = normalize(top_right + top_left + bottom_left + bottom_right) * normal_factor;
 	
 	// Jacobian Determinant
 	// Used for foam/whitecap rendering

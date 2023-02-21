@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bjrox2llj64pm"]
+[gd_scene load_steps=10 format=3 uid="uid://bjrox2llj64pm"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://example/Example.gd" id="2_hewa1"]
@@ -56,7 +56,7 @@ max_distance = 1000.0
 size = Vector3(200, 200, 200)
 ambient_mode = 0
 
-[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("reflection_probe")]
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("reflection_probe", "world", "ocean", "sun_light", "sky_light")]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
 current = true
 near = 1.0
@@ -65,10 +65,19 @@ script = ExtResource("5_eso43")
 speed = 100.0
 sprint_speed = 500.0
 reflection_probe = NodePath("../ReflectionProbe")
+world = NodePath("..")
+ocean = NodePath("../Ocean3D")
+sun_light = NodePath("../DirectionalLight3D_Sun")
+sky_light = NodePath("../DirectionalLight3D_Sky")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D_Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.848048, 0.223954, -0.48027, 0, 0.906308, 0.422618, 0.529919, -0.358401, 0.768593, 0, 2.5, 0)
 light_energy = 0.5
+
+[node name="DirectionalLight3D_Sky" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.5, 0)
+visible = false
+light_energy = 2.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 

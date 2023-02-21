@@ -8,6 +8,20 @@ extends Camera3D
 @export_range(1.0, 90.0) var zoom_fov := 25.0
 
 @export var reflection_probe:ReflectionProbe
+@export var world:WorldEnvironment
+@export var ocean:Ocean3D
+@export var sun_light:DirectionalLight3D
+@export var sky_light:DirectionalLight3D
+
+@export var surfaced_fog_color := Color(0.34901961684227, 0.60784316062927, 0.8901960849762)
+@export var surfaced_fog_density := 0.0001
+@export var surfaced_fog_sky_affect := 0.0
+@export var surfaced_ocean_metallic := 0.1
+
+@export var underwater_fog_color := Color(0.12549020349979, 0.26274511218071, 0.44705882668495)
+@export var underwater_fog_density := 0.015
+@export var underwater_fog_sky_affect := 1.0
+@export var underwater_ocean_metallic := 0.05
 
 
 var camera_motion := Vector2.ZERO
@@ -60,8 +74,34 @@ func _process(delta:float) -> void:
 		rotate(basis.x, camera_motion.y * -camera_sensitivity * delta)
 	
 		camera_motion = Vector2.ZERO
+	
+	if ocean.get_wave_height(global_position, 2) > global_position.y:
+		go_under_water()
+
+	else:
+		go_above_water()
 
 
 func _input(event:InputEvent) -> void:
 	if motion_enabled and event is InputEventMouseMotion:
 		camera_motion += event.relative
+
+
+func go_under_water() -> void:
+	world.environment.fog_enabled = false
+	world.environment.volumetric_fog_enabled = true
+	ocean._material.set_shader_parameter("normal_factor", -1.0)
+	ocean._material.set_shader_parameter("refraction_distance_power", 1.0)
+	ocean._material.set_shader_parameter("metallic_strength", underwater_ocean_metallic)
+	sky_light.visible = true
+	sun_light.light_energy = 0.75
+
+
+func go_above_water() -> void:
+	world.environment.fog_enabled = true
+	world.environment.volumetric_fog_enabled = false
+	ocean._material.set_shader_parameter("normal_factor", 1.0)
+	ocean._material.set_shader_parameter("refraction_distance_power", 1.55)
+	ocean._material.set_shader_parameter("metallic_strength", surfaced_ocean_metallic)
+	sky_light.visible = false
+	sun_light.light_energy = 0.5
