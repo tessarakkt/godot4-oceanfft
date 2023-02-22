@@ -62,7 +62,7 @@ func _on_wind_direction_value_changed(value:float) -> void:
 
 
 func _on_wave_speed_value_changed(value:float) -> void:
-	ocean.wave_speed = -value
+	ocean.wave_scroll_speed = -value
 
 
 func _on_cull_enabled_toggled(button_pressed:bool) -> void:

@@ -30,8 +30,8 @@ fft_resolution = 128
 horizontal_dimension = 512
 time_scale = 1.1
 choppiness = 0.5
-wave_speed = 0.003
-wave_length = 15.0
+wave_scroll_speed = -0.003
+wind_speed = 15.0
 
 [node name="QuadTree3D" type="Node3D" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("5_li4kg")
@@ -174,11 +174,11 @@ max_value = 2.5
 step = 0.1
 value = 0.5
 
-[node name="WaveLengthLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+[node name="WindSpeedLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-text = "Wave Length"
+text = "Wind Speed"
 
-[node name="WaveLength" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+[node name="WindSpeed" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 min_value = 15.0
 max_value = 250.0
@@ -186,7 +186,7 @@ value = 15.0
 
 [node name="WaveSpeedLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-text = "Wave Speed"
+text = "Wave Texture Scroll Speed"
 
 [node name="WaveSpeed" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
@@ -199,7 +199,6 @@ text = "Wind Direction"
 
 [node name="WindDirection" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-tooltip_text = "Tick marks represent, in order, North (000), East (090), South (180), and West (270)."
 max_value = 360.0
 step = 0.001
 tick_count = 4
@@ -211,6 +210,6 @@ ticks_on_borders = true
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/PlanetaryCurve" to="." method="_on_planetary_curve_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Speed" to="." method="_on_speed_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Choppiness" to="." method="_on_choppiness_value_changed"]
-[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WaveLength" to="." method="_on_wind_speed_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WindSpeed" to="." method="_on_wind_speed_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WaveSpeed" to="." method="_on_wave_speed_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WindDirection" to="." method="_on_wind_direction_value_changed"]

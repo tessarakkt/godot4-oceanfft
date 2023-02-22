@@ -32,7 +32,7 @@ var zoom_factor := 0.0
 func _process(delta:float) -> void:
 	var motion := Vector3.ZERO
 	
-	if motion_enabled:
+	if motion_enabled and current:
 		if Input.is_action_pressed("free_cam_forward"):
 			motion -= Vector3(basis.z.x, 0.0, basis.z.z).normalized()
 	
@@ -83,7 +83,7 @@ func _process(delta:float) -> void:
 
 
 func _input(event:InputEvent) -> void:
-	if motion_enabled and event is InputEventMouseMotion:
+	if motion_enabled and current and event is InputEventMouseMotion:
 		camera_motion += event.relative
 
 

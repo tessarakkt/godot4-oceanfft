@@ -43,7 +43,6 @@ func _ready() -> void:
 		
 		## Set max view distance and fade range start
 		material.set_shader_parameter("view_distance_max", camera.far)
-		material.set_shader_parameter("view_fade_start", 0.005)
 		
 		## Initialize LOD meshes for each level
 		var current_size = quad_size

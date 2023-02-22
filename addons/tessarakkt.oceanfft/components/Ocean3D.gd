@@ -34,57 +34,77 @@ enum FFTResolution {
 }
 
 
+## Whether simulate() should be called by _process(). The simulation_frameskip
+## setting will control whether this calls every frame, or skips frames. This
+## does not affect the ability to call simulate() directly, but it probably
+## should be disabled if you are calling the simulation directly.
 @export var simulation_enabled := true
+
+@export_group("Simulation Settings")
+
+## Controls how many frames the _process() skips calling simulate().
+## Set to 0 to disable frame skip.
 @export_range(0, 30, 1) var simulation_frameskip := 0
+
+## The resolution to generate the displacement maps at via FFT in the compute
+## shaders.
 @export var fft_resolution:FFTResolution = FFTResolution.FFT_256x256:
 	set(new_fft_resolution):
 		fft_resolution = new_fft_resolution
 		_is_initial_spectrum_changed = true
-		_is_spectrum_changed = true
-		_is_scale_changed = true
 		_material.set_shader_parameter("fft_resolution", fft_resolution)
 
+## The horizontal distance the ocean patch should be simulated for.
 @export_range(0, 2048) var horizontal_dimension := 256:
 	set(new_horizontal_dimension):
 		horizontal_dimension = new_horizontal_dimension
 		_is_initial_spectrum_changed = true
-		_is_spectrum_changed = true
-		_is_scale_changed = true
 
-@export_range(0.0, 10.0) var horizontal_scale := 1.0:
-	set(new_horizontal_scale):
-		horizontal_scale = new_horizontal_scale
-		_is_scale_changed = true
-
+## The time scale for the simulation. Speeds up or slows down the waves.
 @export_range(0.001, 5.0) var time_scale := 1.0
 
+## The wave number ranges of the wave energy spectrum that each displacement
+## cascade covers.
+@export var cascade_ranges:Array[Vector2] = [Vector2(0.0, 0.03), Vector2(0.03, 0.15), Vector2(0.15, 1.0)]
+
+## The UV scales applied to each displacement map cascade when applied to the
+## surface geometry.
+@export var cascade_scales:Array[float] = [GOLDEN_RATIO * 2.0, GOLDEN_RATIO, 0.5]
+
+
+@export_group("Weather Settings")
+
+## Wave choppiness value. Higher values give waves sharper crests, but can cause
+## wave geometry to fold in over itself.
 @export_range(0.0, 10.0) var choppiness := 1.5:
 	set(new_choppiness):
 		choppiness = new_choppiness
-		_is_spectrum_changed = true
 
+## Direction the wind is blowing.
 @export_range(0.0, 360.0) var wind_direction_degrees := 0.0:
 	set(new_wind_direction_degrees):
 		wind_direction_degrees = clamp(new_wind_direction_degrees, 0.0, 360.0)
 		_wind_rad = deg_to_rad(new_wind_direction_degrees)
 
-@export_range(0.0, 100.0) var wave_speed := 0.0
+## Controls how much the generated displacement maps are scrolled horizontally
+## over time.
+@export_range(-10.0, 10.0) var wave_scroll_speed := 0.0
 
-@export_range(0.0, 1000.0) var wave_length := 300.0:
+## The speed of the wind passed to the wave simulation.
+@export_range(0.0, 1000.0) var wind_speed := 300.0:
 	set(new_wave_length):
 		wave_vector = wave_vector.normalized() * new_wave_length
 	get:
 		return wave_vector.length()
 
-@export var cascade_ranges:Array[Vector2] = [Vector2(0.0, 0.03), Vector2(0.03, 0.15), Vector2(0.15, 1.0)]
-@export var cascade_scales:Array[float] = [GOLDEN_RATIO * 2.0, GOLDEN_RATIO, 0.5]
-@export var uv_scale := 0.00390625
 
+## TODO: figure out what this is actually supposed to do
 var wave_vector := Vector2(300.0, 0.0):
 	set(new_wave_vector):
 		wave_vector = new_wave_vector
 		_is_initial_spectrum_changed = true
 
+var _uv_scale := 0.00390625
 
 var _rd:RenderingDevice = RenderingServer.create_local_rendering_device()
 
@@ -135,7 +155,6 @@ var _waves_image_cascade:Array[Image] = []
 var _waves_texture_cascade:Array[ImageTexture] = []
 
 var _is_ping_phase := true
-var _is_scale_changed := true
 
 var _frameskip := 0
 var _accumulated_delta := 0.0
@@ -312,7 +331,7 @@ func _ready() -> void:
 	
 	_material.set_shader_parameter("cascade_displacements", _waves_texture_cascade)
 	_material.set_shader_parameter("cascade_uv_scales", cascade_scales)
-	_material.set_shader_parameter("uv_scale", uv_scale)
+	_material.set_shader_parameter("uv_scale", _uv_scale)
 	
 	#### Compile & Initialize FFT Shaders
 	############################################################################
@@ -373,7 +392,7 @@ func _process(delta:float) -> void:
 	if simulation_enabled:
 		_accumulated_delta += delta
 		
-		_wind_uv_offset += Vector2(cos(_wind_rad), sin(_wind_rad)) * wave_speed * delta
+		_wind_uv_offset += Vector2(cos(_wind_rad), sin(_wind_rad)) * wave_scroll_speed * delta
 		_material.set_shader_parameter("wind_uv_offset", _wind_uv_offset)
 		
 		if simulation_frameskip > 0:
@@ -629,7 +648,7 @@ func global_to_pixel(global_pos:Vector3, cascade:int) -> Vector2i:
 	uv_pos.y = global_pos.z
 	
 	## Apply UV scale
-	uv_pos *= uv_scale
+	uv_pos *= _uv_scale
 	uv_pos *= 1.0 / cascade_scales[cascade]
 	
 	## Offset by wind scrolling
