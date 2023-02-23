@@ -22,6 +22,26 @@ uniform vec4 deep_color:source_color = vec4(0.004f, 0.016f, 0.047f, 1.0);
 uniform vec4 shallow_color:source_color = vec4(0, 0.729412, 0.988235, 1);
 
 
+group_uniforms DomainWarp;
+/******************************************************************************/
+// Apply a static domain warp texture to the displacement map UV reads in order
+// to break up tiling artifacts when viewing large distances.
+// Static domain warp is used rather than animated or player centered to avoid
+// vertex/UV swimming artifacts.
+
+// Controls how large the domain_warp_texture is stretched horizontally.
+// Smaller numbers result in more horizontal stretching.
+// To stretch the texture to cover X units, set this value to 1.0 / X
+uniform float domain_warp_uv_scale : hint_range(0.0, 1.0, 0.00000001) = 0.0000625;
+
+// Controls how much distortion is applied to the displacement map UV reads
+uniform float domain_warp_strength = 1500.0;
+
+// Noise texture used to domain warp the displacement map UV reads to break up
+// tiling at large distances from the camera.
+uniform sampler2D domain_warp_texture;
+
+
 group_uniforms Fresnel;
 /******************************************************************************/
 // Note that PBR specular and metallic settings can significantly affect the
@@ -112,10 +132,6 @@ group_uniforms Internal;
 // For inverting surface normals, for underwater effect
 uniform float normal_factor = 1.0;
 
-// The resolution of the displacement textures.
-// Updated on initialization only by Ocean3D
-uniform float fft_resolution = 256.0;
-
 // The UV scales for each cascade.
 // Updated on initialization only by Ocean3D._ready()
 uniform float cascade_uv_scales[CASCADE_COUNT];
@@ -189,14 +205,21 @@ void vertex() {
 	float morph_factor = (clamp(linear_dist, min_lod_morph_distance, max_lod_morph_distance) - min_lod_morph_distance) / (max_lod_morph_distance - min_lod_morph_distance);
 	VERTEX.xz -= lod_morph(morph_factor, UV);
 	
+	// Domain Warp
+	vec2 domain_warp = vec2(
+			texture(domain_warp_texture, VERTEX.xz * domain_warp_uv_scale).r,
+			texture(domain_warp_texture, -VERTEX.xz * domain_warp_uv_scale).r);
+	domain_warp *= domain_warp_strength * (linear_dist / view_distance_max);
+	vec2 domain_warped_uv = VERTEX.xz + domain_warp;
+	
 	// Vertex Offset
 	// Use the world vertex XZ coordinates as UV for simplicity
-	vec3 displacement = get_displacement(VERTEX.xz);
+	vec3 displacement = get_displacement(domain_warped_uv);
 	
 	// Planetary Curve
 	// Take distance squared from camera to vertex, multiply by strength factor,
 	// subtract from vertex Y.
-	float curvation = planetary_curve_strength * (pow(VERTEX.x - CAMERA_POSITION_WORLD.x, 2.0) + pow(VERTEX.z - CAMERA_POSITION_WORLD.z, 2.0));
+	float curvation = planetary_curve_strength * (pow(domain_warped_uv.x - CAMERA_POSITION_WORLD.x, 2.0) + pow(domain_warped_uv.y - CAMERA_POSITION_WORLD.z, 2.0));
 	
 	VERTEX += displacement;
 	VERTEX.y -= curvation;
@@ -204,12 +227,12 @@ void vertex() {
 	world_vertex = VERTEX;
 	
 	// Surface Normals
-	float offset = 1.0 / (fft_resolution * (1.0 / fft_resolution));
+	float offset = 1.0;
 	
-	vec3 right = (vec3(offset, get_displacement(VERTEX.xz + vec2(offset, 0.0)).y, 0.0)) - displacement;
-	vec3 left = (vec3(-offset, get_displacement(VERTEX.xz + vec2(-offset, 0.0)).y, 0.0)) - displacement;
-	vec3 bottom = (vec3(0.0, get_displacement(VERTEX.xz + vec2(0.0, offset)).y, offset)) - displacement;
-	vec3 top = (vec3(0.0, get_displacement(VERTEX.xz + vec2(0.0, -offset)).y, -offset)) - displacement;
+	vec3 right = (vec3(offset, get_displacement(domain_warped_uv + vec2(offset, 0.0)).y, 0.0)) - displacement;
+	vec3 left = (vec3(-offset, get_displacement(domain_warped_uv + vec2(-offset, 0.0)).y, 0.0)) - displacement;
+	vec3 bottom = (vec3(0.0, get_displacement(domain_warped_uv + vec2(0.0, offset)).y, offset)) - displacement;
+	vec3 top = (vec3(0.0, get_displacement(domain_warped_uv + vec2(0.0, -offset)).y, -offset)) - displacement;
 	
 	vec3 top_right = cross(right, top);
 	vec3 top_left = cross(top, left);

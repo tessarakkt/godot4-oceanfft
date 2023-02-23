@@ -52,7 +52,6 @@ enum FFTResolution {
 	set(new_fft_resolution):
 		fft_resolution = new_fft_resolution
 		_is_initial_spectrum_changed = true
-		_material.set_shader_parameter("fft_resolution", fft_resolution)
 
 ## The horizontal distance the ocean patch should be simulated for.
 @export_range(0, 2048) var horizontal_dimension := 256:
