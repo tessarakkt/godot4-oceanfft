@@ -55,8 +55,7 @@ void main() {
     {
         h = vec2(0.f);
         hX = vec2(0.f);
-        hZ = vec2(0.f);
     }
 
-    imageStore(u_spectrum, pixel_coord, vec4(hX + multiplyByI(h), hZ));
+    imageStore(u_spectrum, pixel_coord, vec4(hX + multiplyByI(h), 0.0, 0.0));
 }

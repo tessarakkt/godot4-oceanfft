@@ -31,20 +31,17 @@ void main() {
     int thread_count = int(u.total_count * 0.5f);
     int thread_idx = pixel_coord.y;
 
-    int in_idx = thread_idx & (u.subseq_count - 1);		
+    int in_idx = thread_idx & (u.subseq_count - 1);
     int out_idx = ((thread_idx - in_idx) << 1) + in_idx;
 
     float angle = -PI * (float(in_idx) / float(u.subseq_count));
     vec2 twiddle = vec2(cos(angle), sin(angle));
 
-    vec4 a = imageLoad(u_input, ivec2(pixel_coord.x, pixel_coord.y));
-    vec4 b = imageLoad(u_input, ivec2(pixel_coord.x, pixel_coord.y + thread_count));
+    vec2 a = imageLoad(u_input, ivec2(pixel_coord.x, pixel_coord.y)).xy;
+    vec2 b = imageLoad(u_input, ivec2(pixel_coord.x, pixel_coord.y + thread_count)).xy;
 
-    // Transforming two complex sequences independently and simultaneously
+    vec4 result = ButterflyOperation(a.xy, b.xy, twiddle);
 
-    vec4 result0 = ButterflyOperation(a.xy, b.xy, twiddle);
-    vec4 result1 = ButterflyOperation(a.zw, b.zw, twiddle);
-
-    imageStore(u_output, ivec2(pixel_coord.x, out_idx), vec4(result0.xy, result1.xy));
-    imageStore(u_output, ivec2(pixel_coord.x, out_idx + u.subseq_count), vec4(result0.zw, result1.zw));
+    imageStore(u_output, ivec2(pixel_coord.x, out_idx), vec4(result.xy, 0.0, 0.0));
+    imageStore(u_output, ivec2(pixel_coord.x, out_idx + u.subseq_count), vec4(result.zw, 0.0, 0.0));
 }
