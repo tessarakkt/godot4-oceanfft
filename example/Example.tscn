@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bjrox2llj64pm"]
+[gd_scene load_steps=12 format=3 uid="uid://bjrox2llj64pm"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://example/Example.gd" id="2_hewa1"]
@@ -7,6 +7,18 @@
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
 [ext_resource type="PackedScene" uid="uid://rmewe8a2xeoe" path="res://example/FloatingRectangle.tscn" id="6_q2mn5"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="7_xa10r"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
+noise_type = 3
+fractal_type = 0
+fractal_octaves = 2
+fractal_lacunarity = 3.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_o5jyh"]
+width = 1024
+height = 1024
+seamless = true
+noise = SubResource("FastNoiseLite_nywmb")
 
 [sub_resource type="SphereMesh" id="SphereMesh_84wiv"]
 radius = 10.0
@@ -29,6 +41,7 @@ simulation_frameskip = 1
 fft_resolution = 128
 horizontal_dimension = 512
 time_scale = 1.1
+domain_warp_texture = SubResource("NoiseTexture2D_o5jyh")
 choppiness = 0.5
 wave_scroll_speed = -0.003
 wind_speed = 15.0

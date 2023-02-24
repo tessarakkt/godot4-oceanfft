@@ -71,6 +71,32 @@ enum FFTResolution {
 @export var cascade_scales:Array[float] = [GOLDEN_RATIO * 2.0, GOLDEN_RATIO, 0.5]
 
 
+@export_group("Domain Warp")
+
+## Noise texture used to domain warp the displacement maps as they are applied
+## to the surface.
+@export var domain_warp_texture:NoiseTexture2D:
+	set(new_domain_warp_texture):
+		_material.set_shader_parameter("domain_warp_texture", new_domain_warp_texture)
+		domain_warp_texture = new_domain_warp_texture
+		await new_domain_warp_texture.changed
+		_domain_warp_image = new_domain_warp_texture.get_image()
+
+## Controls how much distortion is applied to the displacement map domain warp
+@export_range(0.0, 5000.0) var domain_warp_strength := 1500.0:
+	set(new_domain_warp_strength):
+		_material.set_shader_parameter("domain_warp_strength", new_domain_warp_strength)
+		domain_warp_strength = new_domain_warp_strength
+
+## Controls how large the domain_warp_texture is stretched horizontally.
+## Smaller numbers result in more horizontal stretching.
+## To stretch the texture to cover X world units, set this value to 1.0 / X
+@export_range(0.0, 1.0, 0.0000001) var domain_warp_uv_scale := 0.0000625:
+	set(new_domain_warp_uv_scale):
+		_material.set_shader_parameter("domain_warp_uv_scale", new_domain_warp_uv_scale)
+		domain_warp_uv_scale = new_domain_warp_uv_scale
+
+
 @export_group("Weather Settings")
 
 ## Wave choppiness value. Higher values give waves sharper crests, but can cause
@@ -157,6 +183,8 @@ var _is_ping_phase := true
 
 var _frameskip := 0
 var _accumulated_delta := 0.0
+
+var _domain_warp_image:Image
 
 var _wind_uv_offset := Vector2.ZERO
 var _wind_rad := 0.0
@@ -634,7 +662,7 @@ func simulate(delta:float) -> void:
 ## Convert a global position (on the horizontal XZ plane) to a pixel coordinate
 ## for sampling the wave displacement texture directly. The Y coordinate is
 ## ignored.
-func global_to_pixel(global_pos:Vector3, cascade:int) -> Vector2i:
+func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = true) -> Vector2i:
 	## The order of operations in this function is dependent on the order of
 	## operations used in the vertex shader to rotate and scale the displacement
 	## map before applying it. Make sure to check if the vertex shader should be
@@ -645,6 +673,20 @@ func global_to_pixel(global_pos:Vector3, cascade:int) -> Vector2i:
 	var uv_pos := Vector2.ZERO
 	uv_pos.x = global_pos.x
 	uv_pos.y = global_pos.z
+	
+	## Apply domain warp
+	if apply_domain_warp and _domain_warp_image != null:
+		var camera:Camera3D = get_viewport().get_camera_3d()
+		var linear_dist:float = (global_pos - camera.global_position).length()
+		
+		## Recursive call; note that it is called with the apply_domain_warp
+		## parameter set to false to avoid infinite recursion.
+		var base_pixel_pos := global_to_pixel(global_pos, cascade, false)
+		var domain_warp := Vector2(
+				_domain_warp_image.get_pixelv(base_pixel_pos * domain_warp_uv_scale).r,
+				_domain_warp_image.get_pixelv(-base_pixel_pos * domain_warp_uv_scale).r)
+		domain_warp *= domain_warp_strength * (linear_dist / camera.far)
+		uv_pos += domain_warp
 	
 	## Apply UV scale
 	uv_pos *= _uv_scale
