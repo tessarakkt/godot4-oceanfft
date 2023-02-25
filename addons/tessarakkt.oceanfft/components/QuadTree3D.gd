@@ -2,12 +2,23 @@ extends Node3D
 class_name QuadTree3D
 
 
+## Specifies the LOD level of the current quad. There will be X - 1 subquad
+## levels nested below this quad.
 @export_range(0, 1000000, 1) var lod_level := 2
+
+## Horizontal size of the current quad.
 @export_range(1.0, 65535.0) var quad_size := 1024.0
-@export_range(0.0, 1.0) var morph_range := 0.15
+
+## Morph range for CDLOD geomorph between LOD levels.
+@export_range(0.0, 1.0, 0.001) var morph_range := 0.15
+
+## Vertex resolution of each of the quads in this tree.
 @export_range(0, 32000, 1) var mesh_vertex_resolution := 256
+
+## Ranges for each LOD level. Accessed as ranges[lod_level].
 @export var ranges:Array[float] = [512.0, 1024.0, 2048.0]
-@export var camera:Camera3D
+
+## The visual shader to apply to the surface geometry.
 @export var material:ShaderMaterial
 
 
@@ -16,13 +27,22 @@ class_name QuadTree3D
 ## https://github.com/godotengine/godot/issues/70985
 var Quad
 
-
+## Whether the current quad is the root quad in the tree. Initializes all nested
+## subquads on ready.
 var is_root_quad := true
-var pause_cull := false
-var cull_box:AABB
-var lod_meshes:Array[PlaneMesh] = []
-var mesh_instance:MeshInstance3D
 
+## If this is true, the LOD system will be paused in its current state.
+var pause_cull := false
+
+## The cull box that encloses this quad.
+var cull_box:AABB
+
+## Meshes for each LOD level.
+## TODO: Why am I storing so many meshes?
+var lod_meshes:Array[PlaneMesh] = []
+
+## This quads mesh instance.
+var mesh_instance:MeshInstance3D
 
 var _visibility_detector:VisibleOnScreenNotifier3D
 var _subquads:Array[QuadTree3D] = []
@@ -38,7 +58,9 @@ func _ready() -> void:
 		Quad = load("res://addons/tessarakkt.oceanfft/components/QuadTree3D.tscn")
 		
 		## Set max view distance and fade range start
+		var camera := get_viewport().get_camera_3d()
 		material.set_shader_parameter("view_distance_max", camera.far)
+		material.set_shader_parameter("vertex_resolution", mesh_vertex_resolution)
 		
 		## Initialize LOD meshes for each level
 		var current_size = quad_size
@@ -70,7 +92,6 @@ func _ready() -> void:
 	mesh_instance.visible = false
 	mesh_instance.mesh = lod_meshes[lod_level]
 	mesh_instance.material_override = material
-	mesh_instance.set_instance_shader_parameter("vertex_resolution", float(mesh_vertex_resolution))
 	mesh_instance.set_instance_shader_parameter("patch_size", quad_size)
 	mesh_instance.set_instance_shader_parameter("min_lod_morph_distance", ranges[lod_level] * 2 * (1.0 - morph_range))
 	mesh_instance.set_instance_shader_parameter("max_lod_morph_distance", ranges[lod_level] * 2)
@@ -91,7 +112,6 @@ func _ready() -> void:
 			new_quad.ranges = ranges
 			new_quad.process_mode = PROCESS_MODE_DISABLED
 			new_quad.position = offset * offset_length
-			new_quad.mesh_vertex_resolution = mesh_vertex_resolution
 			new_quad.morph_range = morph_range
 			new_quad.Quad = Quad
 			new_quad.lod_meshes = lod_meshes
@@ -105,7 +125,8 @@ func _ready() -> void:
 ## Process mode is set to PROCESS_MODE_DISABLED for subquads, so only the root
 ## quad will run _process().
 func _process(_delta:float) -> void:
-	if not pause_cull:
+	if not pause_cull and Engine.get_frames_drawn() % 2:
+		var camera := get_viewport().get_camera_3d()
 		lod_select(camera.global_position)
 
 
@@ -127,6 +148,7 @@ func lod_select(cam_pos:Vector3) -> bool:
 	if not _visibility_detector.is_on_screen():
 		## This quad is not on screen. Do not make it visible, and return true
 		## to mark the area as handled.
+		mesh_instance.visible = false
 		return true
 	
 	if lod_level == 0:
@@ -159,7 +181,7 @@ func lod_select(cam_pos:Vector3) -> bool:
 		return true
 
 
-## Reset all quads to invisible.
+## Reset this quad and all subquads to invisible.
 func reset_visibility() -> void:
 	if mesh_instance.visible:
 		## If this quad is visible, no children should be visible.

@@ -114,6 +114,9 @@ uniform vec2 wind_uv_offset = vec2(0.0, 0.0);
 // Updated with each call to Ocean3D.simulate()
 uniform sampler2D cascade_displacements[CASCADE_COUNT];
 
+// The vertex resolution of the mesh tiles the shader is applied to.
+uniform float vertex_resolution = 256.0;
+
 
 group_uniforms Internal.DomainWarp;
 /******************************************************************************/
@@ -159,9 +162,7 @@ uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
 
 // Instance Uniforms
 /******************************************************************************/
-// TODO: Reduce usage of these
 instance uniform float patch_size = 512.0;
-instance uniform float vertex_resolution = 256.0;
 instance uniform float min_lod_morph_distance;
 instance uniform float max_lod_morph_distance;
 

@@ -46,12 +46,11 @@ choppiness = 0.5
 wave_scroll_speed = -0.003
 wind_speed = 15.0
 
-[node name="QuadTree3D" type="Node3D" parent="." node_paths=PackedStringArray("camera")]
+[node name="QuadTree3D" type="Node3D" parent="."]
 script = ExtResource("5_li4kg")
 lod_level = 8
 quad_size = 32768.0
 ranges = Array[float]([125.0, 250.0, 500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0])
-camera = NodePath("../Camera3D")
 material = ExtResource("5_0jjw4")
 
 [node name="WaveHeightSampler" type="MeshInstance3D" parent="."]
