@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bjrox2llj64pm"]
+[gd_scene load_steps=13 format=3 uid="uid://bjrox2llj64pm"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://example/Example.gd" id="2_hewa1"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
 [ext_resource type="PackedScene" uid="uid://rmewe8a2xeoe" path="res://example/FloatingRectangle.tscn" id="6_q2mn5"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="7_xa10r"]
+[ext_resource type="Script" path="res://example/OceanUI.gd" id="8_h37lk"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
 noise_type = 3
@@ -93,7 +94,10 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.5
 visible = false
 light_energy = 2.5
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." node_paths=PackedStringArray("ocean", "free_camera")]
+script = ExtResource("8_h37lk")
+ocean = NodePath("../Ocean3D")
+free_camera = NodePath("../Camera3D")
 
 [node name="Displacement_cascade0" type="TextureRect" parent="CanvasLayer"]
 custom_minimum_size = Vector2(256, 256)
@@ -112,13 +116,19 @@ offset_left = 576.0
 offset_right = 832.0
 offset_bottom = 256.0
 
-[node name="FPS" type="Label" parent="CanvasLayer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer"]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -23.0
+offset_top = -50.0
 offset_right = 40.0
 grow_vertical = 0
+
+[node name="FPS" type="Label" parent="CanvasLayer/VBoxContainer"]
+layout_mode = 2
+
+[node name="OceanFPS" type="Label" parent="CanvasLayer/VBoxContainer"]
+layout_mode = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="CanvasLayer"]
 custom_minimum_size = Vector2(256, 0)
@@ -216,12 +226,12 @@ step = 0.001
 tick_count = 4
 ticks_on_borders = true
 
-[connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="." method="_on_simulate_enabled_toggled"]
-[connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/CullEnabled" to="." method="_on_cull_enabled_toggled"]
-[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Frameskip" to="." method="_on_frameskip_value_changed"]
-[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/PlanetaryCurve" to="." method="_on_planetary_curve_value_changed"]
-[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Speed" to="." method="_on_speed_value_changed"]
-[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Choppiness" to="." method="_on_choppiness_value_changed"]
-[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WindSpeed" to="." method="_on_wind_speed_value_changed"]
-[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WaveSpeed" to="." method="_on_wave_speed_value_changed"]
-[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WindDirection" to="." method="_on_wind_direction_value_changed"]
+[connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="CanvasLayer" method="_on_simulate_enabled_toggled"]
+[connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/CullEnabled" to="CanvasLayer" method="_on_cull_enabled_toggled"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Frameskip" to="CanvasLayer" method="_on_frameskip_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/PlanetaryCurve" to="CanvasLayer" method="_on_planetary_curve_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Speed" to="CanvasLayer" method="_on_speed_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Choppiness" to="CanvasLayer" method="_on_choppiness_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WindSpeed" to="CanvasLayer" method="_on_wind_speed_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WaveSpeed" to="CanvasLayer" method="_on_wave_speed_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/WindDirection" to="CanvasLayer" method="_on_wind_direction_value_changed"]
