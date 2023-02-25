@@ -1,3 +1,4 @@
+@icon("res://addons/tessarakkt.oceanfft/icons/BuoyancyProbe3D.svg")
 extends Marker3D
 class_name BuoyancyProbe3D
 

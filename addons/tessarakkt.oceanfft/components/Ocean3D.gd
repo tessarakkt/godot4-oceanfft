@@ -1,3 +1,4 @@
+@icon("res://addons/tessarakkt.oceanfft/icons/Ocean3D.svg")
 extends Node3D
 class_name Ocean3D
 

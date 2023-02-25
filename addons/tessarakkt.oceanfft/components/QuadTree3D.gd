@@ -1,3 +1,4 @@
+@icon("res://addons/tessarakkt.oceanfft/icons/QuadTree3D.svg")
 extends Node3D
 class_name QuadTree3D
 

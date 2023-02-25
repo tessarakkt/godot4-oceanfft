@@ -1,3 +1,4 @@
+@icon("res://addons/tessarakkt.oceanfft/icons/BuoyancyBody3D.svg")
 extends RigidBody3D
 class_name BuoyancyBody3D
 
