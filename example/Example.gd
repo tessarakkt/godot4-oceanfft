@@ -70,4 +70,4 @@ func _on_cull_enabled_toggled(button_pressed:bool) -> void:
 
 
 func _on_planetary_curve_value_changed(value:float) -> void:
-	$QuadTree3D.planetary_curve_strength = value * 0.0001
+	ocean.planetary_curve_strength = value * 0.0001

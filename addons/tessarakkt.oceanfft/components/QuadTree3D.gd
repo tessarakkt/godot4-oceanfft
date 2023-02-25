@@ -5,10 +5,6 @@ class_name QuadTree3D
 @export_range(0, 1000000, 1) var lod_level := 2
 @export_range(1.0, 65535.0) var quad_size := 1024.0
 @export_range(0.0, 1.0) var morph_range := 0.15
-@export_range(0.0, 0.001) var planetary_curve_strength := 0.000001:
-	set(new_planetary_curve_strength):
-		planetary_curve_strength = new_planetary_curve_strength
-		material.set_shader_parameter("planetary_curve_strength", planetary_curve_strength)
 @export_range(0, 32000, 1) var mesh_vertex_resolution := 256
 @export var ranges:Array[float] = [512.0, 1024.0, 2048.0]
 @export var camera:Camera3D

@@ -90,9 +90,9 @@ func _input(event:InputEvent) -> void:
 func go_under_water() -> void:
 	world.environment.fog_enabled = false
 	world.environment.volumetric_fog_enabled = true
-	ocean._material.set_shader_parameter("normal_factor", -1.0)
-	ocean._material.set_shader_parameter("refraction_distance_power", 1.0)
-	ocean._material.set_shader_parameter("metallic_strength", underwater_ocean_metallic)
+	ocean.material.set_shader_parameter("normal_factor", -1.0)
+	ocean.material.set_shader_parameter("refraction_distance_power", 1.0)
+	ocean.material.set_shader_parameter("metallic_strength", underwater_ocean_metallic)
 	sky_light.visible = true
 	sun_light.light_energy = 0.75
 
@@ -100,8 +100,8 @@ func go_under_water() -> void:
 func go_above_water() -> void:
 	world.environment.fog_enabled = true
 	world.environment.volumetric_fog_enabled = false
-	ocean._material.set_shader_parameter("normal_factor", 1.0)
-	ocean._material.set_shader_parameter("refraction_distance_power", 1.55)
-	ocean._material.set_shader_parameter("metallic_strength", surfaced_ocean_metallic)
+	ocean.material.set_shader_parameter("normal_factor", 1.0)
+	ocean.material.set_shader_parameter("refraction_distance_power", 1.55)
+	ocean.material.set_shader_parameter("metallic_strength", surfaced_ocean_metallic)
 	sky_light.visible = false
 	sun_light.light_energy = 0.5
