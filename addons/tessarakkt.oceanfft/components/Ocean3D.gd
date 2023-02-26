@@ -262,7 +262,7 @@ func _ready() -> void:
 	## inputs change.
 	
 	## Compile Shader
-	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/OceanInitialSpectrum.glsl")
+	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/InitialSpectrum.glsl")
 	_initial_spectrum_shader = _rd.shader_create_from_spirv(shader_file.get_spirv())
 	_initial_spectrum_pipeline = _rd.compute_pipeline_create(_initial_spectrum_shader)
 	
@@ -295,7 +295,7 @@ func _ready() -> void:
 	## Applies time based flow to a crafted random data spectrum.
 	
 	## Compile Shader
-	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/OceanPhase.glsl")
+	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/Phase.glsl")
 	_phase_shader = _rd.shader_create_from_spirv(shader_file.get_spirv())
 	_phase_pipeline = _rd.compute_pipeline_create(_phase_shader)
 	
@@ -360,7 +360,7 @@ func _ready() -> void:
 	## Ping/Pong textures)
 	
 	## Compile Shader
-	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/OceanSpectrum.glsl")
+	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/Spectrum.glsl")
 	_spectrum_shader = _rd.shader_create_from_spirv(shader_file.get_spirv())
 	_spectrum_pipeline = _rd.compute_pipeline_create(_spectrum_shader)
 	
@@ -402,11 +402,11 @@ func _ready() -> void:
 	## resulting displacement map will be stored in the Specturm texture.
 	
 	## Compile Shaders
-	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/OceanFFTHorizontal.glsl")
+	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/FFTHorizontal.glsl")
 	_fft_horizontal_shader = _rd.shader_create_from_spirv(shader_file.get_spirv())
 	_fft_horizontal_pipeline = _rd.compute_pipeline_create(_fft_horizontal_shader)
 	
-	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/OceanFFTVertical.glsl")
+	shader_file = load("res://addons/tessarakkt.oceanfft/shaders/FFTVertical.glsl")
 	_fft_vertical_shader = _rd.shader_create_from_spirv(shader_file.get_spirv())
 	_fft_vertical_pipeline = _rd.compute_pipeline_create(_fft_vertical_shader)
 	

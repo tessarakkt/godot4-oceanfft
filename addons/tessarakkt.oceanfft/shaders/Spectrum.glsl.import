@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://dor63or8bt32e"
+path="res://.godot/imported/Spectrum.glsl-82e3f1a956b41eb6f2e37e6278ce4bea.res"
+
+[deps]
+
+source_file="res://addons/tessarakkt.oceanfft/shaders/Spectrum.glsl"
+dest_files=["res://.godot/imported/Spectrum.glsl-82e3f1a956b41eb6f2e37e6278ce4bea.res"]
+
+[params]
+

@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://2bgdnitk3d1m"
+path="res://.godot/imported/Phase.glsl-041b1927e282ae5bbfa319841cad637b.res"
+
+[deps]
+
+source_file="res://addons/tessarakkt.oceanfft/shaders/Phase.glsl"
+dest_files=["res://.godot/imported/Phase.glsl-041b1927e282ae5bbfa319841cad637b.res"]
+
+[params]
+

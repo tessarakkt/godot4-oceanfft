@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://sbprgks2pmd3"
+path="res://.godot/imported/InitialSpectrum.glsl-962968e09236fa4192355bfbd78be752.res"
+
+[deps]
+
+source_file="res://addons/tessarakkt.oceanfft/shaders/InitialSpectrum.glsl"
+dest_files=["res://.godot/imported/InitialSpectrum.glsl-962968e09236fa4192355bfbd78be752.res"]
+
+[params]
+
