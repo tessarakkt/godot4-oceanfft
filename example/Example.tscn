@@ -1,6 +1,7 @@
-[gd_scene load_steps=16 format=3 uid="uid://bjrox2llj64pm"]
+[gd_scene load_steps=17 format=3 uid="uid://bs1yo1162gltj"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="2_jhrdm"]
 [ext_resource type="Material" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="5_0jjw4"]
 [ext_resource type="Script" path="res://example/Camera.gd" id="5_eso43"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
@@ -28,8 +29,12 @@ expand_margin_top = 10.0
 expand_margin_right = 10.0
 expand_margin_bottom = 10.0
 
-[node name="WorldEnvironment" type="WorldEnvironment"]
+[node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("ocean", "sun_light", "sky_light")]
 environment = ExtResource("1_o40li")
+script = ExtResource("2_jhrdm")
+ocean = NodePath("Ocean3D")
+sun_light = NodePath("DirectionalLight3D_Sun")
+sky_light = NodePath("DirectionalLight3D_Sky")
 
 [node name="Ocean3D" type="Node3D" parent="."]
 script = ExtResource("7_xa10r")
@@ -66,7 +71,7 @@ max_rudder_force = 3000.0
 buoyancy_multiplier = 35000.0
 ocean = NodePath("../Ocean3D")
 
-[node name="Camera3D" type="Camera3D" parent="MotorVesselBody3D" node_paths=PackedStringArray("reflection_probe", "world", "ocean", "sun_light", "sky_light")]
+[node name="Camera3D" type="Camera3D" parent="MotorVesselBody3D" node_paths=PackedStringArray("reflection_probe")]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
 current = true
 near = 1.0
@@ -75,21 +80,14 @@ script = ExtResource("5_eso43")
 speed = 10.0
 sprint_speed = 25.0
 reflection_probe = NodePath("../../ReflectionProbe")
-world = NodePath("../..")
-ocean = NodePath("../../Ocean3D")
-sun_light = NodePath("../../DirectionalLight3D_Sun")
-sky_light = NodePath("../../DirectionalLight3D_Sky")
-surfaced_ocean_metallic = 0.0
-underwater_ocean_metallic = 0.0
 
 [node name="ReflectionProbe" type="ReflectionProbe" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0)
-visible = false
 max_distance = 1000.0
 size = Vector3(200, 200, 200)
 ambient_mode = 0
 
-[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("reflection_probe", "world", "ocean", "sun_light", "sky_light")]
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("reflection_probe")]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
 current = true
 near = 1.0
@@ -98,12 +96,6 @@ script = ExtResource("5_eso43")
 speed = 100.0
 sprint_speed = 500.0
 reflection_probe = NodePath("../ReflectionProbe")
-world = NodePath("..")
-ocean = NodePath("../Ocean3D")
-sun_light = NodePath("../DirectionalLight3D_Sun")
-sky_light = NodePath("../DirectionalLight3D_Sky")
-surfaced_ocean_metallic = 0.0
-underwater_ocean_metallic = 0.0
 
 [node name="DirectionalLight3D_Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.848048, 0.223954, -0.48027, 0, 0.906308, 0.422618, 0.529919, -0.358401, 0.768593, 0, 2.5, 0)
