@@ -1,14 +1,16 @@
-[gd_scene load_steps=17 format=3 uid="uid://bs1yo1162gltj"]
+[gd_scene load_steps=24 format=3 uid="uid://bs1yo1162gltj"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="2_jhrdm"]
-[ext_resource type="Material" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="5_0jjw4"]
+[ext_resource type="Material" uid="uid://cmyo0unntq078" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="5_0jjw4"]
 [ext_resource type="Script" path="res://example/Camera.gd" id="5_eso43"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
+[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SplashParticles.gdshader" id="6_nklv0"]
 [ext_resource type="PackedScene" uid="uid://rmewe8a2xeoe" path="res://example/FloatingRectangle.tscn" id="6_q2mn5"]
 [ext_resource type="PackedScene" uid="uid://bbes3eh3swxnh" path="res://example/MotorRectangle.tscn" id="7_lob4t"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="7_xa10r"]
 [ext_resource type="Script" path="res://example/OceanUI.gd" id="8_h37lk"]
+[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterParticles.gdshader" id="10_kqf5f"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
 noise_type = 3
@@ -22,6 +24,101 @@ height = 1024
 seamless = true
 noise = SubResource("FastNoiseLite_nywmb")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p0g3t"]
+shader = ExtResource("6_nklv0")
+shader_parameter/splash_subparticles = 10
+shader_parameter/splash_jacobian_limit = -3.0
+shader_parameter/sea_level = 0.0
+shader_parameter/normal_factor = 1.0
+shader_parameter/cascade_uv_scales = null
+shader_parameter/uv_scale = 0.00195312
+shader_parameter/wind_uv_offset = Vector2(0, 0)
+shader_parameter/view_distance_max = 16000.0
+shader_parameter/cascade_displacements = null
+shader_parameter/domain_warp_uv_scale = 6.25e-05
+shader_parameter/domain_warp_strength = 1500.0
+shader_parameter/camera_position_world = null
+shader_parameter/direction = Vector3(1, 1, 0)
+shader_parameter/spread = 45.0
+shader_parameter/emission_box_extents = Vector3(500, 0, 500)
+shader_parameter/gravity = Vector3(20, -9.8, 0)
+shader_parameter/initial_linear_velocity_min = 25.0
+shader_parameter/initial_linear_velocity_max = 35.0
+shader_parameter/lifetime_randomness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yu1ih"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_p5o28"]
+material = SubResource("StandardMaterial3D_yu1ih")
+size = Vector2(15, 15)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gc8pj"]
+shader = ExtResource("6_nklv0")
+shader_parameter/splash_subparticles = 10
+shader_parameter/splash_jacobian_limit = -3.0
+shader_parameter/sea_level = 0.0
+shader_parameter/normal_factor = 1.0
+shader_parameter/cascade_uv_scales = null
+shader_parameter/uv_scale = 0.00195312
+shader_parameter/wind_uv_offset = Vector2(0, 0)
+shader_parameter/view_distance_max = 16000.0
+shader_parameter/cascade_displacements = null
+shader_parameter/domain_warp_uv_scale = 6.25e-05
+shader_parameter/domain_warp_strength = 1500.0
+shader_parameter/camera_position_world = null
+shader_parameter/direction = Vector3(1, 1, 0)
+shader_parameter/spread = 45.0
+shader_parameter/emission_box_extents = Vector3(500, 0, 500)
+shader_parameter/gravity = Vector3(20, -9.8, 0)
+shader_parameter/initial_linear_velocity_min = 20.0
+shader_parameter/initial_linear_velocity_max = 30.0
+shader_parameter/lifetime_randomness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5gdxj"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_g2dg2"]
+material = SubResource("StandardMaterial3D_5gdxj")
+size = Vector2(15, 15)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_awrh8"]
+shader = ExtResource("10_kqf5f")
+shader_parameter/emission_sphere_radius = 250.0
+shader_parameter/gravity = Vector3(0, -2.5, 0)
+shader_parameter/turbulence_noise_strength = 0.25
+shader_parameter/turbulence_noise_scale = 0.896006
+shader_parameter/turbulence_influence_min = 0.1
+shader_parameter/turbulence_influence_max = 0.1
+shader_parameter/turbulence_initial_displacement_min = 0.0
+shader_parameter/turbulence_initial_displacement_max = 0.0
+shader_parameter/turbulence_noise_speed_random = 0.0
+shader_parameter/turbulence_noise_speed = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ncfd7"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0.25098)
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_x0k2k"]
+material = SubResource("StandardMaterial3D_ncfd7")
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i8f6a"]
 bg_color = Color(0.188235, 0.188235, 0.188235, 1)
 expand_margin_left = 10.0
@@ -29,12 +126,14 @@ expand_margin_top = 10.0
 expand_margin_right = 10.0
 expand_margin_bottom = 10.0
 
-[node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("ocean", "sun_light", "sky_light")]
+[node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("ocean", "sun_light", "sky_light", "splash_particles", "underwater_particles")]
 environment = ExtResource("1_o40li")
 script = ExtResource("2_jhrdm")
 ocean = NodePath("Ocean3D")
 sun_light = NodePath("DirectionalLight3D_Sun")
 sky_light = NodePath("DirectionalLight3D_Sky")
+splash_particles = NodePath("SplashParticles")
+underwater_particles = NodePath("UnderwaterParticles")
 
 [node name="Ocean3D" type="Node3D" parent="."]
 script = ExtResource("7_xa10r")
@@ -86,6 +185,34 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0)
 max_distance = 1000.0
 size = Vector3(200, 200, 200)
 ambient_mode = 0
+
+[node name="SplashParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.7738, -9.06308)
+emitting = false
+amount = 1000
+sub_emitter = NodePath("SplashSubParticles")
+lifetime = 3.0
+transform_align = 1
+trail_lifetime = 0.15
+process_material = SubResource("ShaderMaterial_p0g3t")
+draw_pass_1 = SubResource("QuadMesh_p5o28")
+
+[node name="SplashSubParticles" type="GPUParticles3D" parent="SplashParticles"]
+emitting = false
+amount = 5000
+lifetime = 3.0
+process_material = SubResource("ShaderMaterial_gc8pj")
+draw_pass_1 = SubResource("QuadMesh_g2dg2")
+
+[node name="UnderwaterParticles" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19.7738, -9.06308)
+emitting = false
+amount = 1000
+lifetime = 2.0
+transform_align = 1
+trail_lifetime = 0.15
+process_material = SubResource("ShaderMaterial_awrh8")
+draw_pass_1 = SubResource("QuadMesh_x0k2k")
 
 [node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("reflection_probe")]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
