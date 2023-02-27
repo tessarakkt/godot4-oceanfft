@@ -1,6 +1,9 @@
 @icon("res://addons/tessarakkt.oceanfft/icons/MotorVesselBody3D.svg")
 extends BuoyancyBody3D
 class_name MotorVesselBody3D
+## Physics Body which is moved by 3D physics simulation, and interacts with
+## buoyancy provided by an Ocean3D. Can be moved around with a simple single
+## propeller/rudder configuration.
 
 
 @export var thrust_power_main := 10.0

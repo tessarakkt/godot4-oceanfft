@@ -141,11 +141,13 @@ enum FFTResolution {
 	set(new_choppiness):
 		choppiness = new_choppiness
 
-## Direction the wind is blowing.
+## The wind direction.
 @export_range(0.0, 360.0) var wind_direction_degrees := 0.0:
 	set(new_wind_direction_degrees):
 		wind_direction_degrees = clamp(new_wind_direction_degrees, 0.0, 360.0)
-		_wind_rad = deg_to_rad(new_wind_direction_degrees)
+		wind_direction = deg_to_rad(new_wind_direction_degrees)
+	get:
+		return rad_to_deg(wind_direction)
 
 ## Controls how much the generated displacement maps are scrolled horizontally
 ## over time.
@@ -159,11 +161,19 @@ enum FFTResolution {
 		return wave_vector.length()
 
 
+## The "accumulated wind" that has blown, for wave scrolling from wind.
+## Updated each frame by Ocean3D._process()
+var wind_uv_offset := Vector2.ZERO
+
+## The wind direction.
+var wind_direction := 0.0
+
 ## TODO: figure out what this is actually supposed to do
 var wave_vector := Vector2(300.0, 0.0):
 	set(new_wave_vector):
 		wave_vector = new_wave_vector
 		_is_initial_spectrum_changed = true
+
 
 var _uv_scale := 0.00390625
 
@@ -221,9 +231,6 @@ var _frameskip := 0
 var _accumulated_delta := 0.0
 
 var _domain_warp_image:Image
-
-var _wind_uv_offset := Vector2.ZERO
-var _wind_rad := 0.0
 
 var _rng := RandomNumberGenerator.new()
 
@@ -453,8 +460,8 @@ func _process(delta:float) -> void:
 	if simulation_enabled:
 		_accumulated_delta += delta
 		
-		_wind_uv_offset += Vector2(cos(_wind_rad), sin(_wind_rad)) * wave_scroll_speed * delta
-		material.set_shader_parameter("wind_uv_offset", _wind_uv_offset)
+		wind_uv_offset += Vector2(cos(wind_direction), sin(wind_direction)) * wave_scroll_speed * delta
+		material.set_shader_parameter("wind_uv_offset", wind_uv_offset)
 		
 		if simulation_frameskip > 0:
 			_frameskip += 1
@@ -727,7 +734,7 @@ func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = t
 	uv_pos *= 1.0 / cascade_scales[cascade]
 	
 	## Offset by wind scrolling
-	uv_pos += _wind_uv_offset * cascade_scales[cascade]
+	uv_pos += wind_uv_offset * cascade_scales[cascade]
 	
 	## Normalize values to 0.0-1.0
 	uv_pos.x -= floorf(uv_pos.x)
