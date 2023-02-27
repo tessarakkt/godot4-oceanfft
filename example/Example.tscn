@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://bs1yo1162gltj"]
+[gd_scene load_steps=25 format=3 uid="uid://bs1yo1162gltj"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="2_jhrdm"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="7_xa10r"]
 [ext_resource type="Script" path="res://example/OceanUI.gd" id="8_h37lk"]
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterParticles.gdshader" id="10_kqf5f"]
+[ext_resource type="Texture2D" uid="uid://n8ghpdii3aqh" path="res://addons/tessarakkt.oceanfft/graphics/Splash.png" id="10_o46r2"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
 noise_type = 3
@@ -26,8 +27,9 @@ noise = SubResource("FastNoiseLite_nywmb")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p0g3t"]
 shader = ExtResource("6_nklv0")
-shader_parameter/splash_subparticles = 10
-shader_parameter/splash_jacobian_limit = -3.0
+shader_parameter/splash_subparticles = 40
+shader_parameter/splash_jacobian_limit = -1.0
+shader_parameter/splash_coverage = 0.1
 shader_parameter/sea_level = 0.0
 shader_parameter/normal_factor = 1.0
 shader_parameter/cascade_uv_scales = null
@@ -46,23 +48,26 @@ shader_parameter/initial_linear_velocity_min = 25.0
 shader_parameter/initial_linear_velocity_max = 35.0
 shader_parameter/lifetime_randomness = 0.25
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yu1ih"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5bfsg"]
+render_priority = 1
 transparency = 1
 shading_mode = 0
 vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("10_o46r2")
 billboard_mode = 3
 particles_anim_h_frames = 1
 particles_anim_v_frames = 1
 particles_anim_loop = false
 
 [sub_resource type="QuadMesh" id="QuadMesh_p5o28"]
-material = SubResource("StandardMaterial3D_yu1ih")
+material = SubResource("StandardMaterial3D_5bfsg")
 size = Vector2(15, 15)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gc8pj"]
 shader = ExtResource("6_nklv0")
 shader_parameter/splash_subparticles = 10
 shader_parameter/splash_jacobian_limit = -3.0
+shader_parameter/splash_coverage = 1.0
 shader_parameter/sea_level = 0.0
 shader_parameter/normal_factor = 1.0
 shader_parameter/cascade_uv_scales = null
@@ -82,9 +87,11 @@ shader_parameter/initial_linear_velocity_max = 30.0
 shader_parameter/lifetime_randomness = 0.25
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5gdxj"]
+render_priority = 1
 transparency = 1
 shading_mode = 0
 vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("10_o46r2")
 billboard_mode = 3
 particles_anim_h_frames = 1
 particles_anim_v_frames = 1
@@ -126,13 +133,14 @@ expand_margin_top = 10.0
 expand_margin_right = 10.0
 expand_margin_bottom = 10.0
 
-[node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("ocean", "sun_light", "sky_light", "splash_particles", "underwater_particles")]
+[node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("ocean", "sun_light", "sky_light", "splash_particles", "splash_sub_particles", "underwater_particles")]
 environment = ExtResource("1_o40li")
 script = ExtResource("2_jhrdm")
 ocean = NodePath("Ocean3D")
 sun_light = NodePath("DirectionalLight3D_Sun")
 sky_light = NodePath("DirectionalLight3D_Sky")
 splash_particles = NodePath("SplashParticles")
+splash_sub_particles = NodePath("SplashParticles/SplashSubParticles")
 underwater_particles = NodePath("UnderwaterParticles")
 
 [node name="Ocean3D" type="Node3D" parent="."]

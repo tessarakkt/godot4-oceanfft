@@ -6,6 +6,7 @@ shader_type particles;
 
 uniform int splash_subparticles = 10;
 uniform float splash_jacobian_limit = -3.0;
+uniform float splash_coverage = 1.0;
 uniform float sea_level = 0.0;
 
 
@@ -110,7 +111,9 @@ void start() {
 		TRANSFORM[3].xyz += displacement;
 		vec4 nj = get_normals_jacobian(domain_warped_uv, displacement);
 		
-		if (nj.w > splash_jacobian_limit) {
+		float splash_value = clamp((-nj.w + splash_jacobian_limit) * splash_coverage, 0.0, 1.0);
+		
+		if (splash_value < 0.5) {
 			// Not enough turbulence here. Disable the particle.
 			ACTIVE = false;
 		}
