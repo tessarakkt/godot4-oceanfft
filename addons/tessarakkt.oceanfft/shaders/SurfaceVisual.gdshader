@@ -164,7 +164,7 @@ void vertex() {
 	// Planetary Curve
 	// Take distance squared from camera to vertex, multiply by strength factor,
 	// subtract from vertex Y.
-	float curvation = planetary_curve_strength * (pow(domain_warped_uv.x - CAMERA_POSITION_WORLD.x, 2.0) + pow(domain_warped_uv.y - CAMERA_POSITION_WORLD.z, 2.0));
+	float curvation = planetary_curve_strength * (pow(abs(domain_warped_uv.x - CAMERA_POSITION_WORLD.x), 2.0) + pow(abs(domain_warped_uv.y - CAMERA_POSITION_WORLD.z), 2.0));
 	VERTEX.y -= curvation;
 }
 
