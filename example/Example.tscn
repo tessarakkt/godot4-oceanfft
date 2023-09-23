@@ -27,10 +27,6 @@ noise = SubResource("FastNoiseLite_nywmb")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p0g3t"]
 shader = ExtResource("6_nklv0")
-shader_parameter/splash_subparticles = 40
-shader_parameter/splash_jacobian_limit = -1.0
-shader_parameter/splash_coverage = 0.1
-shader_parameter/sea_level = 0.0
 shader_parameter/normal_factor = 1.0
 shader_parameter/cascade_uv_scales = null
 shader_parameter/uv_scale = 0.00195312
@@ -40,13 +36,17 @@ shader_parameter/cascade_displacements = null
 shader_parameter/domain_warp_uv_scale = 6.25e-05
 shader_parameter/domain_warp_strength = 1500.0
 shader_parameter/camera_position_world = null
+shader_parameter/splash_subparticles = 40
+shader_parameter/splash_jacobian_limit = -1.0
+shader_parameter/splash_coverage = 0.1
+shader_parameter/sea_level = 0.0
+shader_parameter/lifetime_randomness = 0.25
+shader_parameter/emission_box_extents = Vector3(500, 0, 500)
 shader_parameter/direction = Vector3(1, 1, 0)
 shader_parameter/spread = 45.0
-shader_parameter/emission_box_extents = Vector3(500, 0, 500)
 shader_parameter/gravity = Vector3(20, -9.8, 0)
 shader_parameter/initial_linear_velocity_min = 25.0
 shader_parameter/initial_linear_velocity_max = 35.0
-shader_parameter/lifetime_randomness = 0.25
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5bfsg"]
 render_priority = 1
@@ -65,10 +65,6 @@ size = Vector2(15, 15)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gc8pj"]
 shader = ExtResource("6_nklv0")
-shader_parameter/splash_subparticles = 10
-shader_parameter/splash_jacobian_limit = -3.0
-shader_parameter/splash_coverage = 1.0
-shader_parameter/sea_level = 0.0
 shader_parameter/normal_factor = 1.0
 shader_parameter/cascade_uv_scales = null
 shader_parameter/uv_scale = 0.00195312
@@ -78,13 +74,17 @@ shader_parameter/cascade_displacements = null
 shader_parameter/domain_warp_uv_scale = 6.25e-05
 shader_parameter/domain_warp_strength = 1500.0
 shader_parameter/camera_position_world = null
+shader_parameter/splash_subparticles = 10
+shader_parameter/splash_jacobian_limit = -3.0
+shader_parameter/splash_coverage = 1.0
+shader_parameter/sea_level = 0.0
+shader_parameter/lifetime_randomness = 0.25
+shader_parameter/emission_box_extents = Vector3(500, 0, 500)
 shader_parameter/direction = Vector3(1, 1, 0)
 shader_parameter/spread = 45.0
-shader_parameter/emission_box_extents = Vector3(500, 0, 500)
 shader_parameter/gravity = Vector3(20, -9.8, 0)
 shader_parameter/initial_linear_velocity_min = 20.0
 shader_parameter/initial_linear_velocity_max = 30.0
-shader_parameter/lifetime_randomness = 0.25
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5gdxj"]
 render_priority = 1
