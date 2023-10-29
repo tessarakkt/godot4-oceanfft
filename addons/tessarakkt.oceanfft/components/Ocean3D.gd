@@ -35,9 +35,9 @@ enum FFTResolution {
 }
 
 
-## Whether simulate() should be called by _process(). The simulation_frameskip
+## Whether _simulate() should be called by _process(). The simulation_frameskip
 ## setting will control whether this calls every frame, or skips frames. This
-## does not affect the ability to call simulate() directly, but it probably
+## does not affect the ability to call _simulate() directly, but it probably
 ## should be disabled if you are calling the simulation directly.
 @export var simulation_enabled := true
 
@@ -47,7 +47,7 @@ enum FFTResolution {
 
 @export_group("Simulation Settings")
 
-## Controls how many frames the _process() skips calling simulate().
+## Controls how many frames the _process() skips calling _simulate().
 ## Set to 0 to disable frame skip.
 @export_range(0, 30, 1) var simulation_frameskip := 0
 
@@ -233,11 +233,171 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
-	
 	RenderingServer.call_on_render_thread(_initialize_simulation)
 
 
-## This must be called via RenderServer.call_on_render_thread().
+func _process(delta:float) -> void:
+	if simulation_enabled:
+		_accumulated_delta += delta
+		
+		wind_uv_offset += Vector2(cos(wind_direction), sin(wind_direction)) * wave_scroll_speed * delta
+		material.set_shader_parameter("wind_uv_offset", wind_uv_offset)
+		
+		if simulation_frameskip > 0:
+			_frameskip += 1
+			if _frameskip <= simulation_frameskip:
+				return
+			else:
+				_frameskip = 0
+		
+		RenderingServer.call_on_render_thread(_simulate.bind(_accumulated_delta))
+		_accumulated_delta = 0.0
+
+
+func _enter_tree() -> void:
+	add_to_group("ocean")
+
+
+## Convert a global position (on the horizontal XZ plane) to a pixel coordinate
+## for sampling the wave displacement texture directly. The Y coordinate is
+## ignored.
+func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = true) -> Vector2i:
+	## The order of operations in this function is dependent on the order of
+	## operations used in the vertex shader to rotate and scale the displacement
+	## map before applying it. Make sure to check if the vertex shader should be
+	## updated to account for any changes made here.
+	
+	## Convert to UV coordinate
+	## The visual shader uses the global XZ coordinates as UV
+	var uv_pos := Vector2.ZERO
+	uv_pos.x = global_pos.x
+	uv_pos.y = global_pos.z
+	
+	## Apply domain warp
+	if apply_domain_warp and _domain_warp_image != null:
+		var camera:Camera3D = get_viewport().get_camera_3d()
+		var linear_dist:float = (global_pos - camera.global_position).length()
+		
+		## Recursive call; note that it is called with the apply_domain_warp
+		## parameter set to false to avoid infinite recursion.
+		var base_pixel_pos := global_to_pixel(global_pos, cascade, false)
+		var domain_warp := Vector2(
+				_domain_warp_image.get_pixelv(base_pixel_pos * domain_warp_uv_scale).r,
+				_domain_warp_image.get_pixelv(-base_pixel_pos * domain_warp_uv_scale).r)
+		domain_warp *= domain_warp_strength * (linear_dist / camera.far)
+		uv_pos += domain_warp
+	
+	## Apply UV scale
+	uv_pos *= _uv_scale
+	uv_pos *= 1.0 / cascade_scales[cascade]
+	
+	## Offset by wind scrolling
+	uv_pos += wind_uv_offset * cascade_scales[cascade]
+	
+	## Normalize values to 0.0-1.0
+	uv_pos.x -= floorf(uv_pos.x)
+	uv_pos.y -= floorf(uv_pos.y)
+	
+	## Convert to pixel coordinate
+	var pixel_pos := Vector2i.ZERO
+	pixel_pos.x = floor((fft_resolution - 1) * uv_pos.x)
+	pixel_pos.y = floor((fft_resolution - 1) * uv_pos.y)
+	
+	return pixel_pos
+
+
+## Query the wave height at a given location on the horizontal XZ plane. The Y
+## coordinate is ignored, and global position in this context is the position
+## relative to the oceans parent node. Since each pixel encodes both a vertical
+## and horizontal displacement, we need to offset the horizontal displacement 
+## and resample a few times to get an accurate height. The number of resample
+## iterations is defined by steps parameter.
+func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> float:
+	var pixel:Color
+	var xz_offset := Vector3.ZERO
+	var total_height := 0.0
+	var camera := get_viewport().get_camera_3d()
+	var linear_dist := (global_pos - camera.global_position).length()
+	
+	## Wave Displacements
+	for cascade in range(max_cascade):
+		for i in range(steps):
+			var pixel_pos := global_to_pixel(global_pos - xz_offset, cascade)
+			
+			pixel = _waves_image_cascade[cascade].get_pixelv(pixel_pos)
+			xz_offset.x += pixel.r
+			xz_offset.z += pixel.b
+		
+		total_height += pixel.g
+		xz_offset = Vector3.ZERO
+	
+	## Wave Amplitude Distance Fade
+	var amplitude_fade_range:float = clamp(linear_dist, 0.0, amplitude_scale_fade_distance) / amplitude_scale_fade_distance
+	total_height *= lerp(amplitude_scale_max, amplitude_scale_min, amplitude_fade_range)
+	
+	## Planetary Curve
+	var curvation:float = planetary_curve_strength * (pow(global_pos.x - camera.global_position.x, 2.0) + pow(global_pos.y - camera.global_position.z, 2.0))
+	total_height -= curvation;
+	
+	return total_height
+
+
+## Get the wave displacement map of a single cascade as an Image.
+## This returns the displacement map already cached on the CPU, it will not
+## call _simulate(), or marshall additional data from the GPU.
+func get_waves(cascade:int = 0) -> Image:
+	return _waves_image_cascade[cascade]
+
+
+## Get the wave displacement map of a single cascade as a Texture2DRD.
+func get_waves_texture(cascade:int = 0) -> Texture2DRD:
+	return _waves_texture_cascade[cascade]
+
+
+## Get the wave displacement maps of all cascades as an Array of Images.
+## This returns the displacement map already cached on the CPU, it will not
+## call _simulate(), or marshall additional data from the GPU.
+func get_all_waves() -> Array[Image]:
+	return _waves_image_cascade
+
+
+## Get the wave displacement maps of all cascades as an Array of Texture2DRDs.
+func get_all_waves_textures() -> Array[Texture2DRD]:
+	return _waves_texture_cascade
+
+
+func _pack_initial_spectrum_settings(cascade:int) -> PackedByteArray:
+	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
+	settings_bytes.append_array(PackedFloat32Array([cascade_ranges[cascade].x, cascade_ranges[cascade].y]).to_byte_array())
+	settings_bytes.append_array(PackedVector2Array([wave_vector]).to_byte_array())
+	return settings_bytes
+
+
+func _pack_phase_settings(delta_time:float, cascade:int) -> PackedByteArray:
+	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
+	settings_bytes.append_array(PackedFloat32Array([delta_time]).to_byte_array())
+	return settings_bytes
+
+
+func _pack_spectrum_settings(cascade:int) -> PackedByteArray:
+	var settings_bytes = PackedInt32Array([horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
+	settings_bytes.append_array(PackedFloat32Array([choppiness, fft_resolution]).to_byte_array())
+	return settings_bytes
+
+
+func _pack_fft_settings(subseq_count:int) -> PackedByteArray:
+	return PackedInt32Array([fft_resolution, subseq_count]).to_byte_array()
+
+
+#### Render Thread Code
+################################################################################
+## All code below this point must be run on the main render thread via
+## RenderingServer.call_on_render_thread().
+
+
+## Initialize the ocean simulation. Compiles shaders, prepares texture and
+## settings buffers.
+## This must be called via RenderingServer.call_on_render_thread().
 func _initialize_simulation() -> void:
 	var shader_file:Resource
 	var settings_bytes:PackedByteArray
@@ -428,33 +588,11 @@ func _initialize_simulation() -> void:
 	_sub_pong_uniform.add_id(_sub_pong_tex)
 
 
-func _process(delta:float) -> void:
-	if simulation_enabled:
-		_accumulated_delta += delta
-		
-		wind_uv_offset += Vector2(cos(wind_direction), sin(wind_direction)) * wave_scroll_speed * delta
-		material.set_shader_parameter("wind_uv_offset", wind_uv_offset)
-		
-		if simulation_frameskip > 0:
-			_frameskip += 1
-			if _frameskip <= simulation_frameskip:
-				return
-			else:
-				_frameskip = 0
-		
-		RenderingServer.call_on_render_thread(simulate.bind(_accumulated_delta))
-		_accumulated_delta = 0.0
-
-
-func _enter_tree() -> void:
-	add_to_group("ocean")
-
-
 ## Simulate a single iteration of the ocean. If simulation_enabled is true, this
 ## will be run every frame, excluding frameskips. The resulting displacement map
 ## texture can be retrieved using the get_waves_texture() function.
-## This must be called via RenderServer.call_on_render_thread().
-func simulate(delta:float) -> void:
+## This must be called via RenderingServer.call_on_render_thread().
+func _simulate(delta:float) -> void:
 	var uniform_set:RID
 	var compute_list:int
 	var settings_bytes:PackedByteArray
@@ -546,7 +684,7 @@ func simulate(delta:float) -> void:
 			print("error updating spectrum settings buffer")
 		
 		## Ensure the Spectrum texture binding is correct from previous frames.
-		## It gets changed later on in simulate().
+		## It gets changed later on in _simulate().
 		_spectrum_uniform_cascade[cascade].binding = Binding.SPECTRUM
 		
 		## Build Uniform Set
@@ -659,134 +797,3 @@ func simulate(delta:float) -> void:
 	
 	## This needs to get updated outside the cascade iteration loop
 	_is_ping_phase = not _is_ping_phase
-
-
-## Convert a global position (on the horizontal XZ plane) to a pixel coordinate
-## for sampling the wave displacement texture directly. The Y coordinate is
-## ignored.
-func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = true) -> Vector2i:
-	## The order of operations in this function is dependent on the order of
-	## operations used in the vertex shader to rotate and scale the displacement
-	## map before applying it. Make sure to check if the vertex shader should be
-	## updated to account for any changes made here.
-	
-	## Convert to UV coordinate
-	## The visual shader uses the global XZ coordinates as UV
-	var uv_pos := Vector2.ZERO
-	uv_pos.x = global_pos.x
-	uv_pos.y = global_pos.z
-	
-	## Apply domain warp
-	if apply_domain_warp and _domain_warp_image != null:
-		var camera:Camera3D = get_viewport().get_camera_3d()
-		var linear_dist:float = (global_pos - camera.global_position).length()
-		
-		## Recursive call; note that it is called with the apply_domain_warp
-		## parameter set to false to avoid infinite recursion.
-		var base_pixel_pos := global_to_pixel(global_pos, cascade, false)
-		var domain_warp := Vector2(
-				_domain_warp_image.get_pixelv(base_pixel_pos * domain_warp_uv_scale).r,
-				_domain_warp_image.get_pixelv(-base_pixel_pos * domain_warp_uv_scale).r)
-		domain_warp *= domain_warp_strength * (linear_dist / camera.far)
-		uv_pos += domain_warp
-	
-	## Apply UV scale
-	uv_pos *= _uv_scale
-	uv_pos *= 1.0 / cascade_scales[cascade]
-	
-	## Offset by wind scrolling
-	uv_pos += wind_uv_offset * cascade_scales[cascade]
-	
-	## Normalize values to 0.0-1.0
-	uv_pos.x -= floorf(uv_pos.x)
-	uv_pos.y -= floorf(uv_pos.y)
-	
-	## Convert to pixel coordinate
-	var pixel_pos := Vector2i.ZERO
-	pixel_pos.x = floor((fft_resolution - 1) * uv_pos.x)
-	pixel_pos.y = floor((fft_resolution - 1) * uv_pos.y)
-	
-	return pixel_pos
-
-
-## Query the wave height at a given location on the horizontal XZ plane. The Y
-## coordinate is ignored, and global position in this context is the position
-## relative to the oceans parent node. Since each pixel encodes both a vertical
-## and horizontal displacement, we need to offset the horizontal displacement 
-## and resample a few times to get an accurate height. The number of resample
-## iterations is defined by steps parameter.
-func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> float:
-	var pixel:Color
-	var xz_offset := Vector3.ZERO
-	var total_height := 0.0
-	var camera := get_viewport().get_camera_3d()
-	var linear_dist := (global_pos - camera.global_position).length()
-	
-	## Wave Displacements
-	for cascade in range(max_cascade):
-		for i in range(steps):
-			var pixel_pos := global_to_pixel(global_pos - xz_offset, cascade)
-			
-			pixel = _waves_image_cascade[cascade].get_pixelv(pixel_pos)
-			xz_offset.x += pixel.r
-			xz_offset.z += pixel.b
-		
-		total_height += pixel.g
-		xz_offset = Vector3.ZERO
-	
-	## Wave Amplitude Distance Fade
-	var amplitude_fade_range:float = clamp(linear_dist, 0.0, amplitude_scale_fade_distance) / amplitude_scale_fade_distance
-	total_height *= lerp(amplitude_scale_max, amplitude_scale_min, amplitude_fade_range)
-	
-	## Planetary Curve
-	var curvation:float = planetary_curve_strength * (pow(global_pos.x - camera.global_position.x, 2.0) + pow(global_pos.y - camera.global_position.z, 2.0))
-	total_height -= curvation;
-	
-	return total_height
-
-
-## Get the wave displacement map of a single cascade as an Image.
-## This returns the displacement map already cached on the CPU, it will not
-## call simulate(), or marshall additional data from the GPU.
-func get_waves(cascade:int = 0) -> Image:
-	return _waves_image_cascade[cascade]
-
-
-## Get the wave displacement map of a single cascade as a Texture2DRD.
-func get_waves_texture(cascade:int = 0) -> Texture2DRD:
-	return _waves_texture_cascade[cascade]
-
-
-## Get the wave displacement maps of all cascades as an Array of Images.
-## This returns the displacement map already cached on the CPU, it will not
-## call simulate(), or marshall additional data from the GPU.
-func get_all_waves() -> Array[Image]:
-	return _waves_image_cascade
-
-
-## Get the wave displacement maps of all cascades as an Array of Texture2DRDs.
-func get_all_waves_textures() -> Array[Texture2DRD]:
-	return _waves_texture_cascade
-
-
-func _pack_initial_spectrum_settings(cascade:int) -> PackedByteArray:
-	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
-	settings_bytes.append_array(PackedFloat32Array([cascade_ranges[cascade].x, cascade_ranges[cascade].y]).to_byte_array())
-	settings_bytes.append_array(PackedVector2Array([wave_vector]).to_byte_array())
-	return settings_bytes
-
-
-func _pack_phase_settings(delta_time:float, cascade:int) -> PackedByteArray:
-	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
-	settings_bytes.append_array(PackedFloat32Array([delta_time]).to_byte_array())
-	return settings_bytes
-
-
-func _pack_spectrum_settings(cascade:int) -> PackedByteArray:
-	var settings_bytes = PackedInt32Array([horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
-	settings_bytes.append_array(PackedFloat32Array([choppiness, fft_resolution]).to_byte_array())
-	return settings_bytes
-
-
-func _pack_fft_settings(subseq_count:int) -> PackedByteArray:
-	return PackedInt32Array([fft_resolution, subseq_count]).to_byte_array()
