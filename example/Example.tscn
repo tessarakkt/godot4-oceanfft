@@ -170,9 +170,9 @@ ocean = NodePath("../Ocean3D")
 [node name="MotorVesselBody3D" parent="." node_paths=PackedStringArray("ocean") instance=ExtResource("7_lob4t")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 0, 0)
 mass = 5000.0
+gravity_scale = 4.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -5, 0)
-gravity_scale = 4.0
 thrust_power_main = 25000.0
 max_rudder_force = 3000.0
 buoyancy_multiplier = 35000.0
@@ -309,9 +309,17 @@ text = "Frameskip"
 
 [node name="Frameskip" type="SpinBox" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
-tooltip_text = "You probably don't want to use more than 5 here. If running <20fps, any value will start to be noticable."
 max_value = 30.0
 value = 1.0
+
+[node name="HeightmapSyncFrameskipLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Heightmap Sync Frameskip"
+
+[node name="HeightmapSyncFrameskip" type="SpinBox" parent="CanvasLayer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+min_value = -1.0
+max_value = 30.0
 
 [node name="PlanetaryCurveLabel" type="Label" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
@@ -377,6 +385,7 @@ ticks_on_borders = true
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="CanvasLayer" method="_on_simulate_enabled_toggled"]
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/CullEnabled" to="CanvasLayer" method="_on_cull_enabled_toggled"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Frameskip" to="CanvasLayer" method="_on_frameskip_value_changed"]
+[connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/HeightmapSyncFrameskip" to="CanvasLayer" method="_on_heightmap_sync_frameskip_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/PlanetaryCurve" to="CanvasLayer" method="_on_planetary_curve_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Speed" to="CanvasLayer" method="_on_speed_value_changed"]
 [connection signal="value_changed" from="CanvasLayer/PanelContainer/VBoxContainer/Choppiness" to="CanvasLayer" method="_on_choppiness_value_changed"]

@@ -82,3 +82,7 @@ func _on_cull_enabled_toggled(button_pressed:bool) -> void:
 
 func _on_planetary_curve_value_changed(value:float) -> void:
 	ocean.planetary_curve_strength = value * 0.0001
+
+
+func _on_heightmap_sync_frameskip_value_changed(value: float) -> void:
+	ocean.heightmap_sync_frameskip = int(value)

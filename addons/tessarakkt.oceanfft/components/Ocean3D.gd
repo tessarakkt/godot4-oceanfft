@@ -48,8 +48,19 @@ enum FFTResolution {
 @export_group("Simulation Settings")
 
 ## Controls how many frames the _process() skips calling _simulate().
+## For a smooth visual simulation, _simulate() should be called at least 30
+## frames per second (FPS / (frameskip + 1) >= 30).
 ## Set to 0 to disable frame skip.
 @export_range(0, 30, 1) var simulation_frameskip := 0
+
+## Controls how frequently _process() requests a heightmap sync when calling
+## _simulate(). This is used by the buoyancy system, high frameskip settings
+## may cause floating objects to appear disconnected from the rendered waves.
+## When used in conjunction with simulation_frameskip, this will only count
+## frames where _simulate() was called by _process().
+## Set to -1 to disable heightmap sync (breaks buoyancy).
+## Set to 0 to disable heightmap sync frame skip.
+@export_range(-1, 30, 1) var heightmap_sync_frameskip := 0
 
 ## The resolution to generate the displacement maps at via FFT in the compute
 ## shaders.
@@ -224,6 +235,7 @@ var _waves_texture_cascade:Array[Texture2DRD] = []
 var _is_ping_phase := true
 
 var _frameskip := 0
+var _heightmap_sync_frameskip := 0
 var _accumulated_delta := 0.0
 
 var _domain_warp_image:Image
@@ -250,7 +262,16 @@ func _process(delta:float) -> void:
 			else:
 				_frameskip = 0
 		
-		RenderingServer.call_on_render_thread(_simulate.bind(_accumulated_delta))
+		var sync_heightmap := heightmap_sync_frameskip != -1
+		if heightmap_sync_frameskip > 0:
+			_heightmap_sync_frameskip += 1
+			if _heightmap_sync_frameskip <= heightmap_sync_frameskip:
+				sync_heightmap = false
+			else:
+				sync_heightmap = true
+				_heightmap_sync_frameskip = 0
+		
+		RenderingServer.call_on_render_thread(_simulate.bind(_accumulated_delta, sync_heightmap))
 		_accumulated_delta = 0.0
 
 
@@ -590,9 +611,12 @@ func _initialize_simulation() -> void:
 
 ## Simulate a single iteration of the ocean. If simulation_enabled is true, this
 ## will be run every frame, excluding frameskips. The resulting displacement map
-## texture can be retrieved using the get_waves_texture() function.
+## texture can be retrieved using the get_waves_texture() function, or as an
+## Image via get_waves(). The texture is the same buffer in VRAM the compute
+## shaders operate on. The image is stored in CPU RAM and is only updated when
+## sync_heightmap is true.
 ## This must be called via RenderingServer.call_on_render_thread().
-func _simulate(delta:float) -> void:
+func _simulate(delta:float, sync_heightmap:bool) -> void:
 	var uniform_set:RID
 	var compute_list:int
 	var settings_bytes:PackedByteArray
@@ -793,7 +817,8 @@ func _simulate(delta:float) -> void:
 		
 		## Retrieve the displacement map from the Spectrum texture, and store it
 		## CPU side for use by buoyancy and wave interaction systems.
-		_waves_image_cascade[cascade].set_data(fft_resolution, fft_resolution, false, Image.FORMAT_RGF, _rd.texture_get_data(_spectrum_tex_cascade[cascade], 0))
+		if sync_heightmap:
+			_waves_image_cascade[cascade].set_data(fft_resolution, fft_resolution, false, Image.FORMAT_RGF, _rd.texture_get_data(_spectrum_tex_cascade[cascade], 0))
 	
 	## This needs to get updated outside the cascade iteration loop
 	_is_ping_phase = not _is_ping_phase
