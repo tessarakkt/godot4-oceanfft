@@ -1,3 +1,4 @@
+@tool
 @icon("res://addons/tessarakkt.oceanfft/icons/BuoyancyProbe3D.svg")
 extends Marker3D
 class_name BuoyancyProbe3D
@@ -28,8 +29,30 @@ class_name BuoyancyProbe3D
 ## to this probe. If the probe is added to the body after _ready(), the ocean
 ## will need to be manually assigned.
 var ocean:Ocean3D
+var _has_buoyancy_body := false
 
+const _NO_BODY_CONFIGURATION_WARNING :=\
+	"BuoyancyProbe3D only serves to provide a buoyancy probe to a BuoyancyBody3D derived node.
+	Please ensure a BuoyancyBody3D is above it in the tree (e.g. as a parent, grandparent, etc)"
 
 ## Get the wave height at this buoyancy probes's location.
 func get_wave_height() -> float:
 	return ocean.get_wave_height(global_position, max_cascade, height_sampling_steps)
+
+func _ready():
+	_register_with_buoyancy_body_3d_parent()
+	tree_entered.connect(_register_with_buoyancy_body_3d_parent)
+
+func _register_with_buoyancy_body_3d_parent():
+	var parent := get_parent()
+	while parent:
+		if parent is BuoyancyBody3D:
+			parent.add_probe(self)
+			_has_buoyancy_body = true
+			return
+		parent = parent.get_parent()
+	_has_buoyancy_body = false
+
+func _get_configuration_warnings():
+	if !_has_buoyancy_body:
+		return [_NO_BODY_CONFIGURATION_WARNING]

@@ -1,3 +1,4 @@
+@tool
 @icon("res://addons/tessarakkt.oceanfft/icons/MotorVesselBody3D.svg")
 extends BuoyancyBody3D
 class_name MotorVesselBody3D
@@ -15,6 +16,11 @@ class_name MotorVesselBody3D
 
 
 func _process(delta):
+	if Engine.is_editor_hint():
+		return
+	if !ocean:
+		# Prints BuoyancyBody3D warning from its _physics_process, no need to warn again here
+		return
 	if ocean.get_wave_height(propeller.global_position) > propeller.global_position.y:
 		var prop_horizontal := -global_transform.basis.z
 		prop_horizontal.y = 0.0

@@ -1,3 +1,4 @@
+@tool
 @icon("res://addons/tessarakkt.oceanfft/icons/BuoyancyBody3D.svg")
 extends RigidBody3D
 class_name BuoyancyBody3D
@@ -18,21 +19,27 @@ class_name BuoyancyBody3D
 @export var submerged_drag_linear := 0.05
 @export var submerged_drag_angular := 0.1
 
+const _NO_PROBE_CONFIGURATION_WARNING :=\
+	"This node has no BuoyancyProbes so it cannot interact with an Ocean.
+	Consider adding a BuoyancyProbe3D as a child."
+
 
 var submerged := false
 var submerged_probes := 0
 
-
 var _buoyancy_probes:Array[BuoyancyProbe3D] = []
 
-
-func _ready() -> void:
-	for probe in $BuoyancyProbes.get_children():
-		_buoyancy_probes.append(probe)
-		probe.ocean = ocean
-
+var _displayed_null_ocean_warning := false
 
 func _physics_process(delta:float) -> void:
+	if Engine.is_editor_hint():
+		return
+	if !ocean:
+		if !_displayed_null_ocean_warning:
+			push_warning("Property 'ocean' is null")
+			_displayed_null_ocean_warning = true
+		return
+
 	var gv:Vector3 = ProjectSettings.get_setting("physics/3d/default_gravity_vector")
 	submerged_probes = 0
 	submerged = false
@@ -53,8 +60,15 @@ func _physics_process(delta:float) -> void:
 #	linear_damp = submerged_drag_linear * (submerged_probes / _buoyancy_probes.size())
 #	angular_damp = submerged_drag_angular * (submerged_probes / _buoyancy_probes.size())
 
+func add_probe(probe: BuoyancyProbe3D):
+	_buoyancy_probes.append(probe)
+	probe.ocean = ocean
 
 func _integrate_forces(state):
 	if submerged:
 		linear_velocity *= 1.0 - submerged_drag_linear
 		angular_velocity *= 1.0 - submerged_drag_angular
+
+func _get_configuration_warnings():
+	if _buoyancy_probes.is_empty():
+		return [_NO_PROBE_CONFIGURATION_WARNING]
