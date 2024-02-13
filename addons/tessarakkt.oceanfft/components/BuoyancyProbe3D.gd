@@ -29,7 +29,7 @@ class_name BuoyancyProbe3D
 ## to this probe. If the probe is added to the body after _ready(), the ocean
 ## will need to be manually assigned.
 var ocean:Ocean3D
-var _has_buoyancy_body := false
+var _buoyancy_body : BuoyancyBody3D = null
 
 const _NO_BODY_CONFIGURATION_WARNING :=\
 	"BuoyancyProbe3D only serves to provide a buoyancy probe to a BuoyancyBody3D derived node.
@@ -39,20 +39,23 @@ const _NO_BODY_CONFIGURATION_WARNING :=\
 func get_wave_height() -> float:
 	return ocean.get_wave_height(global_position, max_cascade, height_sampling_steps)
 
-func _ready():
-	_register_with_buoyancy_body_3d_parent()
-	tree_entered.connect(_register_with_buoyancy_body_3d_parent)
-
 func _register_with_buoyancy_body_3d_parent():
 	var parent := get_parent()
 	while parent:
 		if parent is BuoyancyBody3D:
 			parent.add_probe(self)
-			_has_buoyancy_body = true
+			_buoyancy_body = parent
 			return
 		parent = parent.get_parent()
-	_has_buoyancy_body = false
+	_buoyancy_body = null
+
+func _enter_tree():
+	_register_with_buoyancy_body_3d_parent()
+
+func _exit_tree():
+	if _buoyancy_body:
+		_buoyancy_body.remove_probe(self)
 
 func _get_configuration_warnings():
-	if !_has_buoyancy_body:
+	if !_buoyancy_body:
 		return [_NO_BODY_CONFIGURATION_WARNING]

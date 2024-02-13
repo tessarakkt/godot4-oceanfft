@@ -64,6 +64,11 @@ func add_probe(probe: BuoyancyProbe3D):
 	_buoyancy_probes.append(probe)
 	probe.ocean = ocean
 
+func remove_probe(probe: BuoyancyProbe3D):
+	var index := _buoyancy_probes.find(probe)
+	if index >= 0:
+		_buoyancy_probes.remove_at(index)
+
 func _integrate_forces(state):
 	if submerged:
 		linear_velocity *= 1.0 - submerged_drag_linear
