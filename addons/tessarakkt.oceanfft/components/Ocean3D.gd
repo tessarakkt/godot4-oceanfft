@@ -1,4 +1,5 @@
 @icon("res://addons/tessarakkt.oceanfft/icons/Ocean3D.svg")
+@tool
 extends Node3D
 class_name Ocean3D
 
@@ -43,7 +44,7 @@ enum FFTResolution {
 
 ## The vertex and shader that will use the generated displacement maps to deform
 ## the surface geometry and apply visual shading.
-@export var material:ShaderMaterial = preload("res://addons/tessarakkt.oceanfft/Ocean.tres")
+@onready var material:Terrain3DMaterial = get_node("%Terrain3D").material
 
 @export_group("Simulation Settings")
 
@@ -94,7 +95,7 @@ enum FFTResolution {
 @export_range(0.0, 0.001, 0.0000001) var planetary_curve_strength := 0.000001:
 	set(new_planetary_curve_strength):
 		planetary_curve_strength = new_planetary_curve_strength
-		material.set_shader_parameter("planetary_curve_strength", planetary_curve_strength)
+		material.set_shader_param("planetary_curve_strength", planetary_curve_strength)
 
 @export_subgroup("Amplitude Distance Fade")
 
@@ -103,20 +104,20 @@ enum FFTResolution {
 @export_range(0.0, 5.0, 0.01) var amplitude_scale_min := 0.25:
 	set(new_amplitude_scale_min):
 		amplitude_scale_min = new_amplitude_scale_min
-		material.set_shader_parameter("amplitude_scale_min", amplitude_scale_min)
+		material.set_shader_param("amplitude_scale_min", amplitude_scale_min)
 
 ## Amplitude scale applied to the ocean surface near the camera.
 @export_range(0.0, 5.0, 0.01) var amplitude_scale_max := 1.0:
 	set(new_amplitude_scale_max):
 		amplitude_scale_max = new_amplitude_scale_max
-		material.set_shader_parameter("amplitude_scale_max", amplitude_scale_max)
+		material.set_shader_param("amplitude_scale_max", amplitude_scale_max)
 
 ## Linear interpolate between amplitude_scale_min at 0 units from camera, and
 ## amplitude_scale_max at amplitude_scale_fade_distance units from camera.
 @export_range(0.0, 32000.0, 10.0) var amplitude_scale_fade_distance := 12000.0:
 	set(new_amplitude_scale_fade_distance):
 		amplitude_scale_fade_distance = new_amplitude_scale_fade_distance
-		material.set_shader_parameter("amplitude_scale_fade_distance", amplitude_scale_fade_distance)
+		material.set_shader_param("amplitude_scale_fade_distance", amplitude_scale_fade_distance)
 
 @export_subgroup("Domain Warp")
 
@@ -124,7 +125,7 @@ enum FFTResolution {
 ## to the surface.
 @export var domain_warp_texture:NoiseTexture2D:
 	set(new_domain_warp_texture):
-		material.set_shader_parameter("domain_warp_texture", new_domain_warp_texture)
+		material.set_shader_param("domain_warp_texture", new_domain_warp_texture)
 		domain_warp_texture = new_domain_warp_texture
 		await new_domain_warp_texture.changed
 		_domain_warp_image = new_domain_warp_texture.get_image()
@@ -132,7 +133,7 @@ enum FFTResolution {
 ## Controls how much distortion is applied to the displacement map domain warp
 @export_range(0.0, 5000.0) var domain_warp_strength := 1500.0:
 	set(new_domain_warp_strength):
-		material.set_shader_parameter("domain_warp_strength", new_domain_warp_strength)
+		material.set_shader_param("domain_warp_strength", new_domain_warp_strength)
 		domain_warp_strength = new_domain_warp_strength
 
 ## Controls how large the domain_warp_texture is stretched horizontally.
@@ -140,7 +141,7 @@ enum FFTResolution {
 ## To stretch the texture to cover X world units, set this value to 1.0 / X
 @export_range(0.0, 1.0, 0.0000001) var domain_warp_uv_scale := 0.0000625:
 	set(new_domain_warp_uv_scale):
-		material.set_shader_parameter("domain_warp_uv_scale", new_domain_warp_uv_scale)
+		material.set_shader_param("domain_warp_uv_scale", new_domain_warp_uv_scale)
 		domain_warp_uv_scale = new_domain_warp_uv_scale
 
 
@@ -245,6 +246,11 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
+	
+	var camera := get_viewport().get_camera_3d()
+	material.set_shader_param("view_distance_max", camera.far)
+	#material.set_shader_param("vertex_resolution", mesh_vertex_resolution)
+	
 	RenderingServer.call_on_render_thread(_initialize_simulation)
 
 
@@ -253,7 +259,7 @@ func _process(delta:float) -> void:
 		_accumulated_delta += delta
 		
 		wind_uv_offset += Vector2(cos(wind_direction), sin(wind_direction)) * wave_scroll_speed * delta
-		material.set_shader_parameter("wind_uv_offset", wind_uv_offset)
+		material.set_shader_param("wind_uv_offset", wind_uv_offset)
 		
 		if simulation_frameskip > 0:
 			_frameskip += 1
@@ -576,9 +582,9 @@ func _initialize_simulation() -> void:
 		_waves_texture_cascade[i] = Texture2DRD.new()
 		_waves_texture_cascade[i].texture_rd_rid = _spectrum_tex_cascade[i]
 	
-	material.set_shader_parameter("cascade_displacements", _waves_texture_cascade)
-	material.set_shader_parameter("cascade_uv_scales", cascade_scales)
-	material.set_shader_parameter("uv_scale", _uv_scale)
+	material.set_shader_param("cascade_displacements", _waves_texture_cascade)
+	material.set_shader_param("cascade_uv_scales", cascade_scales)
+	material.set_shader_param("uv_scale", _uv_scale)
 	
 	#### Compile & Initialize FFT Shaders
 	############################################################################

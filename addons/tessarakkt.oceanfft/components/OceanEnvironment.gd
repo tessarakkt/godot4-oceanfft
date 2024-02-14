@@ -1,4 +1,5 @@
 @icon("res://addons/tessarakkt.oceanfft/icons/OceanEnvironment.svg")
+@tool
 extends WorldEnvironment
 class_name OceanEnvironment
 ## Manages environment settings, including above water/under water transitions
@@ -136,8 +137,8 @@ func go_above_water() -> void:
 	environment.fog_enabled = true
 	environment.volumetric_fog_enabled = false
 	
-	ocean.material.set_shader_parameter("normal_factor", 1.0)
-	ocean.material.set_shader_parameter("refraction_distance_power", 1.55)
+	ocean.material.set_shader_param("normal_factor", 1.0)
+	ocean.material.set_shader_param("refraction_distance_power", 1.55)
 	
 	if splash_particles != null:
 		splash_particles.emitting = true
