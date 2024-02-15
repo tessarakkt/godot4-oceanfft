@@ -3,6 +3,7 @@
 extends Marker3D
 class_name BuoyancyProbe3D
 ## Buoyancy probe used by BuoyancyBody3D to approximate an objects buoyancy.
+##
 ## This is used as a wave height sampler by BuoyancyBody3D in order to do
 ## buoyancy calculations. It has no effect on its own, and must be added to a
 ## buoyancy body in order to provide an effect. This could also be used as a
