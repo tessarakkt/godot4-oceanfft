@@ -5,7 +5,6 @@ class_name BuoyancyBody3D
 ## Physics Body which is moved by 3D physics simulation, and interacts with
 ## buoyancy provided by an Ocean3D.
 
-
 ## Buoyancy force multiplier applied to all buoyancy probes.
 @export var buoyancy_multiplier := 1.0
 
@@ -19,17 +18,18 @@ class_name BuoyancyBody3D
 @export var submerged_drag_linear := 0.05
 @export var submerged_drag_angular := 0.1
 
-const _NO_PROBE_CONFIGURATION_WARNING :=\
-	"This node has no BuoyancyProbes so it cannot interact with an Ocean.
-	Consider adding a BuoyancyProbe3D as a child."
 
-
+## True if the body has at least one probe underwater.
 var submerged := false
+## Number of probes that are currently underwater.
 var submerged_probes := 0
 
-var _buoyancy_probes:Array[BuoyancyProbe3D] = []
 
+# Probes currently used in calculating this body's buoyancy
+var _buoyancy_probes:Array[BuoyancyProbe3D] = []
+# Used to only display the warning that the ocean is null once
 var _displayed_null_ocean_warning := false
+
 
 func _physics_process(delta:float) -> void:
 	if Engine.is_editor_hint():
@@ -60,20 +60,26 @@ func _physics_process(delta:float) -> void:
 #	linear_damp = submerged_drag_linear * (submerged_probes / _buoyancy_probes.size())
 #	angular_damp = submerged_drag_angular * (submerged_probes / _buoyancy_probes.size())
 
-func add_probe(probe: BuoyancyProbe3D):
-	_buoyancy_probes.append(probe)
-	probe.ocean = ocean
-
-func remove_probe(probe: BuoyancyProbe3D):
-	var index := _buoyancy_probes.find(probe)
-	if index >= 0:
-		_buoyancy_probes.remove_at(index)
-
 func _integrate_forces(state):
 	if submerged:
 		linear_velocity *= 1.0 - submerged_drag_linear
 		angular_velocity *= 1.0 - submerged_drag_angular
 
+## Adds a BuoyancyProbe3D to this body's buoyancy calculation.
+func add_probe(probe: BuoyancyProbe3D):
+	_buoyancy_probes.append(probe)
+	probe.ocean = ocean
+
+## Removes a BuoyancyProbe3D to this body's buoyancy calculation.
+func remove_probe(probe: BuoyancyProbe3D):
+	var index := _buoyancy_probes.find(probe)
+	if index >= 0:
+		_buoyancy_probes.remove_at(index)
+
 func _get_configuration_warnings():
+	const _NO_PROBE_CONFIGURATION_WARNING :=\
+		"This node has no BuoyancyProbes so it cannot interact with an Ocean.
+		Consider adding a BuoyancyProbe3D as a child."
+
 	if _buoyancy_probes.is_empty():
 		return [_NO_PROBE_CONFIGURATION_WARNING]

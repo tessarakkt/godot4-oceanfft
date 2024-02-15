@@ -23,25 +23,23 @@ class_name BuoyancyProbe3D
 @export_range(0, 2, 1) var max_cascade := 1
 
 
-## The ocean simulation that will be sampled for wave height. If this is a descendant
-## of a BuoyancyBody3D node, that bodies' assigned ocean will be assigned
+## The ocean simulation that will be sampled for wave height. If this probe is
+## added to a BuoyancyBody3D node, that bodies' assigned ocean will be assigned
 ## to this probe.
 var ocean:Ocean3D
 
-## The BuoyancyBody3D this probe is being used by. Assigned automatically by seeking
-## up the tree for a BuoyancyBody3D upon being added to the tree, and removed
-## automatically when exiting the tree
+# The BuoyancyBody3D this probe is being used by. Assigned automatically by seeking
+# up the tree for a BuoyancyBody3D upon being added to the tree, and removed
+# automatically when exiting the tree
 var _buoyancy_body : BuoyancyBody3D = null
 
-const _NO_BODY_CONFIGURATION_WARNING :=\
-	"BuoyancyProbe3D only serves to provide a buoyancy probe to a BuoyancyBody3D derived node.
-	Please ensure a BuoyancyBody3D is above it in the tree (e.g. as a parent, grandparent, etc)"
 
 ## Get the wave height at this buoyancy probes's location.
 func get_wave_height() -> float:
 	return ocean.get_wave_height(global_position, max_cascade, height_sampling_steps)
 
-func _register_with_buoyancy_body_3d_parent():
+# Seeks up the scene tree for the first BuoyancyBody3D ancestor and adds itself to its active probes
+func _add_to_buoyancy_body_3d_ancestor():
 	var parent := get_parent()
 	while parent:
 		if parent is BuoyancyBody3D:
@@ -52,12 +50,16 @@ func _register_with_buoyancy_body_3d_parent():
 	_buoyancy_body = null
 
 func _enter_tree():
-	_register_with_buoyancy_body_3d_parent()
+	_add_to_buoyancy_body_3d_ancestor()
 
 func _exit_tree():
 	if _buoyancy_body:
 		_buoyancy_body.remove_probe(self)
 
 func _get_configuration_warnings():
+	const _NO_BODY_CONFIGURATION_WARNING :=\
+		"BuoyancyProbe3D only serves to provide a buoyancy probe to a BuoyancyBody3D derived node.
+		Please ensure it has a BuoyancyBody3D as an ancestor in the scene tree"
+
 	if !_buoyancy_body:
 		return [_NO_BODY_CONFIGURATION_WARNING]
