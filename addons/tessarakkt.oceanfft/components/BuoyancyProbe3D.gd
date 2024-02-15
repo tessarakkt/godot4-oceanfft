@@ -23,12 +23,14 @@ class_name BuoyancyProbe3D
 @export_range(0, 2, 1) var max_cascade := 1
 
 
-## The ocean simulation that will be sampled for wave height. If this is a child
-## of a BuoyancyBody3D's BuoyancyProbes container node when
-## BuoyancyBody3D._ready() is called, the bodies assigned ocean will be assigned
-## to this probe. If the probe is added to the body after _ready(), the ocean
-## will need to be manually assigned.
+## The ocean simulation that will be sampled for wave height. If this is a descendant
+## of a BuoyancyBody3D node, that bodies' assigned ocean will be assigned
+## to this probe.
 var ocean:Ocean3D
+
+## The BuoyancyBody3D this probe is being used by. Assigned automatically by seeking
+## up the tree for a BuoyancyBody3D upon being added to the tree, and removed
+## automatically when exiting the tree
 var _buoyancy_body : BuoyancyBody3D = null
 
 const _NO_BODY_CONFIGURATION_WARNING :=\
