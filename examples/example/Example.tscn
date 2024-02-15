@@ -1,15 +1,15 @@
 [gd_scene load_steps=25 format=3 uid="uid://bs1yo1162gltj"]
 
-[ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
+[ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://examples/example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="2_jhrdm"]
 [ext_resource type="Material" uid="uid://cmyo0unntq078" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="5_0jjw4"]
-[ext_resource type="Script" path="res://example/Camera.gd" id="5_eso43"]
+[ext_resource type="Script" path="res://examples/example/Camera.gd" id="5_eso43"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SplashParticles.gdshader" id="6_nklv0"]
-[ext_resource type="PackedScene" uid="uid://rmewe8a2xeoe" path="res://example/FloatingRectangle.tscn" id="6_q2mn5"]
-[ext_resource type="PackedScene" uid="uid://bbes3eh3swxnh" path="res://example/MotorRectangle.tscn" id="7_lob4t"]
+[ext_resource type="PackedScene" uid="uid://rmewe8a2xeoe" path="res://examples/example/FloatingRectangle.tscn" id="6_q2mn5"]
+[ext_resource type="PackedScene" uid="uid://bbes3eh3swxnh" path="res://examples/example/MotorRectangle.tscn" id="7_lob4t"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="7_xa10r"]
-[ext_resource type="Script" path="res://example/OceanUI.gd" id="8_h37lk"]
+[ext_resource type="Script" path="res://examples/example/OceanUI.gd" id="8_h37lk"]
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterParticles.gdshader" id="10_kqf5f"]
 [ext_resource type="Texture2D" uid="uid://n8ghpdii3aqh" path="res://addons/tessarakkt.oceanfft/graphics/Splash.png" id="10_o46r2"]
 
@@ -168,15 +168,15 @@ gravity_scale = 4.0
 ocean = NodePath("../Ocean3D")
 
 [node name="MotorVesselBody3D" parent="." node_paths=PackedStringArray("ocean") instance=ExtResource("7_lob4t")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, -0.012544, 0)
 mass = 5000.0
 gravity_scale = 4.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -5, 0)
 thrust_power_main = 25000.0
 max_rudder_force = 3000.0
-buoyancy_multiplier = 35000.0
 ocean = NodePath("../Ocean3D")
+buoyancy_multiplier = 35000.0
 
 [node name="Camera3D" type="Camera3D" parent="MotorVesselBody3D" node_paths=PackedStringArray("reflection_probe")]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)
