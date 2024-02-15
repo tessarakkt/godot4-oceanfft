@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://17getqp6pf6r"]
+
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="1_tt3n2"]
+[ext_resource type="Material" uid="uid://cmyo0unntq078" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="2_e1hrm"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_n6vuo"]
+lightmap_size_hint = Vector2i(5122, 5122)
+material = ExtResource("2_e1hrm")
+size = Vector2(256, 256)
+subdivide_width = 512
+subdivide_depth = 512
+
+[node name="Ocean3DBasicSetupExample" type="Node3D"]
+editor_description = "This scene represents the most minimal example of a working Ocean3D setup"
+script = ExtResource("1_tt3n2")
+wind_direction_degrees = 257.143
+wind_speed = 28.581
+
+[node name="PlaneMeshInstance" type="MeshInstance3D" parent="."]
+instance_shader_parameters/max_lod_morph_distance = 1024.0
+instance_shader_parameters/patch_size = 512.0
+mesh = SubResource("PlaneMesh_n6vuo")
+skeleton = NodePath("../..")

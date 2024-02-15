@@ -169,8 +169,11 @@ enum FFTResolution {
 @export_range(-10.0, 10.0) var wave_scroll_speed := 0.0
 
 ## The speed of the wind passed to the wave simulation.
-@export_range(0.0, 1000.0) var wind_speed := 300.0:
+@export_range(0.01, 1000.0) var wind_speed := 300.0:
 	set(new_wave_length):
+		# Setting wind_speed to 0 breaks the simulation since Vector2.ZERO normalized is still Vector2.ZERO
+		if new_wave_length < 0.01:
+			new_wave_length = 0.01
 		wave_vector = wave_vector.normalized() * new_wave_length
 	get:
 		return wave_vector.length()
@@ -301,8 +304,8 @@ func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = t
 	uv_pos.y = global_pos.z
 	
 	## Apply domain warp
-	if apply_domain_warp and _domain_warp_image != null:
-		var camera:Camera3D = get_viewport().get_camera_3d()
+	var camera:Camera3D = _get_camera()
+	if camera and apply_domain_warp and _domain_warp_image != null:
 		var linear_dist:float = (global_pos - camera.global_position).length()
 		
 		## Recursive call; note that it is called with the apply_domain_warp
@@ -343,8 +346,9 @@ func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> 
 	var pixel:Color
 	var xz_offset := Vector3.ZERO
 	var total_height := 0.0
-	var camera := get_viewport().get_camera_3d()
-	var linear_dist := (global_pos - camera.global_position).length()
+	var camera := _get_camera()
+	var camera_global_position = camera.global_position if camera else Vector3.ZERO
+	var linear_dist := (global_pos - camera_global_position).length()
 	
 	## Wave Displacements
 	for cascade in range(max_cascade):
@@ -363,7 +367,7 @@ func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> 
 	total_height *= lerp(amplitude_scale_max, amplitude_scale_min, amplitude_fade_range)
 	
 	## Planetary Curve
-	var curvation:float = planetary_curve_strength * (pow(global_pos.x - camera.global_position.x, 2.0) + pow(global_pos.y - camera.global_position.z, 2.0))
+	var curvation:float = planetary_curve_strength * (pow(global_pos.x - camera_global_position.x, 2.0) + pow(global_pos.y - camera_global_position.z, 2.0))
 	total_height -= curvation;
 	
 	return total_height
@@ -828,3 +832,8 @@ func _simulate(delta:float, sync_heightmap:bool) -> void:
 	
 	## This needs to get updated outside the cascade iteration loop
 	_is_ping_phase = not _is_ping_phase
+
+func _get_camera() -> Camera3D:
+	if Engine.is_editor_hint():
+		return EditorInterface.get_editor_viewport_3d().get_camera_3d()
+	return get_viewport().get_camera_3d()
