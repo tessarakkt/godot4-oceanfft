@@ -42,6 +42,9 @@ enum FFTResolution {
 ## should be disabled if you are calling the simulation directly.
 @export var simulation_enabled := true
 
+## Whether _simulate() should be called by _process() within the editor.
+@export var editor_simulation_enabled := true
+
 ## The vertex and shader that will use the generated displacement maps to deform
 ## the surface geometry and apply visual shading.
 @export var material:ShaderMaterial = preload("res://addons/tessarakkt.oceanfft/Ocean.tres")
@@ -251,6 +254,8 @@ func _ready() -> void:
 
 func _process(delta:float) -> void:
 	if simulation_enabled:
+		if Engine.is_editor_hint() and !editor_simulation_enabled:
+			return
 		_accumulated_delta += delta
 		
 		wind_uv_offset += Vector2(cos(wind_direction), sin(wind_direction)) * wave_scroll_speed * delta
