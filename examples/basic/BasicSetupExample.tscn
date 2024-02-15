@@ -7,8 +7,8 @@
 lightmap_size_hint = Vector2i(5122, 5122)
 material = ExtResource("2_e1hrm")
 size = Vector2(256, 256)
-subdivide_width = 512
-subdivide_depth = 512
+subdivide_width = 256
+subdivide_depth = 256
 
 [node name="Ocean3DBasicSetupExample" type="Node3D"]
 editor_description = "This scene represents the most minimal example of a working Ocean3D setup"
