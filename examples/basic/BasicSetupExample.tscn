@@ -1,11 +1,21 @@
-[gd_scene load_steps=4 format=3 uid="uid://17getqp6pf6r"]
+[gd_scene load_steps=6 format=3 uid="uid://17getqp6pf6r"]
 
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="1_tt3n2"]
-[ext_resource type="Material" uid="uid://cmyo0unntq078" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="2_e1hrm"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/ocean_renderers/OceanSurfaceRenderer3D.gd" id="3_qjgib"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_n6vuo"]
-lightmap_size_hint = Vector2i(5122, 5122)
-material = ExtResource("2_e1hrm")
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ab76n"]
+noise_type = 3
+fractal_type = 0
+fractal_octaves = 2
+fractal_lacunarity = 3.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_om2wv"]
+width = 1024
+height = 1024
+seamless = true
+noise = SubResource("FastNoiseLite_ab76n")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ltt1y"]
 size = Vector2(256, 256)
 subdivide_width = 256
 subdivide_depth = 256
@@ -13,11 +23,10 @@ subdivide_depth = 256
 [node name="Ocean3DBasicSetupExample" type="Node3D"]
 editor_description = "This scene represents the most minimal example of a working Ocean3D setup"
 script = ExtResource("1_tt3n2")
-wind_direction_degrees = 257.143
-wind_speed = 28.581
+domain_warp_texture = SubResource("NoiseTexture2D_om2wv")
 
-[node name="PlaneMeshInstance" type="MeshInstance3D" parent="."]
-instance_shader_parameters/max_lod_morph_distance = 1024.0
-instance_shader_parameters/patch_size = 512.0
-mesh = SubResource("PlaneMesh_n6vuo")
-skeleton = NodePath("../..")
+[node name="OceanRenderer3D" type="Node3D" parent="." node_paths=PackedStringArray("ocean")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 2.08165e-12, 2.08165e-12)
+script = ExtResource("3_qjgib")
+ocean = NodePath("..")
+settings = SubResource("PlaneMesh_ltt1y")
