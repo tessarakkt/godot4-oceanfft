@@ -47,7 +47,7 @@ enum FFTResolution {
 
 ## The vertex and shader that will use the generated displacement maps to deform
 ## the surface geometry and apply visual shading.
-@export var material:ShaderMaterial = preload("res://addons/tessarakkt.oceanfft/Ocean.tres")
+@export var material:ShaderMaterial = preload("res://addons/tessarakkt.oceanfft/Ocean.tres").duplicate()
 
 @export_group("Simulation Settings")
 
