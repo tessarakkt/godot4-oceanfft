@@ -10,8 +10,9 @@ class_name OceanSurfaceRenderer3D
 
 enum RenderingMode {
 	SIMPLE_PLANE,
-	MULTI_MESH
+	MULTI_PLANE
 }
+
 @export var rendering_mode : RenderingMode = RenderingMode.SIMPLE_PLANE:
 	set(value):
 		rendering_mode = value
@@ -30,7 +31,7 @@ enum RenderingMode {
 # TODO editor script with dropdown triggered by what's available
 var _rendering_modes := {
 	RenderingMode.SIMPLE_PLANE: SimplePlaneRenderer,
-	RenderingMode.MULTI_MESH: MultiMeshRenderer
+	RenderingMode.MULTI_PLANE: MultiMeshPlaneGridRenderer
 }
 
 var renderer : BaseOceanRenderer = null:
@@ -82,7 +83,7 @@ class SimplePlaneRenderer extends BaseOceanRenderer:
 	var mesh := PlaneMesh.new()
 
 	func _init():
-		settings = mesh
+		settings = Settings.new()
 		mesh_instance.mesh = mesh
 		mesh_instance.material_override = null
 		add_child(mesh_instance)
@@ -100,14 +101,29 @@ class SimplePlaneRenderer extends BaseOceanRenderer:
 	
 	func is_available() -> bool:
 		return true
+	
+	func _on_settings_changed() -> void:
+		mesh.subdivide_width = settings.subdivisions.x
+		mesh.subdivide_depth = settings.subdivisions.y
+		mesh.size = settings.size
 
-class MultiMeshRenderer extends BaseOceanRenderer:
+	class Settings extends Resource:
+		@export var size := Vector2(256, 256):
+			set(value):
+				size = value
+				emit_changed()
+		@export var subdivisions := Vector2(256, 256):
+			set(value):
+				subdivisions = value
+				emit_changed()
+
+class MultiMeshPlaneGridRenderer extends BaseOceanRenderer:
 	var multimesh_instance := MultiMeshInstance3D.new()
 	var multimesh := MultiMesh.new()
 	var mesh := PlaneMesh.new()
 
 	func _init():
-		settings = MultiMeshRenderer.Settings.new()
+		settings = MultiMeshPlaneGridRenderer.Settings.new()
 		multimesh_instance.multimesh = multimesh
 		multimesh.mesh = mesh
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
@@ -129,12 +145,17 @@ class MultiMeshRenderer extends BaseOceanRenderer:
 		update_mesh_instances()
 	
 	func update_mesh_instances() -> void:
-		multimesh.visible_instance_count = settings.x_count * settings.z_count
+		# update mesh
+		mesh.size = settings.instance_size
+		mesh.subdivide_width = settings.instance_subdivisions.x
+		mesh.subdivide_depth = settings.instance_subdivisions.y
+		# update instance transforms
+		multimesh.visible_instance_count = settings.rows * settings.columns
 		var i := 0
-		var offset = -Vector3((settings.x_count / 2.0) - 0.5, 0, (settings.z_count / 2.0) - 0.5) * ocean.horizontal_dimension
+		var offset = -Vector3((settings.rows / 2.0) - 0.5, 0, (settings.columns / 2.0) - 0.5) * ocean.horizontal_dimension
 		var basis_position = position + offset
-		for x in settings.x_count:
-			for z in settings.z_count:
+		for x in settings.rows:
+			for z in settings.columns:
 				var transform := Transform3D()
 				transform.origin = basis_position + Vector3(x * ocean.horizontal_dimension, 0,  z * ocean.horizontal_dimension)
 				multimesh.set_instance_transform(i, transform)
@@ -147,11 +168,21 @@ class MultiMeshRenderer extends BaseOceanRenderer:
 		return true
 	
 	class Settings extends Resource:
-		@export var x_count := 4:
+		@export_category("Mesh Instance Settings")
+		@export var instance_size := Vector2(256, 256):
 			set(value):
-				x_count = value
+				instance_size = value
 				emit_changed()
-		@export var z_count := 4:
+		@export var instance_subdivisions := Vector2(256, 256):
 			set(value):
-				z_count = value
+				instance_subdivisions = value
+				emit_changed()
+		@export_category("Grid Settings")
+		@export var rows := 4:
+			set(value):
+				rows = value
+				emit_changed()
+		@export var columns := 4:
+			set(value):
+				columns = value
 				emit_changed()
