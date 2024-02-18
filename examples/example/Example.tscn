@@ -1,10 +1,10 @@
-[gd_scene load_steps=25 format=3 uid="uid://bs1yo1162gltj"]
+[gd_scene load_steps=31 format=3 uid="uid://bs1yo1162gltj"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://examples/example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="2_jhrdm"]
-[ext_resource type="Material" uid="uid://cmyo0unntq078" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="5_0jjw4"]
+[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SurfaceVisual.gdshader" id="4_7vjvd"]
 [ext_resource type="Script" path="res://examples/example/Camera.gd" id="5_eso43"]
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/ocean_surface/QuadTreeOceanSurface3D.gd" id="6_me71s"]
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SplashParticles.gdshader" id="6_nklv0"]
 [ext_resource type="PackedScene" uid="uid://rmewe8a2xeoe" path="res://examples/example/FloatingRectangle.tscn" id="6_q2mn5"]
 [ext_resource type="PackedScene" uid="uid://bbes3eh3swxnh" path="res://examples/example/MotorRectangle.tscn" id="7_lob4t"]
@@ -12,6 +12,15 @@
 [ext_resource type="Script" path="res://examples/example/OceanUI.gd" id="8_h37lk"]
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterParticles.gdshader" id="10_kqf5f"]
 [ext_resource type="Texture2D" uid="uid://n8ghpdii3aqh" path="res://addons/tessarakkt.oceanfft/graphics/Splash.png" id="10_o46r2"]
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_xs501"]
+texture_rd_rid = RID(23792319228551293)
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_qh2h1"]
+texture_rd_rid = RID(23792332113453154)
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_iaa32"]
+texture_rd_rid = RID(23792344998355043)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
 noise_type = 3
@@ -24,6 +33,64 @@ width = 1024
 height = 1024
 seamless = true
 noise = SubResource("FastNoiseLite_nywmb")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_gub2d"]
+noise_type = 3
+fractal_octaves = 7
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_h2j7u"]
+width = 2048
+height = 2048
+seamless = true
+noise = SubResource("FastNoiseLite_gub2d")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yvk7f"]
+render_priority = 0
+shader = ExtResource("4_7vjvd")
+shader_parameter/normal_factor = 1.0
+shader_parameter/cascade_uv_scales = Array[float]([3.23607, 1.61803, 0.5])
+shader_parameter/uv_scale = 0.00390625
+shader_parameter/wind_uv_offset = Vector2(-0.488392, 0)
+shader_parameter/view_distance_max = 16000.0
+shader_parameter/vertex_resolution = 256.0
+shader_parameter/cascade_displacements = Array[Texture2DRD]([SubResource("Texture2DRD_xs501"), SubResource("Texture2DRD_qh2h1"), SubResource("Texture2DRD_iaa32")])
+shader_parameter/domain_warp_uv_scale = 6.25e-05
+shader_parameter/domain_warp_strength = 1500.0
+shader_parameter/domain_warp_texture = SubResource("NoiseTexture2D_o5jyh")
+shader_parameter/planetary_curve_strength = 1e-06
+shader_parameter/amplitude_scale_min = 0.25
+shader_parameter/amplitude_scale_max = 1.0
+shader_parameter/amplitude_scale_fade_distance = 12000.0
+shader_parameter/specular_strength = 1.0
+shader_parameter/specular_power = 1500.0
+shader_parameter/view_fade_start = 0.95
+shader_parameter/deep_color = Color(0.004, 0.016, 0.047, 1)
+shader_parameter/shallow_color = Color(0, 0.729412, 0.988235, 1)
+shader_parameter/fresnel_offset = 0.02
+shader_parameter/fresnel_strength = 0.0
+shader_parameter/fresnel_power = 5.0
+shader_parameter/fresnel_exposure = 0.01
+shader_parameter/fresnel_sky_color = Color(1.6, 4.8, 6.4, 1)
+shader_parameter/pbr_specular_strength = 0.5
+shader_parameter/pbr_specular_offset = 0.05
+shader_parameter/pbr_metallic_strength = 0.0
+shader_parameter/refraction_factor_min = 0.0
+shader_parameter/refraction_factor_max = 0.025
+shader_parameter/refraction_distance_power = 1.55
+shader_parameter/refraction_distance_max = 30000.0
+shader_parameter/refraction_background_brightness = 0.2
+shader_parameter/refraction_depth_factor = 1e-05
+shader_parameter/sss_backlight_strength = 0.0125
+shader_parameter/sss_backlight_fov = 10.0
+shader_parameter/sss_backlight_depth = 15.0
+shader_parameter/sss_upwelling = 0.05
+shader_parameter/sss_color = Color(0, 0.729412, 0.988235, 1)
+shader_parameter/foam_jacobian_limit = 0.5
+shader_parameter/foam_coverage = 0.1
+shader_parameter/foam_mix_strength = 1.0
+shader_parameter/foam_diffuse_strength = 1.0
+shader_parameter/foam_diffuse_color = Color(0.917647, 0.968627, 1, 1)
+shader_parameter/foam_texture = SubResource("NoiseTexture2D_h2j7u")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p0g3t"]
 shader = ExtResource("6_nklv0")
@@ -145,6 +212,7 @@ underwater_particles = NodePath("UnderwaterParticles")
 
 [node name="Ocean3D" type="Node3D" parent="."]
 script = ExtResource("7_xa10r")
+material = SubResource("ShaderMaterial_yvk7f")
 simulation_frameskip = 1
 fft_resolution = 128
 horizontal_dimension = 512
@@ -154,12 +222,9 @@ choppiness = 0.5
 wave_scroll_speed = -0.003
 wind_speed = 15.0
 
-[node name="QuadTree3D" type="Node3D" parent="."]
-script = ExtResource("5_li4kg")
-lod_level = 7
-quad_size = 32768.0
-ranges = Array[float]([250.0, 500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0])
-material = ExtResource("5_0jjw4")
+[node name="QuadTreeOceanSurface3D" type="Node3D" parent="Ocean3D" node_paths=PackedStringArray("ocean")]
+script = ExtResource("6_me71s")
+ocean = NodePath("..")
 
 [node name="FloatingRectangle" parent="." node_paths=PackedStringArray("ocean") instance=ExtResource("6_q2mn5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 52.6454)
@@ -175,8 +240,8 @@ center_of_mass_mode = 1
 center_of_mass = Vector3(0, -5, 0)
 thrust_power_main = 25000.0
 max_rudder_force = 3000.0
-ocean = NodePath("../Ocean3D")
 buoyancy_multiplier = 35000.0
+ocean = NodePath("../Ocean3D")
 
 [node name="Camera3D" type="Camera3D" parent="MotorVesselBody3D" node_paths=PackedStringArray("reflection_probe")]
 transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 24, 0)

@@ -178,6 +178,9 @@ enum FFTResolution {
 	get:
 		return wave_vector.length()
 
+var camera: Camera3D:
+	get:
+		return _get_camera()
 
 ## The "accumulated wind" that has blown, for wave scrolling from wind.
 ## Updated each frame by Ocean3D._process()

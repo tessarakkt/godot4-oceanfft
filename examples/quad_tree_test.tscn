@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8qga4ckydyh8"]
+
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="1_8cvas"]
+[ext_resource type="Shader" path="res://examples/example/UvBorder.gdshader" id="3_oiwyy"]
+[ext_resource type="Script" path="res://examples/example/Camera.gd" id="3_pocxd"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8a5mo"]
+render_priority = 0
+shader = ExtResource("3_oiwyy")
+shader_parameter/border_size = 0.01
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, -6.95048e-16, 4.19021e-17, 4.19021e-17, 0.120137, 0.992757, -6.95048e-16, -0.992757, 0.120137, -329.305, 150.82, 0)
+script = ExtResource("3_pocxd")
+motion_enabled = true
+
+[node name="QuadTree3D" type="Node3D" parent="."]
+script = ExtResource("1_8cvas")
+use_visibility_detector = true
+lod_level = 4
+quad_size = 1000.0
+mesh_vertex_resolution = 10
+ranges = Array[float]([10.0, 100.0, 500.0, 1000.0, 2000.0])
+material = SubResource("ShaderMaterial_8a5mo")
+use_debug_colors = true
+debug_colors = Array[Color]([Color(0, 0, 0, 1), Color(0.560784, 0.333333, 0.32549, 1), Color(1, 0.501961, 0.435294, 1), Color(0, 0, 0.768627, 1), Color(0.894118, 0.666667, 0.870588, 1), Color(0.717647, 0.4, 0.2, 1), Color(0.133333, 0.301961, 0.466667, 1)])

@@ -1,17 +1,18 @@
-[gd_scene load_steps=14 format=3 uid="uid://wbghghxw5rhd"]
+[gd_scene load_steps=13 format=3 uid="uid://bh3fqd4aihgcd"]
 
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="1_7oy5j"]
-[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SurfaceVisual.gdshader" id="2_3sbmi"]
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/ocean_surface/OceanSurface3DBase.gd" id="3_4pudc"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="1_cbkwx"]
+[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SurfaceVisual.gdshader" id="2_mvxs8"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/ocean_surface/QuadTreeOceanSurface3D.gd" id="3_hfnug"]
+[ext_resource type="Script" path="res://examples/example/Camera.gd" id="4_qsxxs"]
 
-[sub_resource type="Texture2DRD" id="Texture2DRD_4ifqy"]
-texture_rd_rid = RID(49573277034618907)
+[sub_resource type="Texture2DRD" id="Texture2DRD_3yeqw"]
+texture_rd_rid = RID(20793469983269005)
 
-[sub_resource type="Texture2DRD" id="Texture2DRD_ltaif"]
-texture_rd_rid = RID(49573289919520794)
+[sub_resource type="Texture2DRD" id="Texture2DRD_vb8t0"]
+texture_rd_rid = RID(20793482868170891)
 
-[sub_resource type="Texture2DRD" id="Texture2DRD_gemr6"]
-texture_rd_rid = RID(49573302804422432)
+[sub_resource type="Texture2DRD" id="Texture2DRD_e26dj"]
+texture_rd_rid = RID(20793495753072785)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
 noise_type = 3
@@ -19,7 +20,7 @@ fractal_type = 0
 fractal_octaves = 2
 fractal_lacunarity = 3.0
 
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_o5jyh"]
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_pbym3"]
 width = 1024
 height = 1024
 seamless = true
@@ -35,19 +36,19 @@ height = 2048
 seamless = true
 noise = SubResource("FastNoiseLite_gub2d")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_aydlv"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pyrdx"]
 render_priority = 0
-shader = ExtResource("2_3sbmi")
+shader = ExtResource("2_mvxs8")
 shader_parameter/normal_factor = 1.0
 shader_parameter/cascade_uv_scales = Array[float]([3.23607, 1.61803, 0.5])
 shader_parameter/uv_scale = 0.00390625
 shader_parameter/wind_uv_offset = Vector2(0, 0)
-shader_parameter/view_distance_max = 16000.0
+shader_parameter/view_distance_max = 1e+06
 shader_parameter/vertex_resolution = 256.0
-shader_parameter/cascade_displacements = Array[Texture2DRD]([SubResource("Texture2DRD_4ifqy"), SubResource("Texture2DRD_ltaif"), SubResource("Texture2DRD_gemr6")])
+shader_parameter/cascade_displacements = Array[Texture2DRD]([SubResource("Texture2DRD_3yeqw"), SubResource("Texture2DRD_vb8t0"), SubResource("Texture2DRD_e26dj")])
 shader_parameter/domain_warp_uv_scale = 6.25e-05
 shader_parameter/domain_warp_strength = 1500.0
-shader_parameter/domain_warp_texture = SubResource("NoiseTexture2D_o5jyh")
+shader_parameter/domain_warp_texture = SubResource("NoiseTexture2D_pbym3")
 shader_parameter/planetary_curve_strength = 1e-06
 shader_parameter/amplitude_scale_min = 0.25
 shader_parameter/amplitude_scale_max = 1.0
@@ -83,21 +84,19 @@ shader_parameter/foam_diffuse_strength = 1.0
 shader_parameter/foam_diffuse_color = Color(0.917647, 0.968627, 1, 1)
 shader_parameter/foam_texture = SubResource("NoiseTexture2D_h2j7u")
 
-[sub_resource type="GDScript" id="GDScript_xspk3"]
-
-[sub_resource type="Resource" id="Resource_00fl7"]
-script = SubResource("GDScript_xspk3")
-size = Vector2(10, 256)
-subdivisions = Vector2(256, 256)
-
 [node name="Node3D" type="Node3D"]
 
 [node name="Ocean3D" type="Node3D" parent="."]
-script = ExtResource("1_7oy5j")
-material = SubResource("ShaderMaterial_aydlv")
-choppiness = 3.853
+script = ExtResource("1_cbkwx")
+material = SubResource("ShaderMaterial_pyrdx")
 
-[node name="OceanSurfaceRenderer3D" type="Node3D" parent="Ocean3D" node_paths=PackedStringArray("ocean")]
-script = ExtResource("3_4pudc")
+[node name="QuadTreeOceanSurface3D" type="Node3D" parent="Ocean3D" node_paths=PackedStringArray("ocean")]
+script = ExtResource("3_hfnug")
+lod_level = 3
+quad_size = 8196.0
 ocean = NodePath("..")
-settings = SubResource("Resource_00fl7")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15.8266, -385.094)
+script = ExtResource("4_qsxxs")
+motion_enabled = true
