@@ -3,21 +3,20 @@
 extends Node3D
 class_name QuadTree3D
 
-@export var use_visibility_detector := true
 
-enum LodSize {
-	LOD_32 = 32,
-	LOD_64 = 64,
-	LOD_128 = 128,
-	LOD_256 = 256,
-	LOD_512 = 512,
-	LOD_1024 = 1024,
-	LOD_2048 = 2048,
-	LOD_4096 = 4096,
-	LOD_8192 = 8192,
-	LOD_16384 = 16384,
-	LOD_32768 = 32768,
-}
+# enum LodSize {
+# 	LOD_32 = 32,
+# 	LOD_64 = 64,
+# 	LOD_128 = 128,
+# 	LOD_256 = 256,
+# 	LOD_512 = 512,
+# 	LOD_1024 = 1024,
+# 	LOD_2048 = 2048,
+# 	LOD_4096 = 4096,
+# 	LOD_8192 = 8192,
+# 	LOD_16384 = 16384,
+# 	LOD_32768 = 32768,
+# }
 
 @export var trigger_reinitialize: bool:
 	set(value):
@@ -36,13 +35,8 @@ enum LodSize {
 ## Vertex resolution of each of the quads in this tree.
 @export_range(0, 32000, 1) var mesh_vertex_resolution := 256
 
-# @export var min_lod := LodSize.LOD_128
-# @export var max_lod := LodSize.LOD_4096
-
 ## Ranges for each LOD level. Accessed as ranges[lod_level].
 @export var ranges:Array[float] = [512.0, 1024.0, 2048.0]
-
-@export var debug_material : Material
 
 ## The visual shader to apply to the surface geometry.
 @export var material: Material:
@@ -53,26 +47,12 @@ enum LodSize {
 		for quad in _subquads:
 			quad.material = material
 		if material and material is ShaderMaterial:
-			## Set max view distance and fade range start
-			if material.get_shader_parameter("view_distance_max") and camera:
-				push_warning("camera not set")
-				material.set_shader_parameter("view_distance_max", _camera.far)
+			## Set fade range start
 			if material.get_shader_parameter("vertex_resolution"):
 				material.set_shader_parameter("vertex_resolution", mesh_vertex_resolution)
 
 ## The camera this QuadTree3D is basing its LOD calculations on
 @export var camera: Camera3D
-
-@export var use_debug_colors := false
-@export var debug_colors : Array[Color] = [
-	Color.WHITE,
-	Color.RED,
-	Color.GREEN,
-	Color.BLUE,
-	Color.ORANGE,
-	Color.YELLOW
-]
-
 var _camera : Camera3D:
 	get:
 		if camera:
@@ -90,7 +70,6 @@ var pause_cull := false
 var cull_box:AABB
 
 ## Meshes for each LOD level.
-## TODO: Why am I storing so many meshes?
 var lod_meshes:Array[PlaneMesh] = []
 
 ## This quads mesh instance.
@@ -109,20 +88,19 @@ func _ready() -> void:
 	mesh_instance = MeshInstance3D.new()
 	subquad_node = Node3D.new()
 	_visibility_detector = VisibleOnScreenNotifier3D.new()
-	
 	add_child(subquad_node)
 	add_child(mesh_instance)
 	add_child(_visibility_detector)
 	
-	mesh_instance.visible = true
+	if Engine.is_editor_hint() and is_root_quad:
+		mesh_instance.visible = true
+	else:
+		mesh_instance.visible = false
 	mesh_instance.mesh = lod_meshes[lod_level]
 	mesh_instance.material_override = material
 	mesh_instance.set_instance_shader_parameter("patch_size", quad_size)
 	mesh_instance.set_instance_shader_parameter("min_lod_morph_distance", ranges[lod_level] * 2 * (1.0 - morph_range))
 	mesh_instance.set_instance_shader_parameter("max_lod_morph_distance", ranges[lod_level] * 2)
-	if use_debug_colors:
-		print("using debug colors")
-		mesh_instance.set_instance_shader_parameter("albedo", debug_colors[lod_level])
 	
 	_visibility_detector.aabb = AABB(Vector3(-quad_size * 0.75, -quad_size * 0.5, -quad_size * 0.75),
 			Vector3(quad_size * 1.5, quad_size, quad_size * 1.5))
@@ -141,13 +119,11 @@ func _ready() -> void:
 			new_quad.ranges = ranges
 			new_quad.process_mode = PROCESS_MODE_DISABLED
 			new_quad.position = offset * offset_length
-			new_quad.position.y -= 0.1
 			new_quad.morph_range = morph_range
 			new_quad.lod_meshes = lod_meshes
 			new_quad.is_root_quad = false
-			new_quad.use_debug_colors = true
-			new_quad.debug_material = debug_material
 			new_quad.material = material
+			new_quad.camera = _camera
 			
 			subquad_node.add_child(new_quad)
 			_subquads.append(new_quad)
@@ -156,6 +132,8 @@ func _ready() -> void:
 ## quad will run _process().
 func _process(_delta:float) -> void:
 	if not pause_cull and Engine.get_frames_drawn() % 2:
+		lod_select(_camera.global_position)
+		return
 		if Engine.is_editor_hint():
 			lod_select(Vector3.ZERO)
 		else:
@@ -167,12 +145,17 @@ func _process(_delta:float) -> void:
 ## node must handle it.
 ## cam_pos is the camera/player position in global coordinates.
 func lod_select(cam_pos:Vector3) -> bool:
+	if Engine.is_editor_hint():
+		return false
 	## Beginning at the root node of lowest LOD, and working towards the most
 	## detailed LOD 0.
-	if not use_visibility_detector or not _visibility_detector or Engine.is_editor_hint():
-		return false
+
+	# if !Engine.is_editor_hint():
+	# 	print("\nLOD SELECTOR")
+	# 	print("lod selector cam pos", cam_pos)
 	
 	if not within_sphere(cam_pos, ranges[lod_level]):
+		# print("not within sphere")
 		## This quad is not within range of the selected LOD level, the parent
 		## will need to display this at a lower detailed LOD. Return false to
 		## mark the area as not handled.
@@ -197,6 +180,7 @@ func lod_select(cam_pos:Vector3) -> bool:
 		## children that may be able to display this. Check if any are within
 		## their LOD range.
 		if not within_sphere(cam_pos, ranges[lod_level - 1]):
+			# print("within range of LOD level, but a more detailed child may be able to handle this")
 			reset_visibility()
 			
 			## No children are within range of their LOD levels, make this quad
@@ -253,11 +237,14 @@ func reinitialize():
 	_ready()
 
 func _get_camera() -> Camera3D:
+	var cam : Camera3D
 	if Engine.is_editor_hint():
-		return EditorInterface.get_editor_viewport_3d().get_camera_3d()
+		cam = EditorInterface.get_editor_viewport_3d().get_camera_3d()
 	if get_viewport():
-		return get_viewport().get_camera_3d()
-	return null
+		cam = get_viewport().get_camera_3d()
+	if cam:
+		material.set_shader_parameter("view_distance_max", cam.far)
+	return cam
 
 func _create_lod_meshes():
 	print("clear lod meshes")
@@ -265,7 +252,7 @@ func _create_lod_meshes():
 	## Initialize LOD meshes for each level
 	var current_size = quad_size
 	
-	print("creating log meshes")
+	print("creating lod meshes")
 	for i in range(lod_level + 1):
 		var mesh := PlaneMesh.new()
 		mesh.size = Vector2.ONE * current_size
@@ -274,3 +261,4 @@ func _create_lod_meshes():
 		
 		lod_meshes.insert(0, mesh)
 		current_size *= 0.5
+	print(lod_meshes)

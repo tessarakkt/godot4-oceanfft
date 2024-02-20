@@ -2,14 +2,6 @@
 extends OceanSurface3DBase
 class_name QuadTreeOceanSurface3D
 
-## Specifies the LOD level of the current quad. There will be X - 1 subquad
-## levels nested below this quad.
-@export_range(0, 1000000, 1) var lod_level := 2:
-	set(value):
-		lod_level = value
-		quad_tree.lod_level = lod_level
-		quad_tree.reinitialize()
-
 ## Horizontal size of the current quad.
 @export_range(1.0, 65535.0) var quad_size := 1024.0:
 	set(value):
@@ -18,6 +10,7 @@ class_name QuadTreeOceanSurface3D
 		quad_tree.reinitialize()
 
 ## Morph range for CDLOD geomorph between LOD levels.
+# TODO not used?
 @export_range(0.0, 1.0, 0.001) var morph_range := 0.15:
 	set(value):
 		morph_range = value
@@ -36,6 +29,7 @@ class_name QuadTreeOceanSurface3D
 	set(value):
 		ranges = value
 		quad_tree.ranges = ranges
+		quad_tree.lod_level = ranges.size() - 1
 		quad_tree.reinitialize()
 
 var quad_tree : QuadTree3D

@@ -1,4 +1,7 @@
-shader_type spatial;
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://ojp36m6c3w15"]
+
+[sub_resource type="Shader" id="Shader_a1rlo"]
+code = "shader_type spatial;
 render_mode cull_disabled, depth_draw_never, depth_test_disabled;
 
 uniform float border_size = 0.01;
@@ -23,3 +26,9 @@ void fragment() {
 	// Called for every pixel for every light affecting the material.
 	// Uncomment to replace the default light processing function with this one.
 //}
+"
+
+[resource]
+render_priority = 1
+shader = SubResource("Shader_a1rlo")
+shader_parameter/border_size = 0.01
