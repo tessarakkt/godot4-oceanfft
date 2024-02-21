@@ -1,5 +1,5 @@
 @tool
-extends OceanSurface3DBase
+extends OceanSurface3D
 class_name QuadTreeOceanSurface3D
 
 ## Horizontal size of the current quad.

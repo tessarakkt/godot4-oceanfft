@@ -1,5 +1,5 @@
 @tool
-extends OceanSurface3DBase
+extends OceanSurface3D
 class_name MultiMeshPlaneOceanSurface3D
 
 @export var instance_counts : Vector2 = Vector2.ONE * 50:

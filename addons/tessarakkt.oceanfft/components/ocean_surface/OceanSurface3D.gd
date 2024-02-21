@@ -1,6 +1,6 @@
 @tool
 extends Node3D
-class_name OceanSurface3DBase
+class_name OceanSurface3D
 ## Base OceanSurface3D class. Has no rendering.
 
 @export var ocean: Ocean3D:

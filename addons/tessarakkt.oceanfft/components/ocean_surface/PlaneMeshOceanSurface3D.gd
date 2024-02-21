@@ -1,5 +1,5 @@
 @tool
-extends OceanSurface3DBase
+extends OceanSurface3D
 class_name PlaneMeshOceanSurface3D
 
 @export var mesh_size : Vector2 = Vector2(256, 256):
