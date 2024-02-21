@@ -1,3 +1,4 @@
+@tool
 @icon("res://addons/tessarakkt.oceanfft/icons/BuoyancyProbe3D.svg")
 extends Marker3D
 class_name BuoyancyProbe3D
@@ -22,14 +23,43 @@ class_name BuoyancyProbe3D
 @export_range(0, 2, 1) var max_cascade := 1
 
 
-## The ocean simulation that will be sampled for wave height. If this is a child
-## of a BuoyancyBody3D's BuoyancyProbes container node when
-## BuoyancyBody3D._ready() is called, the bodies assigned ocean will be assigned
-## to this probe. If the probe is added to the body after _ready(), the ocean
-## will need to be manually assigned.
+## The ocean simulation that will be sampled for wave height. If this probe is
+## added to a BuoyancyBody3D node, that bodies' assigned ocean will be assigned
+## to this probe.
 var ocean:Ocean3D
+
+# The BuoyancyBody3D this probe is being used by. Assigned automatically by seeking
+# up the tree for a BuoyancyBody3D upon being added to the tree, and removed
+# automatically when exiting the tree
+var _buoyancy_body : BuoyancyBody3D = null
 
 
 ## Get the wave height at this buoyancy probes's location.
 func get_wave_height() -> float:
 	return ocean.get_wave_height(global_position, max_cascade, height_sampling_steps)
+
+# Seeks up the scene tree for the first BuoyancyBody3D ancestor and adds itself to its active probes
+func _add_to_buoyancy_body_3d_ancestor():
+	var parent := get_parent()
+	while parent:
+		if parent is BuoyancyBody3D:
+			parent.add_probe(self)
+			_buoyancy_body = parent
+			return
+		parent = parent.get_parent()
+	_buoyancy_body = null
+
+func _enter_tree():
+	_add_to_buoyancy_body_3d_ancestor()
+
+func _exit_tree():
+	if _buoyancy_body:
+		_buoyancy_body.remove_probe(self)
+
+func _get_configuration_warnings():
+	const _NO_BODY_CONFIGURATION_WARNING :=\
+		"BuoyancyProbe3D only serves to provide a buoyancy probe to a BuoyancyBody3D derived node.
+		Please ensure it has a BuoyancyBody3D as an ancestor in the scene tree"
+
+	if !_buoyancy_body:
+		return [_NO_BODY_CONFIGURATION_WARNING]
