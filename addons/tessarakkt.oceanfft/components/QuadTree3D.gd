@@ -112,6 +112,8 @@ func _ready() -> void:
 ## quad will run _process().
 func _process(_delta:float) -> void:
 	if not pause_cull and Engine.get_frames_drawn() % 2:
+		if !_camera:
+			return
 		lod_select(_camera.global_position)
 
 ## Select which meshes will be displayed at which LOD level. A return value of
