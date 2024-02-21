@@ -51,9 +51,6 @@ var is_root_quad := true
 ## If this is true, the LOD system will be paused in its current state.
 var pause_cull := false
 
-## The cull box that encloses this quad.
-var cull_box:AABB
-
 ## Meshes for each LOD level.
 var lod_meshes:Array[PlaneMesh] = []
 
@@ -90,8 +87,6 @@ func _ready() -> void:
 	_visibility_detector.aabb = AABB(Vector3(-quad_size * 0.75, -quad_size * 0.5, -quad_size * 0.75),
 			Vector3(quad_size * 1.5, quad_size, quad_size * 1.5))
 	mesh_instance.custom_aabb = _visibility_detector.aabb
-	cull_box = AABB(global_position + Vector3(-quad_size * 0.5, -10, -quad_size * 0.5),
-			Vector3(quad_size, 20, quad_size))
 	
 	## If this is not the most detailed LOD level, initialize more detailed
 	## children.
@@ -118,7 +113,6 @@ func _ready() -> void:
 func _process(_delta:float) -> void:
 	if not pause_cull and Engine.get_frames_drawn() % 2:
 		lod_select(_camera.global_position)
-		return
 
 ## Select which meshes will be displayed at which LOD level. A return value of
 ## true marks the node as handled, and a value of false indicates the parent
@@ -197,6 +191,8 @@ func reset_visibility() -> void:
 func within_sphere(center:Vector3, radius:float) -> bool:
 	var radius_squared := radius * radius
 	var dmin := 0.0
+	var cull_box := AABB(global_position + Vector3(-quad_size * 0.5, -10, -quad_size * 0.5),
+			Vector3(quad_size, 20, quad_size))
 	
 	for i in range(3):
 		if center[i] < cull_box.position[i]:
