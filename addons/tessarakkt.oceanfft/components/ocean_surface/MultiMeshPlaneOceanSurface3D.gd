@@ -54,11 +54,11 @@ func update_mesh_instances() -> void:
 	# update instance transforms
 	multimesh.visible_instance_count = rows * columns
 	var i := 0
-	var offset = -Vector3((rows / 2.0) - 0.5, 0, (columns / 2.0) - 0.5) * ocean.horizontal_dimension
+	var offset = -Vector3((rows / 2.0) - 0.5, 0, (columns / 2.0) - 0.5) * Vector3(instance_size.x, 0, instance_size.y)
 	var basis_position = position + offset
 	for x in rows:
 		for z in columns:
 			var transform := Transform3D()
-			transform.origin = basis_position + Vector3(x * ocean.horizontal_dimension, 0,  z * ocean.horizontal_dimension)
+			transform.origin = basis_position + Vector3(x * instance_size.x, 0,  z * instance_size.y)
 			multimesh.set_instance_transform(i, transform)
 			i += 1
