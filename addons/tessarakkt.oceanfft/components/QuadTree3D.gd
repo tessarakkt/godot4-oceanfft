@@ -192,6 +192,7 @@ func lod_select(cam_pos:Vector3) -> bool:
 			## At least one more detailed children is within LOD range. Recurse
 			## through them and select them if appropriate.
 			for subquad in _subquads:
+				subquad.mesh_instance.visible = false
 				if not subquad.lod_select(cam_pos):
 					subquad.mesh_instance.visible = true
 		
