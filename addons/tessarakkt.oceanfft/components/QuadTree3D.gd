@@ -3,21 +3,6 @@
 extends Node3D
 class_name QuadTree3D
 
-
-# enum LodSize {
-# 	LOD_32 = 32,
-# 	LOD_64 = 64,
-# 	LOD_128 = 128,
-# 	LOD_256 = 256,
-# 	LOD_512 = 512,
-# 	LOD_1024 = 1024,
-# 	LOD_2048 = 2048,
-# 	LOD_4096 = 4096,
-# 	LOD_8192 = 8192,
-# 	LOD_16384 = 16384,
-# 	LOD_32768 = 32768,
-# }
-
 @export var trigger_reinitialize: bool:
 	set(value):
 		reinitialize()
@@ -134,11 +119,6 @@ func _process(_delta:float) -> void:
 	if not pause_cull and Engine.get_frames_drawn() % 2:
 		lod_select(_camera.global_position)
 		return
-		if Engine.is_editor_hint():
-			lod_select(Vector3.ZERO)
-		else:
-			lod_select(_camera.global_position)
-
 
 ## Select which meshes will be displayed at which LOD level. A return value of
 ## true marks the node as handled, and a value of false indicates the parent
@@ -241,7 +221,7 @@ func _get_camera() -> Camera3D:
 	var cam : Camera3D
 	if Engine.is_editor_hint():
 		cam = EditorInterface.get_editor_viewport_3d().get_camera_3d()
-	if get_viewport():
+	elif get_viewport():
 		cam = get_viewport().get_camera_3d()
 	if cam:
 		material.set_shader_parameter("view_distance_max", cam.far)
