@@ -307,7 +307,6 @@ func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = t
 	uv_pos.y = global_pos.z
 	
 	## Apply domain warp
-	var camera:Camera3D = _get_camera()
 	if camera and apply_domain_warp and _domain_warp_image != null:
 		var linear_dist:float = (global_pos - camera.global_position).length()
 		
@@ -349,7 +348,6 @@ func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> 
 	var pixel:Color
 	var xz_offset := Vector3.ZERO
 	var total_height := 0.0
-	var camera := _get_camera()
 	var camera_global_position = camera.global_position if camera else Vector3.ZERO
 	var linear_dist := (global_pos - camera_global_position).length()
 	
