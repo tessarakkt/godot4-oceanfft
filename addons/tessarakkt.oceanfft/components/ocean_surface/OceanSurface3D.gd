@@ -29,12 +29,13 @@ func _on_set_ocean() -> void:
 
 func _process(delta: float):
 	if infinite_mode == InfiniteMode.PROCESS:
-		_position_at_camera_xz()
+		call_deferred("_position_at_camera_xz")
 
 func _physics_process(delta: float):
 	if infinite_mode == InfiniteMode.PHYSICS_PROCESS:
-		_position_at_camera_xz()
+		call_deferred("_position_at_camera_xz")
 
 func _position_at_camera_xz():
-	position.x = ocean.camera.position.x
-	position.z = ocean.camera.position.z
+	if ocean.camera:
+		position.x = ocean.camera.position.x
+		position.z = ocean.camera.position.z
