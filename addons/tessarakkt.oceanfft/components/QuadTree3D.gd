@@ -76,6 +76,7 @@ func _ready() -> void:
 	
 	if Engine.is_editor_hint() and is_root_quad:
 		mesh_instance.visible = true
+		return
 	else:
 		mesh_instance.visible = false
 	mesh_instance.mesh = lod_meshes[lod_level]
@@ -87,9 +88,9 @@ func _ready() -> void:
 	_visibility_detector.aabb = AABB(Vector3(-quad_size * 0.75, -quad_size * 0.5, -quad_size * 0.75),
 			Vector3(quad_size * 1.5, quad_size, quad_size * 1.5))
 	mesh_instance.custom_aabb = _visibility_detector.aabb
-	
-	## If this is not the most detailed LOD level, initialize more detailed
-	## children.
+
+	# If this is not the most detailed LOD level, initialize more detailed
+	# children.
 	if lod_level > 0:
 		for offset in [Vector3(1, 0, 1), Vector3(-1, 0, 1), Vector3(1, 0, -1), Vector3(-1, 0, -1)]:
 			var offset_length:float = quad_size * 0.25
@@ -226,12 +227,10 @@ func _get_camera() -> Camera3D:
 	return cam
 
 func _create_lod_meshes():
-	print("clear lod meshes")
 	lod_meshes.clear()
 	## Initialize LOD meshes for each level
 	var current_size = quad_size
 	
-	print("creating lod meshes")
 	for i in range(lod_level + 1):
 		var mesh := PlaneMesh.new()
 		mesh.size = Vector2.ONE * current_size
@@ -240,4 +239,3 @@ func _create_lod_meshes():
 		
 		lod_meshes.insert(0, mesh)
 		current_size *= 0.5
-	print(lod_meshes)
