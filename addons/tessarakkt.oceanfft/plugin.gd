@@ -10,7 +10,6 @@ func _enter_tree():
 	add_custom_type("MotorVesselBody3D", "BuoyancyBody3D", preload("res://addons/tessarakkt.oceanfft/components/MotorVesselBody3D.gd"), preload("res://addons/tessarakkt.oceanfft/icons/BuoyancyBody3D.svg"))
 	add_custom_type("OceanEnvironment", "WorldEnvironment", preload("res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd"), preload("res://addons/tessarakkt.oceanfft/icons/OceanEnvironment.svg"))
 
-
 func _exit_tree():
 	remove_custom_type("BuoyancyBody3D")
 	remove_custom_type("BuoyancySphere3D")

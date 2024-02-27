@@ -1,0 +1,95 @@
+[gd_scene load_steps=12 format=3 uid="uid://b63dgrhana650"]
+
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="1_yd3eb"]
+[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SurfaceVisual.gdshader" id="2_km0s1"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/ocean_surface/QuadTreeOceanSurface3D.gd" id="3_1wy0c"]
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_jxwep"]
+texture_rd_rid = RID(1662770818850591)
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_e4fxf"]
+texture_rd_rid = RID(1662783703748459)
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_taty0"]
+texture_rd_rid = RID(1662796588654329)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
+noise_type = 3
+fractal_type = 0
+fractal_octaves = 2
+fractal_lacunarity = 3.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_o5jyh"]
+width = 1024
+height = 1024
+seamless = true
+noise = SubResource("FastNoiseLite_nywmb")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_gub2d"]
+noise_type = 3
+fractal_octaves = 7
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_h2j7u"]
+width = 2048
+height = 2048
+seamless = true
+noise = SubResource("FastNoiseLite_gub2d")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_aydlv"]
+render_priority = 0
+shader = ExtResource("2_km0s1")
+shader_parameter/normal_factor = 1.0
+shader_parameter/cascade_uv_scales = Array[float]([3.23607, 1.61803, 0.5])
+shader_parameter/uv_scale = 0.00390625
+shader_parameter/wind_uv_offset = Vector2(0, 0)
+shader_parameter/view_distance_max = 16000.0
+shader_parameter/vertex_resolution = 256.0
+shader_parameter/cascade_displacements = Array[Texture2DRD]([SubResource("Texture2DRD_jxwep"), SubResource("Texture2DRD_e4fxf"), SubResource("Texture2DRD_taty0")])
+shader_parameter/domain_warp_uv_scale = 6.25e-05
+shader_parameter/domain_warp_strength = 1500.0
+shader_parameter/domain_warp_texture = SubResource("NoiseTexture2D_o5jyh")
+shader_parameter/planetary_curve_strength = 1e-06
+shader_parameter/amplitude_scale_min = 0.25
+shader_parameter/amplitude_scale_max = 1.0
+shader_parameter/amplitude_scale_fade_distance = 12000.0
+shader_parameter/specular_strength = 1.0
+shader_parameter/specular_power = 1500.0
+shader_parameter/view_fade_start = 0.95
+shader_parameter/deep_color = Color(0.004, 0.016, 0.047, 1)
+shader_parameter/shallow_color = Color(0, 0.729412, 0.988235, 1)
+shader_parameter/fresnel_offset = 0.02
+shader_parameter/fresnel_strength = 0.0
+shader_parameter/fresnel_power = 5.0
+shader_parameter/fresnel_exposure = 0.01
+shader_parameter/fresnel_sky_color = Color(1.6, 4.8, 6.4, 1)
+shader_parameter/pbr_specular_strength = 0.5
+shader_parameter/pbr_specular_offset = 0.05
+shader_parameter/pbr_metallic_strength = 0.0
+shader_parameter/refraction_factor_min = 0.0
+shader_parameter/refraction_factor_max = 0.025
+shader_parameter/refraction_distance_power = 1.55
+shader_parameter/refraction_distance_max = 30000.0
+shader_parameter/refraction_background_brightness = 0.2
+shader_parameter/refraction_depth_factor = 1e-05
+shader_parameter/sss_backlight_strength = 0.0125
+shader_parameter/sss_backlight_fov = 10.0
+shader_parameter/sss_backlight_depth = 15.0
+shader_parameter/sss_upwelling = 0.05
+shader_parameter/sss_color = Color(0, 0.729412, 0.988235, 1)
+shader_parameter/foam_jacobian_limit = 0.5
+shader_parameter/foam_coverage = 0.1
+shader_parameter/foam_mix_strength = 1.0
+shader_parameter/foam_diffuse_strength = 1.0
+shader_parameter/foam_diffuse_color = Color(0.917647, 0.968627, 1, 1)
+shader_parameter/foam_texture = SubResource("NoiseTexture2D_h2j7u")
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Ocean3D" type="Node3D" parent="."]
+script = ExtResource("1_yd3eb")
+material = SubResource("ShaderMaterial_aydlv")
+choppiness = 3.853
+
+[node name="QuadTreeOceanSurface3D" type="Node3D" parent="Ocean3D" node_paths=PackedStringArray("ocean")]
+script = ExtResource("3_1wy0c")
+ocean = NodePath("..")

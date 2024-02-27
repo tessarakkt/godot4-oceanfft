@@ -1,15 +1,15 @@
 [gd_scene load_steps=25 format=3 uid="uid://bs1yo1162gltj"]
 
-[ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
+[ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://examples/example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="2_jhrdm"]
-[ext_resource type="Material" uid="uid://cmyo0unntq078" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="5_0jjw4"]
-[ext_resource type="Script" path="res://example/Camera.gd" id="5_eso43"]
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="5_li4kg"]
+[ext_resource type="Material" uid="uid://cmyo0unntq078" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="4_882xa"]
+[ext_resource type="Script" path="res://examples/example/Camera.gd" id="5_eso43"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/ocean_surface/QuadTreeOceanSurface3D.gd" id="6_me71s"]
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SplashParticles.gdshader" id="6_nklv0"]
-[ext_resource type="PackedScene" uid="uid://rmewe8a2xeoe" path="res://example/FloatingRectangle.tscn" id="6_q2mn5"]
-[ext_resource type="PackedScene" uid="uid://bbes3eh3swxnh" path="res://example/MotorRectangle.tscn" id="7_lob4t"]
+[ext_resource type="PackedScene" uid="uid://rmewe8a2xeoe" path="res://examples/example/FloatingRectangle.tscn" id="6_q2mn5"]
+[ext_resource type="PackedScene" uid="uid://bbes3eh3swxnh" path="res://examples/example/MotorRectangle.tscn" id="7_lob4t"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="7_xa10r"]
-[ext_resource type="Script" path="res://example/OceanUI.gd" id="8_h37lk"]
+[ext_resource type="Script" path="res://examples/example/OceanUI.gd" id="8_h37lk"]
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterParticles.gdshader" id="10_kqf5f"]
 [ext_resource type="Texture2D" uid="uid://n8ghpdii3aqh" path="res://addons/tessarakkt.oceanfft/graphics/Splash.png" id="10_o46r2"]
 
@@ -145,6 +145,8 @@ underwater_particles = NodePath("UnderwaterParticles")
 
 [node name="Ocean3D" type="Node3D" parent="."]
 script = ExtResource("7_xa10r")
+editor_simulation_enabled = false
+material = ExtResource("4_882xa")
 simulation_frameskip = 1
 fft_resolution = 128
 horizontal_dimension = 512
@@ -154,12 +156,13 @@ choppiness = 0.5
 wave_scroll_speed = -0.003
 wind_speed = 15.0
 
-[node name="QuadTree3D" type="Node3D" parent="."]
-script = ExtResource("5_li4kg")
-lod_level = 7
-quad_size = 32768.0
-ranges = Array[float]([250.0, 500.0, 1900.0, 3800.0, 7600.0, 15200.0, 30400.0, 60800.0])
-material = ExtResource("5_0jjw4")
+[node name="QuadTreeOceanSurface3D" type="Node3D" parent="Ocean3D" node_paths=PackedStringArray("ocean")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.61244, 0, -148.585)
+script = ExtResource("6_me71s")
+quad_size = 16384.0
+mesh_vertex_resolution = 128
+ranges = Array[float]([100.0, 200.0, 300.0, 500.0, 1000.0, 2000.0, 10000.0])
+ocean = NodePath("..")
 
 [node name="FloatingRectangle" parent="." node_paths=PackedStringArray("ocean") instance=ExtResource("6_q2mn5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 52.6454)
@@ -168,7 +171,7 @@ gravity_scale = 4.0
 ocean = NodePath("../Ocean3D")
 
 [node name="MotorVesselBody3D" parent="." node_paths=PackedStringArray("ocean") instance=ExtResource("7_lob4t")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, -0.012544, 0)
 mass = 5000.0
 gravity_scale = 4.0
 center_of_mass_mode = 1
@@ -234,11 +237,10 @@ reflection_probe = NodePath("../ReflectionProbe")
 
 [node name="DirectionalLight3D_Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.848048, 0.223954, -0.48027, 0, 0.906308, 0.422618, 0.529919, -0.358401, 0.768593, 0, 2.5, 0)
-light_energy = 0.5
+light_energy = 3.706
 
 [node name="DirectionalLight3D_Sky" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.5, 0)
-visible = false
 light_energy = 2.5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." node_paths=PackedStringArray("ocean", "free_camera", "player_camera")]

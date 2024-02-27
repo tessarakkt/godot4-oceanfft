@@ -1,0 +1,34 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://ojp36m6c3w15"]
+
+[sub_resource type="Shader" id="Shader_a1rlo"]
+code = "shader_type spatial;
+render_mode cull_disabled, depth_draw_never, depth_test_disabled;
+
+uniform float border_size = 0.01;
+
+instance uniform vec3 albedo = vec3(1.0, 1.0, 1.0);
+
+void vertex() {
+	// Called for every vertex the material is visible on.
+}
+
+void fragment() {
+	ALBEDO = albedo;
+	if (UV.x < border_size || UV.x > 1.0 - border_size || UV.y < border_size || UV.y > 1.0 - border_size) {
+		ALPHA = 1.0;
+	} else {
+		ALBEDO = albedo;
+		ALPHA = 0.0;
+	}
+}
+
+//void light() {
+	// Called for every pixel for every light affecting the material.
+	// Uncomment to replace the default light processing function with this one.
+//}
+"
+
+[resource]
+render_priority = 1
+shader = SubResource("Shader_a1rlo")
+shader_parameter/border_size = 0.01

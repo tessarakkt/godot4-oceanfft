@@ -11,7 +11,7 @@ extends Camera3D
 
 
 var camera_motion := Vector2.ZERO
-var motion_enabled := false
+@export var motion_enabled := false
 var zoom_factor := 0.0
 
 
@@ -54,7 +54,8 @@ func _process(delta:float) -> void:
 		
 		if not motion.is_zero_approx():
 			position += motion * delta
-			reflection_probe.position = position
+			if reflection_probe:
+				reflection_probe.position = position
 		
 		rotate(Vector3.UP, camera_motion.x * -camera_sensitivity * delta)
 		rotate(basis.x, camera_motion.y * -camera_sensitivity * delta)

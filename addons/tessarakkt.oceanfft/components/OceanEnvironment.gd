@@ -106,8 +106,10 @@ func _process(_delta):
 func go_under_water() -> void:
 	player_is_surfaced = false
 	
-	sky_light.visible = true
-	sun_light.light_energy = 0.75
+	if sky_light:
+		sky_light.visible = true
+	if sun_light:
+		sun_light.light_energy = 0.75
 	
 	environment.fog_enabled = false
 	environment.volumetric_fog_enabled = true
@@ -130,8 +132,10 @@ func go_under_water() -> void:
 func go_above_water() -> void:
 	player_is_surfaced = true
 	
-	sky_light.visible = false
-	sun_light.light_energy = 0.5
+	if sky_light:
+		sky_light.visible = false
+	if sun_light:
+		sun_light.light_energy = 0.5
 	
 	environment.fog_enabled = true
 	environment.volumetric_fog_enabled = false

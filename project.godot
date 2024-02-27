@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Ocean"
-run/main_scene="res://example/Example.tscn"
+run/main_scene="res://examples/example/Example.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://icon.svg"
 

@@ -1,0 +1,50 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8qga4ckydyh8"]
+
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="1_8cvas"]
+[ext_resource type="Script" path="res://examples/components/common/SliderCamera.gd" id="1_gblmc"]
+[ext_resource type="Shader" path="res://examples/example/UvBorder.gdshader" id="3_oiwyy"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5tsam"]
+render_priority = 0
+shader = ExtResource("3_oiwyy")
+shader_parameter/border_size = 0.01
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, -6.95048e-16, 4.19024e-17, 4.19021e-17, 0.120137, 0.992757, -6.95048e-16, -0.992757, 0.120137, 2.08165e-12, 2615.08, 2.08165e-12)
+far = 10000.0
+script = ExtResource("1_gblmc")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.0125311, 0.999922, 0, -0.999922, 0.0125311, 0, 197.085, 0)
+
+[node name="QuadTree3D" type="Node3D" parent="." node_paths=PackedStringArray("camera")]
+script = ExtResource("1_8cvas")
+lod_level = 8
+mesh_vertex_resolution = 4
+ranges = Array[float]([20.0, 40.0, 80.0, 160.0, 320.0, 640.0, 1280.0, 2560.0, 5120.0, 10240.0])
+material = SubResource("ShaderMaterial_5tsam")
+camera = NodePath("../Camera3D")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 13.0
+offset_top = 12.0
+offset_right = 53.0
+offset_bottom = -13.0
+grow_vertical = 2
+
+[node name="VSlider" type="VSlider" parent="Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.019
+offset_right = 16.0
+offset_bottom = -16.837
+max_value = 1.0
+step = 0.01
+value = 0.5
+
+[connection signal="value_changed" from="Control/VSlider" to="Camera3D" method="_on_v_slider_value_changed"]
