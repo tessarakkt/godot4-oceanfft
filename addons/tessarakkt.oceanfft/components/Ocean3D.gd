@@ -260,7 +260,7 @@ func _ready() -> void:
 
 func _process(delta:float) -> void:
 	if simulation_enabled:
-		if Engine.is_editor_hint() and !editor_simulation_enabled:
+		if Engine.is_editor_hint() and (!editor_simulation_enabled or EditorInterface.is_playing_scene()):
 			return
 		_accumulated_delta += delta
 		
