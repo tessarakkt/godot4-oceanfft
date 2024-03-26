@@ -148,7 +148,7 @@ shader_parameter/distortion_speed = 5.0
 shader_parameter/distortion_amount = 1.0
 shader_parameter/noise_texture = SubResource("NoiseTexture2D_xvh5c")
 
-[node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("ocean", "sun_light", "sky_light", "splash_particles", "splash_sub_particles", "underwater_particles")]
+[node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("ocean", "sun_light", "sky_light", "splash_particles", "splash_sub_particles", "underwater_particles", "underwater_post_proc")]
 environment = ExtResource("1_o40li")
 script = ExtResource("2_jhrdm")
 ocean = NodePath("Ocean3D")
@@ -157,6 +157,7 @@ sky_light = NodePath("DirectionalLight3D_Sky")
 splash_particles = NodePath("SplashParticles")
 splash_sub_particles = NodePath("SplashParticles/SplashSubParticles")
 underwater_particles = NodePath("UnderwaterParticles")
+underwater_post_proc = NodePath("PostProcessingLayer/UnderwaterPostProc")
 
 [node name="Ocean3D" type="Node3D" parent="."]
 script = ExtResource("7_xa10r")
@@ -400,7 +401,7 @@ ticks_on_borders = true
 [node name="PostProcessingLayer" type="CanvasLayer" parent="."]
 layer = 0
 
-[node name="UnderWaterEffect" type="ColorRect" parent="PostProcessingLayer"]
+[node name="UnderwaterPostProc" type="ColorRect" parent="PostProcessingLayer"]
 material = SubResource("ShaderMaterial_6utjj")
 anchors_preset = 15
 anchor_right = 1.0
