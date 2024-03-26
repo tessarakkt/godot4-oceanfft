@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://bs1yo1162gltj"]
+[gd_scene load_steps=30 format=3 uid="uid://bs1yo1162gltj"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="2_jhrdm"]
@@ -12,6 +12,8 @@
 [ext_resource type="Script" path="res://example/OceanUI.gd" id="8_h37lk"]
 [ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterParticles.gdshader" id="10_kqf5f"]
 [ext_resource type="Texture2D" uid="uid://n8ghpdii3aqh" path="res://addons/tessarakkt.oceanfft/graphics/Splash.png" id="10_o46r2"]
+[ext_resource type="Texture2D" uid="uid://b4cb3vkqormjf" path="res://addons/tessarakkt.oceanfft/graphics/bubble_6_grayscale.png" id="12_37laq"]
+[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterPostProc.gdshader" id="14_vnu5r"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
 noise_type = 3
@@ -114,17 +116,18 @@ shader_parameter/turbulence_initial_displacement_max = 0.0
 shader_parameter/turbulence_noise_speed_random = 0.0
 shader_parameter/turbulence_noise_speed = Vector3(0.5, 0.5, 0.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ncfd7"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lmjtv"]
 transparency = 1
 shading_mode = 0
-albedo_color = Color(1, 1, 1, 0.25098)
+albedo_color = Color(1, 1, 1, 0.396078)
+albedo_texture = ExtResource("12_37laq")
 billboard_mode = 3
 particles_anim_h_frames = 1
 particles_anim_v_frames = 1
 particles_anim_loop = false
 
 [sub_resource type="QuadMesh" id="QuadMesh_x0k2k"]
-material = SubResource("StandardMaterial3D_ncfd7")
+material = SubResource("StandardMaterial3D_lmjtv")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i8f6a"]
 bg_color = Color(0.188235, 0.188235, 0.188235, 1)
@@ -132,6 +135,18 @@ expand_margin_left = 10.0
 expand_margin_top = 10.0
 expand_margin_right = 10.0
 expand_margin_bottom = 10.0
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_thv8h"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_xvh5c"]
+seamless = true
+noise = SubResource("FastNoiseLite_thv8h")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6utjj"]
+shader = ExtResource("14_vnu5r")
+shader_parameter/distortion_speed = 5.0
+shader_parameter/distortion_amount = 1.0
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_xvh5c")
 
 [node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("ocean", "sun_light", "sky_light", "splash_particles", "splash_sub_particles", "underwater_particles")]
 environment = ExtResource("1_o40li")
@@ -381,6 +396,18 @@ max_value = 360.0
 step = 0.001
 tick_count = 4
 ticks_on_borders = true
+
+[node name="PostProcessingLayer" type="CanvasLayer" parent="."]
+layer = 0
+
+[node name="UnderWaterEffect" type="ColorRect" parent="PostProcessingLayer"]
+material = SubResource("ShaderMaterial_6utjj")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/SimulateEnabled" to="CanvasLayer" method="_on_simulate_enabled_toggled"]
 [connection signal="toggled" from="CanvasLayer/PanelContainer/VBoxContainer/CullEnabled" to="CanvasLayer" method="_on_cull_enabled_toggled"]
