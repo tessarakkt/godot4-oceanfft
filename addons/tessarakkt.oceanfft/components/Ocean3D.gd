@@ -389,8 +389,7 @@ func get_all_waves_textures() -> Array[Texture2DRD]:
 
 func _pack_initial_spectrum_settings(cascade:int) -> PackedByteArray:
 	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
-	settings_bytes.append_array(PackedFloat32Array([cascade_ranges[cascade].x, cascade_ranges[cascade].y]).to_byte_array())
-	settings_bytes.append_array(PackedVector2Array([wave_vector]).to_byte_array())
+	settings_bytes.append_array(PackedFloat32Array([cascade_ranges[cascade].x, cascade_ranges[cascade].y, wave_vector.x, wave_vector.y]).to_byte_array())
 	return settings_bytes
 
 
