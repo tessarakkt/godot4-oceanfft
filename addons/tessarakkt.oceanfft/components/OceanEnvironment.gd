@@ -55,6 +55,9 @@ class_name OceanEnvironment
 ## set a particle emitter here.
 @export var underwater_particles:GPUParticles3D
 
+## Canvas for displaying post processing effects, add another canvas layer to the scene,
+## put its order below your UI canvas layer to render just the game elements with the effect.
+@export var underwater_post_proc:ColorRect
 
 ## True if the camera has transitioned to above water. False if the camera has
 ## transitioned to below water.
@@ -106,6 +109,8 @@ func _process(_delta):
 func go_under_water() -> void:
 	player_is_surfaced = false
 	
+	underwater_post_proc.visible = true
+	
 	sky_light.visible = true
 	sun_light.light_energy = 0.75
 	
@@ -129,6 +134,8 @@ func go_under_water() -> void:
 ## Transition to above water environment settings.
 func go_above_water() -> void:
 	player_is_surfaced = true
+	
+	underwater_post_proc.visible = false
 	
 	sky_light.visible = false
 	sun_light.light_energy = 0.5
