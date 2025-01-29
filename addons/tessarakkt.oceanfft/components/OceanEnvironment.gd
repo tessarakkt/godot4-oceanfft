@@ -50,10 +50,14 @@ class_name OceanEnvironment
 ## Sky Affect used for environments volumetric fog when under water.
 @export var underwater_fog_sky_affect := 1.0
 
-## Particle emitter for underwater particles (marine snow). Only emits particles
+## Particle emitter for underwater particles/bubbles. Only emits particles
 ## when under water, disabled above water. To disable this effect, simply do not
 ## set a particle emitter here.
 @export var underwater_particles:GPUParticles3D
+
+## Particle emitter for bubbles emitted when the camera first dives below the
+## surface. To disable this effect, do not set a particle emitter here.
+@export var dive_particles:GPUParticles3D
 
 ## Canvas for displaying post processing effects, add another canvas layer to the scene,
 ## put its order below your UI canvas layer to render just the game elements with the effect.
@@ -129,6 +133,9 @@ func go_under_water() -> void:
 	
 	if underwater_particles != null:
 		underwater_particles.emitting = true
+	
+	if dive_particles != null:
+		dive_particles.restart()
 
 
 ## Transition to above water environment settings.
