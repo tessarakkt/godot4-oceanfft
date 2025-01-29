@@ -110,7 +110,7 @@ void start() {
 	float linear_dist = length(TRANSFORM[3].xyz - EMISSION_TRANSFORM[3].xyz);
 	
 	// Restart at a new valid position
-	if (linear_dist > emission_sphere_radius && RESTART_POSITION) {
+	if (TRANSFORM[3].xyz == vec3(0.0) || linear_dist > emission_sphere_radius && RESTART_POSITION) {
 		float s = rand_from_seed(alt_seed) * 2.0 - 1.0;
 		float t = rand_from_seed(alt_seed) * 2.0 * PI;
 		float radius = emission_sphere_radius * sqrt(1.0 - s * s);
