@@ -650,9 +650,6 @@ func _simulate(delta:float, sync_heightmap:bool) -> void:
 			_rd.compute_list_dispatch(compute_list, fft_resolution / WORK_GROUP_DIM, fft_resolution / WORK_GROUP_DIM, 1)
 			_rd.compute_list_end()
 			
-			## Wait for the compute shader to complete
-			_rd.barrier(RenderingDevice.BARRIER_MASK_COMPUTE)
-			
 			_rd.free_rid(uniform_set)
 		
 		## Prevent this from running again until the Wind, FFT Resolution, or
@@ -693,9 +690,6 @@ func _simulate(delta:float, sync_heightmap:bool) -> void:
 		_rd.compute_list_dispatch(compute_list, fft_resolution / WORK_GROUP_DIM, fft_resolution / WORK_GROUP_DIM, 1)
 		_rd.compute_list_end()
 		
-		## Wait for the compute shader to complete
-		_rd.barrier(RenderingDevice.BARRIER_MASK_COMPUTE)
-		
 		_rd.free_rid(uniform_set)
 	
 		#### Execute Spectrum Shader Cascades
@@ -725,9 +719,6 @@ func _simulate(delta:float, sync_heightmap:bool) -> void:
 		@warning_ignore("integer_division")
 		_rd.compute_list_dispatch(compute_list, fft_resolution / WORK_GROUP_DIM, fft_resolution / WORK_GROUP_DIM, 1)
 		_rd.compute_list_end()
-		
-		## Wait for the compute shader to complete
-		_rd.barrier(RenderingDevice.BARRIER_MASK_COMPUTE)
 		
 		_rd.free_rid(uniform_set)
 	
@@ -764,9 +755,6 @@ func _simulate(delta:float, sync_heightmap:bool) -> void:
 			_rd.compute_list_bind_uniform_set(compute_list, uniform_set, UNIFORM_SET)
 			_rd.compute_list_dispatch(compute_list, fft_resolution, 1, 1)
 			_rd.compute_list_end()
-			
-			## Wait for the compute shader to complete
-			_rd.barrier(RenderingDevice.BARRIER_MASK_COMPUTE)
 			
 			_rd.free_rid(uniform_set)
 			
@@ -805,9 +793,6 @@ func _simulate(delta:float, sync_heightmap:bool) -> void:
 			_rd.compute_list_bind_uniform_set(compute_list, uniform_set, UNIFORM_SET)
 			_rd.compute_list_dispatch(compute_list, fft_resolution, 1, 1)
 			_rd.compute_list_end()
-			
-			## Wait for the compute shader to complete
-			_rd.barrier(RenderingDevice.BARRIER_MASK_COMPUTE)
 			
 			_rd.free_rid(uniform_set)
 			

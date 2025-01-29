@@ -1,7 +1,7 @@
 # Godot 4 Ocean Addon
 
 > [!NOTE]
-> Requires Godot 4.2+
+> Requires Godot 4.3+
 
 An early work in progress ocean addon for Godot 4 base on Jerry Tessendorf's
 FFT method for generating the waves, using compute shaders to generate the
