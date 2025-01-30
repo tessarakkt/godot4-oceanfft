@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=6 format=3 uid="uid://cmyo0unntq078"]
 
-[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SurfaceVisual.gdshader" id="1_56q88"]
+[ext_resource type="Shader" uid="uid://bffpid05104ox" path="res://addons/tessarakkt.oceanfft/shaders/SurfaceVisual.gdshader" id="1_56q88"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
 noise_type = 3
