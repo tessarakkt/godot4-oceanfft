@@ -58,6 +58,7 @@ func _process(delta:float) -> void:
 		
 		rotate(Vector3.UP, camera_motion.x * -camera_sensitivity * delta)
 		rotate(basis.x, camera_motion.y * -camera_sensitivity * delta)
+		basis = basis.orthonormalized()
 	
 		camera_motion = Vector2.ZERO
 
