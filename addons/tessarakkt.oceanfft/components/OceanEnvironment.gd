@@ -68,8 +68,11 @@ class_name OceanEnvironment
 var player_is_surfaced := false
 
 
-func _ready():
+func _ready() -> void:
 	var camera := get_viewport().get_camera_3d()
+	
+	if ocean and not ocean.initialized:
+		ocean.initialize_simulation()
 	
 	if splash_particles != null:
 		splash_particles.process_material.set_shader_parameter("view_distance_max", camera.far)
@@ -86,10 +89,14 @@ func _ready():
 			splash_sub_particles.process_material.set_shader_parameter("uv_scale", ocean._uv_scale)
 
 
-func _process(_delta):
+func _process(delta:float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	
-	if ocean.get_wave_height(camera.global_position, 2) > camera.global_position.y:
+	if not ocean.initialized:
+		ocean.initialize_simulation()
+	ocean.simulate(delta)
+	
+	if get_wave_height(camera.global_position, 2) > camera.global_position.y:
 		if player_is_surfaced:
 			go_under_water()
 	else:
@@ -159,3 +166,22 @@ func go_above_water() -> void:
 	if underwater_particles != null:
 		underwater_particles.restart()
 		underwater_particles.emitting = false
+
+
+## Query the wave height at a given location on the horizontal XZ plane. The Y
+## coordinate is ignored, and global position in this context is the position
+## relative to the oceans parent node. Since each pixel encodes both a vertical
+## and horizontal displacement, we need to offset the horizontal displacement
+## and resample a few times to get an accurate height. The number of resample
+## iterations is defined by steps parameter.
+func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> float:
+	return ocean.get_wave_height(get_viewport().get_camera_3d(), global_pos, max_cascade, steps)
+
+
+func _get_configuration_warnings() -> PackedStringArray:
+	var result:PackedStringArray = []
+	
+	if not ocean:
+		result.push_back("OceanEnvironment requires an Ocean3D to be assigned")
+	
+	return result

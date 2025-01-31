@@ -11,9 +11,9 @@ size = Vector3(75, 15, 25)
 
 [node name="BuoyancyBody3D" type="RigidBody3D"]
 mass = 20000.0
+gravity_scale = 3.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -5, 0)
-gravity_scale = 3.0
 script = ExtResource("1_fd4fi")
 buoyancy_multiplier = 35000.0
 
@@ -30,68 +30,58 @@ skeleton = NodePath("../..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, -7, -10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D2" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, -7, 10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D3" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, -7, -10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D4" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, -7, 10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D5" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, -10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D6" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, 10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D7" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, -7, -10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D8" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, -7, 10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D9" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, -7, -10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2
 
 [node name="BuoyancySphere3D10" type="Marker3D" parent="BuoyancyProbes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, -7, 10)
 gizmo_extents = 2.0
 script = ExtResource("2_20g8p")
-radius = 2.5
 max_cascade = 2

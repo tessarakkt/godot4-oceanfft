@@ -13,7 +13,7 @@ class_name BuoyancyBody3D
 @export_range(0.5, 10.0, 0.001) var buoyancy_power := 1.5
 
 ## The ocean that provides this bodies buoyancy.
-@export var ocean:Ocean3D
+@export var environment:OceanEnvironment
 
 @export var submerged_drag_linear := 0.05
 @export var submerged_drag_angular := 0.1
@@ -34,9 +34,10 @@ var _displayed_null_ocean_warning := false
 func _physics_process(delta:float) -> void:
 	if Engine.is_editor_hint():
 		return
-	if !ocean:
+	
+	if !environment:
 		if !_displayed_null_ocean_warning:
-			push_warning("Property 'ocean' is null")
+			push_warning("This BuoyancyBody3D is not a descendant of an OceanEnvironment")
 			_displayed_null_ocean_warning = true
 		return
 
@@ -47,7 +48,7 @@ func _physics_process(delta:float) -> void:
 	## Iterate through all buoyancy probes, calculate each ones buoyancy force,
 	## and apply it at the appropriate offset.
 	for probe in _buoyancy_probes:
-		var depth:float = clamp((probe.global_position.y - ocean.get_wave_height(probe.global_position)), -10000.0, 0.0)
+		var depth:float = clamp((probe.global_position.y - environment.get_wave_height(probe.global_position, probe.max_cascade, probe.height_sampling_steps)), -10000.0, 0.0)
 		var buoyancy = pow(abs(depth), buoyancy_power)
 		
 		if depth < 0.0:
@@ -60,26 +61,48 @@ func _physics_process(delta:float) -> void:
 #	linear_damp = submerged_drag_linear * (submerged_probes / _buoyancy_probes.size())
 #	angular_damp = submerged_drag_angular * (submerged_probes / _buoyancy_probes.size())
 
-func _integrate_forces(state):
+
+func _integrate_forces(state:PhysicsDirectBodyState3D) -> void:
 	if submerged:
 		linear_velocity *= 1.0 - submerged_drag_linear
 		angular_velocity *= 1.0 - submerged_drag_angular
 
+
+func _enter_tree() -> void:
+	_add_ocean_environment_ancestor()
+
+
+func _exit_tree() -> void:
+	environment = null
+
+
+func _add_ocean_environment_ancestor() -> void:
+	var parent := get_parent()
+	while parent:
+		if parent is OceanEnvironment:
+			environment = parent
+			return
+		parent = parent.get_parent()
+	environment = null
+
+
 ## Adds a BuoyancyProbe3D to this body's buoyancy calculation.
-func add_probe(probe: BuoyancyProbe3D):
+func add_probe(probe:BuoyancyProbe3D) -> void:
 	_buoyancy_probes.append(probe)
-	probe.ocean = ocean
+
 
 ## Removes a BuoyancyProbe3D to this body's buoyancy calculation.
-func remove_probe(probe: BuoyancyProbe3D):
+func remove_probe(probe:BuoyancyProbe3D) -> void:
 	var index := _buoyancy_probes.find(probe)
 	if index >= 0:
 		_buoyancy_probes.remove_at(index)
 
-func _get_configuration_warnings():
-	const _NO_PROBE_CONFIGURATION_WARNING :=\
-		"This node has no BuoyancyProbes so it cannot interact with an Ocean.
-		Consider adding a BuoyancyProbe3D as a child."
 
+func _get_configuration_warnings() -> PackedStringArray:
+	var result:PackedStringArray = []
+	
 	if _buoyancy_probes.is_empty():
-		return [_NO_PROBE_CONFIGURATION_WARNING]
+		result.push_back("This node has no BuoyancyProbes so it cannot interact with an Ocean.
+		Consider adding a BuoyancyProbe3D as a child.")
+	
+	return result

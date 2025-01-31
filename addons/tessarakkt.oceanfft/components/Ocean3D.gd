@@ -1,5 +1,5 @@
 @icon("res://addons/tessarakkt.oceanfft/icons/Ocean3D.svg")
-extends Node3D
+extends Resource
 class_name Ocean3D
 
 
@@ -172,6 +172,8 @@ enum FFTResolution {
 		return wave_vector.length()
 
 
+var initialized := false
+
 ## The "accumulated wind" that has blown, for wave scrolling from wind.
 ## Updated each frame by Ocean3D._process()
 var wind_uv_offset := Vector2.ZERO
@@ -243,12 +245,17 @@ var _domain_warp_image:Image
 var _rng := RandomNumberGenerator.new()
 
 
-func _ready() -> void:
+## Initialize the simulation
+func initialize_simulation() -> void:
 	_rng.randomize()
 	RenderingServer.call_on_render_thread(_initialize_simulation)
 
 
-func _process(delta:float) -> void:
+## Simulate a single iteration of the ocean. Respects frameskip and simulation
+## enabled settings.
+func simulate(delta:float) -> void:
+	assert(initialized, "Ocean3D not initialized")
+	
 	if simulation_enabled:
 		_accumulated_delta += delta
 		
@@ -275,18 +282,22 @@ func _process(delta:float) -> void:
 		_accumulated_delta = 0.0
 
 
-func _enter_tree() -> void:
-	add_to_group("ocean")
+## Simulate a single iteration of the ocean. Ignores frameskip and simulation
+## enabled settings.
+func force_simulate(delta:float, sync_heightmap:bool = false) -> void:
+	RenderingServer.call_on_render_thread(_simulate.bind(delta, sync_heightmap))
 
 
 ## Convert a global position (on the horizontal XZ plane) to a pixel coordinate
 ## for sampling the wave displacement texture directly. The Y coordinate is
 ## ignored.
-func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = true) -> Vector2i:
+func global_to_pixel(camera:Camera3D, global_pos:Vector3, cascade:int, apply_domain_warp:bool = true) -> Vector2i:
 	## The order of operations in this function is dependent on the order of
 	## operations used in the vertex shader to rotate and scale the displacement
 	## map before applying it. Make sure to check if the vertex shader should be
 	## updated to account for any changes made here.
+	
+	assert(initialized, "Ocean3D not initialized")
 	
 	## Convert to UV coordinate
 	## The visual shader uses the global XZ coordinates as UV
@@ -296,12 +307,11 @@ func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = t
 	
 	## Apply domain warp
 	if apply_domain_warp and _domain_warp_image != null:
-		var camera:Camera3D = get_viewport().get_camera_3d()
 		var linear_dist:float = (global_pos - camera.global_position).length()
 		
 		## Recursive call; note that it is called with the apply_domain_warp
 		## parameter set to false to avoid infinite recursion.
-		var base_pixel_pos := global_to_pixel(global_pos, cascade, false)
+		var base_pixel_pos := global_to_pixel(camera, global_pos, cascade, false)
 		var domain_warp := Vector2(
 				_domain_warp_image.get_pixelv(base_pixel_pos * domain_warp_uv_scale).r,
 				_domain_warp_image.get_pixelv(-base_pixel_pos * domain_warp_uv_scale).r)
@@ -333,17 +343,18 @@ func global_to_pixel(global_pos:Vector3, cascade:int, apply_domain_warp:bool = t
 ## and horizontal displacement, we need to offset the horizontal displacement 
 ## and resample a few times to get an accurate height. The number of resample
 ## iterations is defined by steps parameter.
-func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> float:
+func get_wave_height(camera:Camera3D, global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> float:
+	assert(initialized, "Ocean3D not initialized")
+	
 	var pixel:Color
 	var xz_offset := Vector3.ZERO
 	var total_height := 0.0
-	var camera := get_viewport().get_camera_3d()
 	var linear_dist := (global_pos - camera.global_position).length()
 	
 	## Wave Displacements
 	for cascade in range(max_cascade):
 		for i in range(steps):
-			var pixel_pos := global_to_pixel(global_pos - xz_offset, cascade)
+			var pixel_pos := global_to_pixel(camera, global_pos - xz_offset, cascade)
 			
 			pixel = _waves_image_cascade[cascade].get_pixelv(pixel_pos)
 			xz_offset.x += pixel.r
@@ -367,11 +378,13 @@ func get_wave_height(global_pos:Vector3, max_cascade:int = 1, steps:int = 2) -> 
 ## This returns the displacement map already cached on the CPU, it will not
 ## call _simulate(), or marshall additional data from the GPU.
 func get_waves(cascade:int = 0) -> Image:
+	assert(initialized, "Ocean3D not initialized")
 	return _waves_image_cascade[cascade]
 
 
 ## Get the wave displacement map of a single cascade as a Texture2DRD.
 func get_waves_texture(cascade:int = 0) -> Texture2DRD:
+	assert(initialized, "Ocean3D not initialized")
 	return _waves_texture_cascade[cascade]
 
 
@@ -379,11 +392,13 @@ func get_waves_texture(cascade:int = 0) -> Texture2DRD:
 ## This returns the displacement map already cached on the CPU, it will not
 ## call _simulate(), or marshall additional data from the GPU.
 func get_all_waves() -> Array[Image]:
+	assert(initialized, "Ocean3D not initialized")
 	return _waves_image_cascade
 
 
 ## Get the wave displacement maps of all cascades as an Array of Texture2DRDs.
 func get_all_waves_textures() -> Array[Texture2DRD]:
+	assert(initialized, "Ocean3D not initialized")
 	return _waves_texture_cascade
 
 
@@ -606,10 +621,11 @@ func _initialize_simulation() -> void:
 	_sub_pong_tex = _rd.texture_create(_fmt_rg32f, RDTextureView.new(), [initial_image_rgf.get_data()])
 	_sub_pong_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	_sub_pong_uniform.add_id(_sub_pong_tex)
+	
+	initialized = true
 
 
-## Simulate a single iteration of the ocean. If simulation_enabled is true, this
-## will be run every frame, excluding frameskips. The resulting displacement map
+## Simulate a single iteration of the ocean. The resulting displacement map
 ## texture can be retrieved using the get_waves_texture() function, or as an
 ## Image via get_waves(). The texture is the same buffer in VRAM the compute
 ## shaders operate on. The image is stored in CPU RAM and is only updated when

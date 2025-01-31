@@ -15,13 +15,11 @@ class_name MotorVesselBody3D
 @onready var rudder:Marker3D = $Propeller
 
 
-func _process(delta):
-	if Engine.is_editor_hint():
+func _process(delta:float) -> void:
+	if not environment or Engine.is_editor_hint():
 		return
-	if !ocean:
-		# Prints BuoyancyBody3D warning from its _physics_process, no need to warn again here
-		return
-	if ocean.get_wave_height(propeller.global_position) > propeller.global_position.y:
+	
+	if environment.get_wave_height(propeller.global_position) > propeller.global_position.y:
 		var prop_horizontal := -global_transform.basis.z
 		prop_horizontal.y = 0.0
 		prop_horizontal = prop_horizontal.normalized()
@@ -32,7 +30,7 @@ func _process(delta):
 		elif Input.is_action_pressed("ship_thrust_main_backwards"):
 			apply_force(global_transform.basis.z * thrust_power_main * prop_dot, propeller.global_position - global_position)
 	
-	if ocean.get_wave_height(rudder.global_position) > rudder.global_position.y:
+	if environment.get_wave_height(rudder.global_position) > rudder.global_position.y:
 		if Input.is_action_pressed("ship_steering_main_left"):
 			apply_force(global_transform.basis.x * max_rudder_force, rudder.global_position - global_position)
 		elif Input.is_action_pressed("ship_steering_main_right"):
