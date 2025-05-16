@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://rmewe8a2xeoe"]
 
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/BuoyancyBody3D.gd" id="1_fd4fi"]
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/BuoyancyProbe3D.gd" id="2_20g8p"]
+[ext_resource type="Script" uid="uid://k1lfja4eye78" path="res://addons/tessarakkt.oceanfft/components/BuoyancyBody3D.gd" id="1_fd4fi"]
+[ext_resource type="Script" uid="uid://rrq5qwevi7xr" path="res://addons/tessarakkt.oceanfft/components/BuoyancyProbe3D.gd" id="2_20g8p"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_s2ec8"]
 size = Vector3(75, 15, 25)

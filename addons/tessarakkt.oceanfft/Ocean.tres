@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=6 format=3 uid="uid://cmyo0unntq078"]
 
-[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/SurfaceVisual.gdshader" id="1_56q88"]
+[ext_resource type="Shader" uid="uid://dddvgper22b7o" path="res://addons/tessarakkt.oceanfft/shaders/SurfaceVisual.gdshader" id="1_56q88"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nywmb"]
 noise_type = 3
@@ -31,9 +31,9 @@ shader_parameter/normal_factor = 1.0
 shader_parameter/cascade_uv_scales = PackedFloat32Array(1, 0.7, 0.3)
 shader_parameter/uv_scale = 0.00195312
 shader_parameter/wind_uv_offset = Vector2(0, 0)
+shader_parameter/cascade_displacements = []
 shader_parameter/view_distance_max = 16000.0
 shader_parameter/vertex_resolution = 256.0
-shader_parameter/cascade_displacements = []
 shader_parameter/domain_warp_uv_scale = 6.25e-05
 shader_parameter/domain_warp_strength = 1500.0
 shader_parameter/domain_warp_texture = SubResource("NoiseTexture2D_pbym3")

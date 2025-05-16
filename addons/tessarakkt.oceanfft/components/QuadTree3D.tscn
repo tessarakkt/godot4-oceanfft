@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b554xveqosfto"]
 
-[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="1_mn2fq"]
+[ext_resource type="Script" uid="uid://ohgsyp3emk0h" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="1_mn2fq"]
 
 [node name="QuadTree3D" type="Node3D"]
 script = ExtResource("1_mn2fq")
