@@ -171,7 +171,7 @@ void vertex() {
 
 void fragment() {
 	// Calculate fragments Fresnel factor
-	float fresnel_factor = pow(1.0 - dot(NORMAL, normalize(VIEW)), fresnel_power);
+	float fresnel_factor = clamp(pow(abs(1.0 - dot(NORMAL, normalize(VIEW))), fresnel_power), -1.0, 1.0);
 	float fresnel = fresnel_factor * fresnel_strength + fresnel_offset;
 	
 	// Get the linear depth between each ocean pixel and whatever is behind it.
