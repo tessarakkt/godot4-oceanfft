@@ -11,8 +11,8 @@ fractal_lacunarity = 3.0
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_pbym3"]
 width = 1024
 height = 1024
-seamless = true
 noise = SubResource("FastNoiseLite_nywmb")
+seamless = true
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_gub2d"]
 noise_type = 3
@@ -21,8 +21,8 @@ fractal_octaves = 7
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_h2j7u"]
 width = 2048
 height = 2048
-seamless = true
 noise = SubResource("FastNoiseLite_gub2d")
+seamless = true
 
 [resource]
 render_priority = 0

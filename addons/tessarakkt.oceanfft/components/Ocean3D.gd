@@ -155,8 +155,12 @@ enum FFTResolution {
 ## The wind direction.
 @export_range(0.0, 360.0) var wind_direction_degrees := 0.0:
 	set(new_wind_direction_degrees):
-		wind_direction_degrees = clamp(new_wind_direction_degrees, 0.0, 360.0)
 		wind_direction = deg_to_rad(new_wind_direction_degrees)
+
+		wind_vector.x = cos(wind_direction)
+		wind_vector.y = sin(wind_direction)
+		
+		wind_vector = wind_vector.normalized() * wind_speed
 	get:
 		return rad_to_deg(wind_direction)
 
@@ -165,11 +169,10 @@ enum FFTResolution {
 @export_range(-10.0, 10.0) var wave_scroll_speed := 0.0
 
 ## The speed of the wind passed to the wave simulation.
-@export_range(0.0, 1000.0) var wind_speed := 300.0:
+@export_range(0.0, 1000.0) var wind_speed := 15.0:
 	set(new_wave_length):
-		wave_vector = wave_vector.normalized() * new_wave_length
-	get:
-		return wave_vector.length()
+		wind_vector = wind_vector.normalized() * new_wave_length
+		wind_speed = new_wave_length
 
 
 var initialized := false
@@ -181,10 +184,9 @@ var wind_uv_offset := Vector2.ZERO
 ## The wind direction.
 var wind_direction := 0.0
 
-## TODO: figure out what this is actually supposed to do
-var wave_vector := Vector2(300.0, 0.0):
+var wind_vector := Vector2(15.0, 0.0):
 	set(new_wave_vector):
-		wave_vector = new_wave_vector
+		wind_vector = new_wave_vector
 		_is_initial_spectrum_changed = true
 
 
@@ -193,7 +195,6 @@ var _uv_scale := 0.00390625
 var _rd:RenderingDevice = RenderingServer.get_rendering_device()
 
 var _fmt_r32f := RDTextureFormat.new()
-var _fmt_rg32f := RDTextureFormat.new()
 var _fmt_rgba32f := RDTextureFormat.new()
 
 var _initial_spectrum_shader:RID
@@ -404,7 +405,7 @@ func get_all_waves_textures() -> Array[Texture2DRD]:
 
 func _pack_initial_spectrum_settings(cascade:int) -> PackedByteArray:
 	var settings_bytes = PackedInt32Array([fft_resolution, horizontal_dimension * cascade_scales[cascade]]).to_byte_array()
-	settings_bytes.append_array(PackedFloat32Array([cascade_ranges[cascade].x, cascade_ranges[cascade].y, wave_vector.x, wave_vector.y]).to_byte_array())
+	settings_bytes.append_array(PackedFloat32Array([cascade_ranges[cascade].x, cascade_ranges[cascade].y, wind_vector.x, wind_vector.y]).to_byte_array())
 	return settings_bytes
 
 
@@ -437,7 +438,7 @@ func _initialize_simulation() -> void:
 	var shader_file:Resource
 	var settings_bytes:PackedByteArray
 	var initial_image_rf := Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RF)
-	var initial_image_rgf := Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RGF)
+	var initial_image_rgbaf := Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RGBAF)
 	
 	#### Initialize RDTextureFormats
 	############################################################################
@@ -447,11 +448,6 @@ func _initialize_simulation() -> void:
 	_fmt_r32f.height = fft_resolution
 	_fmt_r32f.format = RenderingDevice.DATA_FORMAT_R32_SFLOAT
 	_fmt_r32f.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT
-	
-	_fmt_rg32f.width = fft_resolution
-	_fmt_rg32f.height = fft_resolution
-	_fmt_rg32f.format = RenderingDevice.DATA_FORMAT_R32G32_SFLOAT
-	_fmt_rg32f.usage_bits = _fmt_r32f.usage_bits
 	
 	_fmt_rgba32f.width = fft_resolution
 	_fmt_rgba32f.height = fft_resolution
@@ -579,14 +575,14 @@ func _initialize_simulation() -> void:
 	
 	for i in cascade_ranges.size():
 		## Initialized empty, it will be generated each frame
-		_spectrum_tex_cascade[i] = _rd.texture_create(_fmt_rg32f, RDTextureView.new(), [initial_image_rgf.get_data()])
+		_spectrum_tex_cascade[i] = _rd.texture_create(_fmt_rgba32f, RDTextureView.new(), [initial_image_rgbaf.get_data()])
 		_spectrum_uniform_cascade[i] = RDUniform.new()
 		_spectrum_uniform_cascade[i].uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 		_spectrum_uniform_cascade[i].binding = Binding.SPECTRUM
 		_spectrum_uniform_cascade[i].add_id(_spectrum_tex_cascade[i])
 		
 		## Bind the displacement map cascade texture to the visual shader
-		_waves_image_cascade[i] = Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RGF)
+		_waves_image_cascade[i] = Image.create(fft_resolution, fft_resolution, false, Image.FORMAT_RGBAF)
 		_waves_texture_cascade[i] = Texture2DRD.new()
 		_waves_texture_cascade[i].texture_rd_rid = _spectrum_tex_cascade[i]
 	
@@ -618,7 +614,7 @@ func _initialize_simulation() -> void:
 	_fft_settings_uniform.add_id(_fft_settings_buffer)
 	
 	## Initialize empty, will be calculated based on the Spectrum
-	_sub_pong_tex = _rd.texture_create(_fmt_rg32f, RDTextureView.new(), [initial_image_rgf.get_data()])
+	_sub_pong_tex = _rd.texture_create(_fmt_rgba32f, RDTextureView.new(), [initial_image_rgbaf.get_data()])
 	_sub_pong_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
 	_sub_pong_uniform.add_id(_sub_pong_tex)
 	
@@ -818,7 +814,7 @@ func _simulate(delta:float, sync_heightmap:bool) -> void:
 		## Retrieve the displacement map from the Spectrum texture, and store it
 		## CPU side for use by buoyancy and wave interaction systems.
 		if sync_heightmap:
-			_waves_image_cascade[cascade].set_data(fft_resolution, fft_resolution, false, Image.FORMAT_RGF, _rd.texture_get_data(_spectrum_tex_cascade[cascade], 0))
+			_waves_image_cascade[cascade].set_data(fft_resolution, fft_resolution, false, Image.FORMAT_RGBAF, _rd.texture_get_data(_spectrum_tex_cascade[cascade], 0))
 	
 	## This needs to get updated outside the cascade iteration loop
 	_is_ping_phase = not _is_ping_phase

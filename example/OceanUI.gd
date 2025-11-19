@@ -67,7 +67,7 @@ func _on_choppiness_value_changed(value:float) -> void:
 
 
 func _on_wind_speed_value_changed(value:float) -> void:
-	ocean.ocean.wave_vector = ocean.ocean.wave_vector.normalized() * value
+	ocean.ocean.wind_speed = value
 
 
 func _on_wind_direction_value_changed(value:float) -> void:

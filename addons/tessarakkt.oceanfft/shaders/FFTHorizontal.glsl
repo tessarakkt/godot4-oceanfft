@@ -7,8 +7,8 @@
 
 layout(local_size_x = WORK_GROUP_DIM) in;
 
-layout(set = 0, binding = 27, rg32f) uniform readonly image2D u_input;
-layout(set = 0, binding = 28, rg32f) uniform writeonly image2D u_output;
+layout(set = 0, binding = 27, rgba32f) uniform readonly image2D u_input;
+layout(set = 0, binding = 28, rgba32f) uniform writeonly image2D u_output;
 
 layout(set = 0, binding = 0) buffer UniformsBuffer {
     int total_count;
@@ -37,11 +37,12 @@ void main() {
     float angle = -PI * (float(in_idx) / float(u.subseq_count));
     vec2 twiddle = vec2(cos(angle), sin(angle));
 
-    vec2 a = imageLoad(u_input, pixel_coord).xy;
-    vec2 b = imageLoad(u_input, ivec2(pixel_coord.x + thread_count, pixel_coord.y)).xy;
+    vec4 a = imageLoad(u_input, pixel_coord);
+    vec4 b = imageLoad(u_input, ivec2(pixel_coord.x + thread_count, pixel_coord.y));
 
-    vec4 result = ButterflyOperation(a.xy, b.xy, twiddle);
+    vec4 result0 = ButterflyOperation(a.xy, b.xy, twiddle);
+    vec4 result1 = ButterflyOperation(a.zw, b.zw, twiddle);
 
-    imageStore(u_output, ivec2(out_idx, pixel_coord.y), vec4(result.xy, 0.0, 0.0));
-    imageStore(u_output, ivec2(out_idx + u.subseq_count, pixel_coord.y), vec4(result.zw, 0.0, 0.0));
+    imageStore(u_output, ivec2(out_idx, pixel_coord.y), vec4(result0.xy, result1.xy));
+    imageStore(u_output, ivec2(out_idx + u.subseq_count, pixel_coord.y), vec4(result0.zw, result1.zw));
 }

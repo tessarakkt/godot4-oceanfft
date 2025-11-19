@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://bs1yo1162gltj"]
+[gd_scene load_steps=36 format=3 uid="uid://bs1yo1162gltj"]
 
 [ext_resource type="Environment" uid="uid://drui1tvkk7b7q" path="res://example/Environment.tres" id="1_o40li"]
 [ext_resource type="Script" uid="uid://b450bm6b1npjb" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="2_jhrdm"]
@@ -13,6 +13,7 @@
 [ext_resource type="Shader" uid="uid://bov46gyr36itq" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterParticles.gdshader" id="10_kqf5f"]
 [ext_resource type="Texture2D" uid="uid://n8ghpdii3aqh" path="res://addons/tessarakkt.oceanfft/graphics/Splash.png" id="10_o46r2"]
 [ext_resource type="Texture2D" uid="uid://b4cb3vkqormjf" path="res://addons/tessarakkt.oceanfft/graphics/bubble_6_grayscale.png" id="12_37laq"]
+[ext_resource type="Shader" uid="uid://1si34ti2ljp2" path="res://addons/tessarakkt.oceanfft/shaders/IgnoreTextureAlpha.gdshader" id="14_ogoyt"]
 [ext_resource type="Shader" uid="uid://c3d5ijcw5c7t1" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterPostProc.gdshader" id="14_vnu5r"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_18r8k"]
@@ -22,31 +23,19 @@ fractal_type = 0
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_a82po"]
 width = 1024
 height = 1024
-seamless = true
 noise = SubResource("FastNoiseLite_18r8k")
+seamless = true
 
 [sub_resource type="Resource" id="Resource_opkt2"]
 script = ExtResource("7_xa10r")
-simulation_enabled = true
-material = ExtResource("5_0jjw4")
 simulation_frameskip = 1
-heightmap_sync_frameskip = 0
 fft_resolution = 128
 horizontal_dimension = 512
 time_scale = 1.1
-cascade_ranges = Array[Vector2]([Vector2(0, 0.03), Vector2(0.03, 0.15), Vector2(0.15, 1)])
 cascade_scales = Array[float]([3.23607, 1.61803, 0.5])
-planetary_curve_strength = 1e-06
-amplitude_scale_min = 0.25
-amplitude_scale_max = 1.0
-amplitude_scale_fade_distance = 12000.0
 domain_warp_texture = SubResource("NoiseTexture2D_a82po")
-domain_warp_strength = 1500.0
-domain_warp_uv_scale = 6.25e-05
 choppiness = 0.5
-wind_direction_degrees = 0.0
 wave_scroll_speed = -0.003
-wind_speed = 15.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p0g3t"]
 shader = ExtResource("6_nklv0")
@@ -171,6 +160,9 @@ particles_anim_loop = false
 [sub_resource type="QuadMesh" id="QuadMesh_rift2"]
 material = SubResource("StandardMaterial3D_7t82q")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vv7sb"]
+shader = ExtResource("14_ogoyt")
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i8f6a"]
 bg_color = Color(0.188235, 0.188235, 0.188235, 1)
 expand_margin_left = 10.0
@@ -181,8 +173,8 @@ expand_margin_bottom = 10.0
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_thv8h"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_xvh5c"]
-seamless = true
 noise = SubResource("FastNoiseLite_thv8h")
+seamless = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6utjj"]
 shader = ExtResource("14_vnu5r")
@@ -305,17 +297,20 @@ free_camera = NodePath("../Camera3D")
 player_camera = NodePath("../MotorVesselBody3D/Camera3D")
 
 [node name="Displacement_cascade0" type="TextureRect" parent="CanvasLayer"]
+material = SubResource("ShaderMaterial_vv7sb")
 custom_minimum_size = Vector2(256, 256)
 offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Displacement_cascade1" type="TextureRect" parent="CanvasLayer"]
+material = SubResource("ShaderMaterial_vv7sb")
 custom_minimum_size = Vector2(256, 256)
 offset_left = 288.0
 offset_right = 544.0
 offset_bottom = 256.0
 
 [node name="Displacement_cascade2" type="TextureRect" parent="CanvasLayer"]
+material = SubResource("ShaderMaterial_vv7sb")
 custom_minimum_size = Vector2(256, 256)
 offset_left = 576.0
 offset_right = 832.0
@@ -435,7 +430,6 @@ text = "Wind Direction"
 [node name="WindDirection" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 max_value = 360.0
-step = 0.001
 tick_count = 4
 ticks_on_borders = true
 

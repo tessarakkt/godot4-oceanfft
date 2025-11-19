@@ -11,7 +11,7 @@ layout(local_size_x = COMPUTE_WORK_GROUP_DIM, local_size_y = COMPUTE_WORK_GROUP_
 
 layout(set = 0, binding = 20, r32f) readonly uniform image2D u_initial_spectrum;
 layout(set = 0, binding = 26, r32f) readonly uniform image2D u_phases;
-layout(set = 0, binding = 21, rg32f) writeonly uniform image2D u_spectrum;
+layout(set = 0, binding = 21, rgba32f) writeonly uniform image2D u_spectrum;
 
 layout(set = 0, binding = 0) buffer UniformsBuffer {
     int ocean_size;
@@ -55,7 +55,8 @@ void main() {
     {
         h = vec2(0.f);
         hX = vec2(0.f);
+        hZ = vec2(0.f);
     }
 
-    imageStore(u_spectrum, pixel_coord, vec4(hX + multiplyByI(h), 0.0, 0.0));
+    imageStore(u_spectrum, pixel_coord, vec4(hX + multiplyByI(h), hZ));
 }
