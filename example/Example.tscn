@@ -430,7 +430,7 @@ text = "Wind Direction"
 [node name="WindDirection" type="HSlider" parent="CanvasLayer/PanelContainer/VBoxContainer"]
 layout_mode = 2
 max_value = 360.0
-tick_count = 4
+tick_count = 5
 ticks_on_borders = true
 
 [node name="PostProcessingLayer" type="CanvasLayer" parent="."]

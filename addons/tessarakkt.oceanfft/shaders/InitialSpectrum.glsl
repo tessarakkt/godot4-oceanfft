@@ -67,7 +67,7 @@ void main() {
 
         float cosPhi = dot(normalize(u.wind), normalize(wave_vector));
 
-        float S = (1.0 / (2.0 * PI)) * pow(k, -4.0) * (Bl + Bh) * (1.0 + Delta * (2.0 * cosPhi * cosPhi - 1.0));
+        float S = (1.0 / (2.0 * PI)) * pow(k, -4.0) * (Bl + Bh) * (1.0 + Delta * (2.0 * pow(abs(cosPhi), 6.f) - 1.0));
 
         float dk = 2.0 * PI / u.ocean_size;
         h = sqrt(S / 2.0) * dk;
